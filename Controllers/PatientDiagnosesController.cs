@@ -74,12 +74,23 @@ namespace ClinicManagementSystem.Controllers
                 }
             }
 
+            // Remove navigation properties from validation
+            ModelState.Remove("Patient");
+            ModelState.Remove("Doctor");
+
             if (ModelState.IsValid)
             {
-                _context.Add(diagnosis);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Diagnosis created successfully";
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(diagnosis);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Diagnosis created successfully";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error saving diagnosis: {ex.Message}");
+                }
             }
 
             PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
