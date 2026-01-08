@@ -40,6 +40,7 @@ namespace ClinicManagementSystem.Controllers
                 .Include(d => d.User)
                 .Include(d => d.Patients)
                 .Include(d => d.DoctorAssists)
+                .Include(d => d.Subscriptions)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (doctor == null) return NotFound();
