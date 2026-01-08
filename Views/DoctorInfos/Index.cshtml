@@ -27,6 +27,7 @@
                         <th>@Html.DisplayNameFor(model => model.Specialist)</th>
                         <th>@Html.DisplayNameFor(model => model.DoctorTel1)</th>
                         <th>@Html.DisplayNameFor(model => model.Active)</th>
+                        <th>Subscription</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
@@ -80,9 +81,51 @@
                                 }
                             </td>
                             <td>
+                                @{
+                                    var today = DateTime.Today;
+                                    var currentSubscription = item.Subscriptions?
+                                        .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                                        .OrderByDescending(s => s.EndDate)
+                                        .FirstOrDefault();
+
+                                    if (currentSubscription != null)
+                                    {
+                                        var remainingDays = (currentSubscription.EndDate - today).Days;
+                                        if (remainingDays <= 7)
+                                        {
+                                            <span class="badge bg-warning text-dark" title="Expires: @currentSubscription.EndDate.ToString("yyyy-MM-dd")">
+                                                <i class="fas fa-exclamation-triangle"></i> @remainingDays days
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success" title="Expires: @currentSubscription.EndDate.ToString("yyyy-MM-dd")">
+                                                <i class="fas fa-check-circle"></i> Active
+                                            </span>
+                                        }
+                                    }
+                                    else if (item.Subscriptions?.Any() == true)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle"></i> Expired
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-minus-circle"></i> No Subscription
+                                        </span>
+                                    }
+                                }
+                            </td>
+                            <td>
                                 <div class="btn-group-actions">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-controller="DoctorSubscriptions" asp-action="Index" asp-route-doctorId="@item.Id"
+                                       class="btn btn-sm btn-primary" title="Manage Subscriptions">
+                                        <i class="fas fa-calendar-check"></i>
                                     </a>
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Edit">
                                         <i class="fas fa-edit"></i>

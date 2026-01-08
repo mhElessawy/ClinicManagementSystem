@@ -22,7 +22,9 @@ namespace ClinicManagementSystem.Controllers
 
             var doctors = await _context.DoctorInfos
                 .Include(d => d.Specialist)
+                    .ThenInclude(s => s.Department)
                 .Include(d => d.User)
+                .Include(d => d.Subscriptions)
                 .ToListAsync();
 
             return View(doctors);
