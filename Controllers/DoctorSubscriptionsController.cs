@@ -46,19 +46,39 @@ namespace ClinicManagementSystem.Controllers
             if (doctorId == null)
                 return RedirectToAction("Index", "DoctorInfos");
 
-            var doctor = await _context.DoctorInfos.FindAsync(doctorId);
+            var doctor = await _context.DoctorInfos
+                .Include(d => d.Subscriptions)
+                .FirstOrDefaultAsync(d => d.Id == doctorId);
+
             if (doctor == null)
                 return NotFound();
 
             ViewBag.DoctorId = doctorId;
             ViewBag.DoctorName = doctor.DoctorName;
 
+            // Find the last subscription to set the start date after its end date
+            var lastSubscription = doctor.Subscriptions?
+                .OrderByDescending(s => s.EndDate)
+                .FirstOrDefault();
+
+            DateTime defaultStartDate;
+            if (lastSubscription != null)
+            {
+                // Start from the day after the last subscription ends
+                defaultStartDate = lastSubscription.EndDate.AddDays(1);
+            }
+            else
+            {
+                // No previous subscriptions, start from today
+                defaultStartDate = DateTime.Today;
+            }
+
             // Set default dates
             var subscription = new DoctorSubscription
             {
                 DoctorId = doctorId.Value,
-                StartDate = DateTime.Today,
-                EndDate = DateTime.Today.AddMonths(1),
+                StartDate = defaultStartDate,
+                EndDate = defaultStartDate.AddMonths(1),
                 IsActive = true
             };
 
