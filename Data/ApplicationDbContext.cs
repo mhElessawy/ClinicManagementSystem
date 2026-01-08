@@ -18,6 +18,7 @@ namespace ClinicManagementSystem.Models
         public DbSet<Department> Departments { get; set; }
         public DbSet<DoctorAssist> DoctorAssists { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
+        public DbSet<DoctorSubscription> DoctorSubscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -80,6 +81,13 @@ namespace ClinicManagementSystem.Models
                 .WithMany(d => d.PatientDiagnoses)
                 .HasForeignKey(pd => pd.DoctorId)
                 .OnDelete(DeleteBehavior.SetNull);
+
+            // DoctorInfo -> DoctorSubscription (One-to-Many)
+            modelBuilder.Entity<DoctorSubscription>()
+                .HasOne(ds => ds.Doctor)
+                .WithMany(d => d.Subscriptions)
+                .HasForeignKey(ds => ds.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Unique constraints
             modelBuilder.Entity<DoctorInfo>()
