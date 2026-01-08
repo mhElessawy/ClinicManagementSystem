@@ -27,11 +27,14 @@
                         <th>@Html.DisplayNameFor(model => model.Specialist)</th>
                         <th>@Html.DisplayNameFor(model => model.DoctorTel1)</th>
                         <th>@Html.DisplayNameFor(model => model.Active)</th>
+                        <th>Subscription</th>
                         <th>الإجراءات</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @{ int counter = 1; }
+                    @{
+                        int counter = 1;
+                    }
                     @foreach (var item in Model)
                     {
                         <tr>
@@ -39,15 +42,15 @@
                             <td>
                                 @if (item.DoctorPicture != null)
                                 {
-                                    <img src="@Url.Action("GetDoctorImage", new { id = item.Id })" 
-                                         alt="@item.DoctorName" 
-                                         class="img-thumbnail" 
+                                    <img src="@Url.Action("GetDoctorImage", new { id = item.Id })"
+                                         alt="@item.DoctorName"
+                                         class="img-thumbnail"
                                          style="width: 50px; height: 50px; object-fit: cover;" />
                                 }
                                 else
                                 {
-                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23ddd' width='50' height='50'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E" 
-                                         class="img-thumbnail" 
+                                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50'%3E%3Crect fill='%23ddd' width='50' height='50'/%3E%3Ctext fill='%23999' x='50%25' y='50%25' text-anchor='middle' dy='.3em'%3ENo Image%3C/text%3E%3C/svg%3E"
+                                         class="img-thumbnail"
                                          style="width: 50px; height: 50px;" />
                                 }
                             </td>
@@ -55,7 +58,9 @@
                                 <strong>@Html.DisplayFor(modelItem => item.DoctorName)</strong>
                                 @if (!string.IsNullOrEmpty(item.DoctorTitle))
                                 {
-                                    <br /><small class="text-muted">@item.DoctorTitle</small>
+                                    <br />
+                            
+                                    <small class="text-muted">@item.DoctorTitle</small>
                                 }
                             </td>
                             <td>
@@ -64,7 +69,9 @@
                                     <span class="badge bg-info">@item.Specialist.SpecialistName</span>
                                     @if (item.Specialist.Department != null)
                                     {
-                                        <br /><small class="text-muted">@item.Specialist.Department.DepartmentName</small>
+                                        <br />
+                            
+                                        <small class="text-muted">@item.Specialist.Department.DepartmentName</small>
                                     }
                                 }
                             </td>
@@ -80,9 +87,51 @@
                                 }
                             </td>
                             <td>
+                                @{
+                                    var today = DateTime.Today;
+                                    var currentSubscription = item.Subscriptions?
+                                    .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                                    .OrderByDescending(s => s.EndDate)
+                                    .FirstOrDefault();
+
+                                    if (currentSubscription != null)
+                                    {
+                                        var remainingDays = (currentSubscription.EndDate - today).Days;
+                                        if (remainingDays <= 7)
+                                        {
+                                            <span class="badge bg-warning text-dark" title="Expires: @currentSubscription.EndDate.ToString("yyyy-MM-dd")">
+                                                <i class="fas fa-exclamation-triangle"></i> @remainingDays days
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success" title="Expires: @currentSubscription.EndDate.ToString("yyyy-MM-dd")">
+                                                <i class="fas fa-check-circle"></i> Active
+                                            </span>
+                                        }
+                                    }
+                                    else if (item.Subscriptions?.Any() == true)
+                                    {
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-times-circle"></i> Expired
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-minus-circle"></i> No Subscription
+                                        </span>
+                                    }
+                                }
+                            </td>
+                            <td>
                                 <div class="btn-group-actions">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View">
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="View Details">
                                         <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a asp-controller="DoctorSubscriptions" asp-action="Index" asp-route-doctorId="@item.Id"
+                                       class="btn btn-sm btn-primary" title="Manage Subscriptions">
+                                        <i class="fas fa-calendar-check"></i>
                                     </a>
                                     <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Edit">
                                         <i class="fas fa-edit"></i>

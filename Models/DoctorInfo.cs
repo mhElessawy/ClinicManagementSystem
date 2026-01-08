@@ -81,5 +81,34 @@ namespace ClinicManagementSystem.Models
         public virtual ICollection<DoctorAssist> DoctorAssists { get; set; } = new List<DoctorAssist>();
         public virtual ICollection<Patient> Patients { get; set; } = new List<Patient>();
         public virtual ICollection<PatientDiagnosis> PatientDiagnoses { get; set; } = new List<PatientDiagnosis>();
+        public virtual ICollection<DoctorSubscription> Subscriptions { get; set; } = new List<DoctorSubscription>();
+
+        // Computed property to check if doctor has valid subscription
+        [NotMapped]
+        public bool HasValidSubscription
+        {
+            get
+            {
+                if (Subscriptions == null || !Subscriptions.Any())
+                    return false;
+                var today = DateTime.Today;
+                return Subscriptions.Any(s => s.IsActive && s.StartDate <= today && s.EndDate >= today);
+            }
+        }
+        // Get current active subscription
+        [NotMapped]
+        public DoctorSubscription? CurrentSubscription
+        {
+            get
+            {
+                if (Subscriptions == null || !Subscriptions.Any())
+                    return null;
+                var today = DateTime.Today;
+                return Subscriptions
+                    .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                    .OrderByDescending(s => s.EndDate)
+                    .FirstOrDefault();
+            }
+        }
     }
 }

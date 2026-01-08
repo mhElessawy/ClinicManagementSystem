@@ -51,12 +51,13 @@ namespace ClinicManagementSystem.Services
 
             // Try DoctorInfo
             var doctor = await _context.DoctorInfos
+                .Include(d => d.Subscriptions)  // ? ÊÍãíá ÇáÇÔÊÑÇßÇÊ
                 .FirstOrDefaultAsync(d => d.LoginUsername == username && d.CanLogin && d.Active);
 
             if (doctor != null && !string.IsNullOrEmpty(doctor.LoginPassword))
             {
                 bool isValid = false;
-                
+
                 try
                 {
                     isValid = BCrypt.Net.BCrypt.Verify(password, doctor.LoginPassword);
@@ -65,9 +66,25 @@ namespace ClinicManagementSystem.Services
                 {
                     isValid = doctor.LoginPassword == password;
                 }
-                
+
                 if (isValid)
                 {
+                    // ÇáÊÍÞÞ ãä ÕáÇÍíÉ ÇáÇÔÊÑÇß ? ÌÏíÏ
+                    var today = DateTime.Today;
+                    var hasValidSubscription = doctor.Subscriptions != null &&
+                                              doctor.Subscriptions.Any(s => s.IsActive &&
+                                                                           s.StartDate <= today &&
+                                                                           s.EndDate >= today);
+
+                    if (!hasValidSubscription)
+                    {
+                        return new LoginResult
+                        {
+                            Success = false,
+                            ErrorMessage = "Your subscription has expired. Please contact administration to renew your subscription."
+                        };
+                    }
+
                     // Update last login
                     doctor.LastLoginDate = DateTime.Now;
                     await _context.SaveChangesAsync();
@@ -83,6 +100,7 @@ namespace ClinicManagementSystem.Services
                     };
                 }
             }
+
 
             // Try DoctorAssist
             var assistant = await _context.DoctorAssists
