@@ -73,24 +73,40 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
+            // Validate DoctorId
+            if (subscription.DoctorId <= 0)
+            {
+                ModelState.AddModelError("DoctorId", "Invalid doctor selected");
+            }
+
             // Validate dates
             if (subscription.EndDate <= subscription.StartDate)
             {
                 ModelState.AddModelError("EndDate", "End date must be after start date");
             }
 
+            // Remove Doctor navigation property from validation
+            ModelState.Remove("Doctor");
+
             if (ModelState.IsValid)
             {
-                subscription.CreatedDate = DateTime.Now;
-                _context.Add(subscription);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Subscription created successfully";
-                return RedirectToAction(nameof(Index), new { doctorId = subscription.DoctorId });
+                try
+                {
+                    subscription.CreatedDate = DateTime.Now;
+                    _context.Add(subscription);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Subscription created successfully";
+                    return RedirectToAction(nameof(Index), new { doctorId = subscription.DoctorId });
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error saving subscription: {ex.Message}");
+                }
             }
 
             var doctor = await _context.DoctorInfos.FindAsync(subscription.DoctorId);
             ViewBag.DoctorId = subscription.DoctorId;
-            ViewBag.DoctorName = doctor?.DoctorName;
+            ViewBag.DoctorName = doctor?.DoctorName ?? "Unknown";
             return View(subscription);
         }
 
@@ -133,6 +149,9 @@ namespace ClinicManagementSystem.Controllers
                 ModelState.AddModelError("EndDate", "End date must be after start date");
             }
 
+            // Remove Doctor navigation property from validation
+            ModelState.Remove("Doctor");
+
             if (ModelState.IsValid)
             {
                 try
@@ -155,12 +174,20 @@ namespace ClinicManagementSystem.Controllers
                     else
                         throw;
                 }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error updating subscription: {ex.Message}");
+                    var doctor2 = await _context.DoctorInfos.FindAsync(subscription.DoctorId);
+                    ViewBag.DoctorId = subscription.DoctorId;
+                    ViewBag.DoctorName = doctor2?.DoctorName ?? "Unknown";
+                    return View(subscription);
+                }
                 return RedirectToAction(nameof(Index), new { doctorId = subscription.DoctorId });
             }
 
             var doctor = await _context.DoctorInfos.FindAsync(subscription.DoctorId);
             ViewBag.DoctorId = subscription.DoctorId;
-            ViewBag.DoctorName = doctor?.DoctorName;
+            ViewBag.DoctorName = doctor?.DoctorName ?? "Unknown";
             return View(subscription);
         }
 
