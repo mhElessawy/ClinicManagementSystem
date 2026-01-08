@@ -9,6 +9,91 @@
     </div>
 </div>
 
+@if (ViewBag.UserType == "Doctor")
+{
+    var subscription = ViewBag.CurrentSubscription as ClinicManagementSystem.Models.DoctorSubscription;
+
+    if (subscription != null)
+    {
+        var remainingDays = subscription.RemainingDays;
+        var isExpiringSoon = remainingDays <= 7;
+
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="card @(isExpiringSoon ? "border-warning" : "border-success")">
+                    <div class="card-header @(isExpiringSoon ? "bg-warning text-dark" : "bg-success text-white")">
+                        <h5 class="mb-0">
+                            <i class="fas fa-calendar-check"></i> Subscription Status
+                            @if (isExpiringSoon)
+                            {
+                                <span class="badge bg-danger float-end">
+                                    <i class="fas fa-exclamation-triangle"></i> Expiring Soon
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-light text-success float-end">
+                                    <i class="fas fa-check-circle"></i> Active
+                                </span>
+                            }
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-tag"></i> Type:</strong><br>
+                                    <span class="badge bg-info">@subscription.SubscriptionType</span>
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-calendar-alt"></i> Start Date:</strong><br>
+                                    <span class="text-muted">@subscription.StartDate.ToString("dd MMM yyyy")</span>
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-calendar-times"></i> End Date:</strong><br>
+                                    <span class="@(isExpiringSoon ? "text-danger fw-bold" : "text-success fw-bold")">
+                                        @subscription.EndDate.ToString("dd MMM yyyy")
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-3">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-hourglass-half"></i> Remaining Days:</strong><br>
+                                    <span class="@(isExpiringSoon ? "text-danger fw-bold" : "text-success fw-bold")">
+                                        @remainingDays days
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        @if (isExpiringSoon)
+                        {
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Warning:</strong> Your subscription will expire in @remainingDays days. Please contact administration to renew.
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>No Active Subscription:</strong> You do not have an active subscription. Please contact administration.
+                </div>
+            </div>
+        </div>
+    }
+}
+
 <div class="row g-4">
     <div class="col-md-3">
         <div class="card border-primary">

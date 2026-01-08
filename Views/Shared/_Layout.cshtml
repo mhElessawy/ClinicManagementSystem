@@ -124,6 +124,40 @@
                     </ul>
 
                     <ul class="navbar-nav">
+                        @if (userType == "Doctor")
+                        {
+                            @inject ClinicManagementSystem.Models.ApplicationDbContext _db
+                            var doctorId = Context.Session.GetInt32("DoctorId");
+                            if (doctorId.HasValue)
+                            {
+                                var doctor = await _db.DoctorInfos
+                                    .Include(d => d.Subscriptions)
+                                    .FirstOrDefaultAsync(d => d.Id == doctorId.Value);
+
+                                if (doctor != null)
+                                {
+                                    var today = DateTime.Today;
+                                    var currentSubscription = doctor.Subscriptions?
+                                        .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                                        .OrderByDescending(s => s.EndDate)
+                                        .FirstOrDefault();
+
+                                    if (currentSubscription != null)
+                                    {
+                                        var remainingDays = currentSubscription.RemainingDays;
+                                        if (remainingDays <= 7)
+                                        {
+                                            <li class="nav-item">
+                                                <a class="nav-link text-warning" href="#" title="Subscription expiring soon">
+                                                    <i class="fas fa-exclamation-triangle"></i>
+                                                    <span class="badge bg-warning text-dark">@remainingDays days left</span>
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+                                }
+                            }
+                        }
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user-circle"></i> @Context.Session.GetString("FullName")

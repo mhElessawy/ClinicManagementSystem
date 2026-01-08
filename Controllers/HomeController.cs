@@ -40,28 +40,43 @@ namespace ClinicManagementSystem.Controllers
                     .CountAsync(d => d.DoctorId == doctorId.Value);
                 ViewBag.TodayDiagnoses = await _context.PatientDiagnoses
                     .CountAsync(d => d.DoctorId == doctorId.Value && d.DiagnosisDate.Date == DateTime.Today);
-                
+
                 // Get today's and tomorrow's appointments
                 var today = DateTime.Today;
                 var tomorrow = today.AddDays(1);
-                
+
                 ViewBag.TodayAppointments = await _context.Appointments
                     .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value 
-                             && a.AppointmentDate.Date == today 
+                    .Where(a => a.DoctorId == doctorId.Value
+                             && a.AppointmentDate.Date == today
                              && !a.IsDeleted
                              && a.Status == "Scheduled")
                     .OrderBy(a => a.AppointmentTime)
                     .ToListAsync();
-                
+
                 ViewBag.TomorrowAppointments = await _context.Appointments
                     .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value 
-                             && a.AppointmentDate.Date == tomorrow 
+                    .Where(a => a.DoctorId == doctorId.Value
+                             && a.AppointmentDate.Date == tomorrow
                              && !a.IsDeleted
                              && a.Status == "Scheduled")
                     .OrderBy(a => a.AppointmentTime)
                     .ToListAsync();
+
+                // Get doctor's subscription information
+                var doctor = await _context.DoctorInfos
+                    .Include(d => d.Subscriptions)
+                    .FirstOrDefaultAsync(d => d.Id == doctorId.Value);
+
+                if (doctor != null)
+                {
+                    var currentSubscription = doctor.Subscriptions?
+                        .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                        .OrderByDescending(s => s.EndDate)
+                        .FirstOrDefault();
+
+                    ViewBag.CurrentSubscription = currentSubscription;
+                }
             }
             else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
             {
