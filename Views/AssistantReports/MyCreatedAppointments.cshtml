@@ -1,0 +1,83 @@
+@model IEnumerable<ClinicManagementSystem.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Appointments I Created";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-user-plus"></i> Appointments I Created</h2>
+        <p class="text-muted">All appointments created by me</p>
+        <hr />
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> You haven't created any appointments yet.
+            </div>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Doctor</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var appt in Model)
+                    {
+                        <tr>
+                            <td>@appt.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                            <td>@appt.AppointmentTime.ToString(@"hh\:mm")</td>
+                            <td>@appt.Patient?.PatientName</td>
+                            <td>@appt.Doctor?.DoctorName</td>
+                            <td>@(appt.Reason.Length > 30 ? appt.Reason.Substring(0, 30) + "..." : appt.Reason)</td>
+                            <td>
+                                @switch (appt.Status)
+                                {
+                                    case "Scheduled":
+                                        <span class="badge bg-primary">Scheduled</span>
+                                        break;
+                                    case "Completed":
+                                        <span class="badge bg-success">Completed</span>
+                                        break;
+                                    case "Cancelled":
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        break;
+                                    case "NoShow":
+                                        <span class="badge bg-warning">No Show</span>
+                                        break;
+                                }
+                            </td>
+                            <td>
+                                <small>@appt.CreatedDate.ToString("yyyy-MM-dd HH:mm")</small>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="alert alert-success">
+                <strong>Total Appointments Created by You:</strong> @Model.Count()
+            </div>
+        }
+    </div>
+</div>

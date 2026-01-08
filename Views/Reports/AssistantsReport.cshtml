@@ -1,0 +1,69 @@
+@model IEnumerable<ClinicManagementSystem.Models.DoctorAssist>
+
+@{
+    ViewData["Title"] = "Assistants Report";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-user-nurse"></i> Assistants Report</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Reports
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead class="table-danger">
+                <tr>
+                    <th>Assistant Name</th>
+                    <th>Doctor</th>
+                    <th>Phone 1</th>
+                    <th>Phone 2</th>
+                    <th>Can Login</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var assistant in Model)
+                {
+                    <tr>
+                        <td><strong>@assistant.AssistName</strong></td>
+                        <td>@assistant.Doctor?.DoctorName</td>
+                        <td>@assistant.AssistTel1</td>
+                        <td>@assistant.AssistTel2</td>
+                        <td>
+                            @if (assistant.CanLogin)
+                            {
+                                <span class="badge bg-success">Yes</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">No</span>
+                            }
+                        </td>
+                        <td>
+                            @if (assistant.Active)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Inactive</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="alert alert-danger">
+            <strong>Total Assistants:</strong> @Model.Count()
+        </div>
+    </div>
+</div>

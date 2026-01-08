@@ -1,0 +1,78 @@
+@{
+    ViewData["Title"] = "Reports";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-chart-bar"></i> Reports & Analytics</h2>
+        <p class="text-muted">Generate and export various reports</p>
+        <hr />
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card border-primary h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-chart-line fa-4x text-primary mb-3"></i>
+                <h4 class="card-title">Statistics Report</h4>
+                <p class="card-text">View overall system statistics and key metrics</p>
+                <a asp-action="StatisticsReport" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-md fa-4x text-success mb-3"></i>
+                <h4 class="card-title">Doctors Report</h4>
+                <p class="card-text">Complete list of all doctors with details</p>
+                <a asp-action="DoctorsReport" class="btn btn-success">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-procedures fa-4x text-info mb-3"></i>
+                <h4 class="card-title">Patients Report</h4>
+                <p class="card-text">Complete list of all patients with contact info</p>
+                <a asp-action="PatientsReport" class="btn btn-info">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-notes-medical fa-4x text-warning mb-3"></i>
+                <h4 class="card-title">Diagnoses Report</h4>
+                <p class="card-text">Detailed diagnoses report with date filters</p>
+                <a asp-action="DiagnosesReport" class="btn btn-warning">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-danger h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-nurse fa-4x text-danger mb-3"></i>
+                <h4 class="card-title">Assistants Report</h4>
+                <p class="card-text">Complete list of all assistants with their doctors</p>
+                <a asp-action="AssistantsReport" class="btn btn-danger">
+                    <i class="fas fa-eye"></i> View Report
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

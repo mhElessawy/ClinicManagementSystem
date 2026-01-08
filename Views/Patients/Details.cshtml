@@ -1,0 +1,87 @@
+@model ClinicManagementSystem.Models.Patient
+
+@{
+    ViewData["Title"] = "Patient Details";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-user-injured"></i> Patient Details</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle"></i> Personal Information
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Name</dt>
+                    <dd class="col-sm-8">
+                        <strong>@Model.PatientName</strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Civil ID</dt>
+                    <dd class="col-sm-8">@Model.PatientCivilID</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-phone"></i> Contact Information
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Phone 1</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-phone text-success"></i>
+                        @Model.PatientTel1
+                    </dd>
+
+                    <dt class="col-sm-4">Phone 2</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-phone text-info"></i>
+                        @Model.PatientTel2
+                    </dd>
+
+                    <dt class="col-sm-4">Address</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-map-marker-alt text-danger"></i>
+                        @Model.PatientAddress
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-user-md"></i> Assigned Doctor
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Doctor</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-user-md text-success"></i>
+                        @Model.Doctor?.DoctorName
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>

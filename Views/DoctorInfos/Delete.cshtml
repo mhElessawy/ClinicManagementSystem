@@ -1,0 +1,68 @@
+@model ClinicManagementSystem.Models.DoctorInfo
+
+@{
+    ViewData["Title"] = "Delete Doctor";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="fas fa-trash"></i> @ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>تحذير!</strong>Are you sure to Delete this doctor?
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        @if (Model.DoctorPicture != null)
+                        {
+                            <img src="@Url.Action("GetDoctorImage", new { id = Model.Id })" 
+                                 alt="@Model.DoctorName" 
+                                 class="img-fluid rounded" 
+                                 style="max-width: 150px;" />
+                        }
+                    </div>
+
+                    <div class="col-md-8">
+                        <dl class="row">
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.DoctorName)</dt>
+                            <dd class="col-sm-7">@Html.DisplayFor(model => model.DoctorName)</dd>
+
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.DoctorTitle)</dt>
+                            <dd class="col-sm-7">@Html.DisplayFor(model => model.DoctorTitle)</dd>
+
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.Specialist)</dt>
+                            <dd class="col-sm-7">
+                                @if (Model.Specialist != null)
+                                {
+                                    @Model.Specialist.SpecialistName
+                                }
+                            </dd>
+
+                            <dt class="col-sm-5">@Html.DisplayNameFor(model => model.DoctorTel1)</dt>
+                            <dd class="col-sm-7">@Html.DisplayFor(model => model.DoctorTel1)</dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Confirm Delete
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

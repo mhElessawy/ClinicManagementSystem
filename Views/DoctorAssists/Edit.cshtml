@@ -1,0 +1,70 @@
+@model ClinicManagementSystem.Models.DoctorAssist
+@{
+    ViewData["Title"] = "Doctor Assist Update";
+}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> @ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="mb-3">
+                        <label asp-for="DoctorId" class="form-label"></label>
+                        <select asp-for="DoctorId" asp-items="ViewBag.DoctorId" class="form-control">
+                            <option value="">-- Select Doctor --</option>
+                        </select>
+                        <span asp-validation-for="DoctorId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AssistName" class="form-label"></label>
+                        <input asp-for="AssistName" class="form-control" />
+                        <span asp-validation-for="AssistName" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="AssistTel1" class="form-label"></label>
+                                <input asp-for="AssistTel1" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="AssistTel2" class="form-label"></label>
+                                <input asp-for="AssistTel2" class="form-control" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AssistAddress" class="form-label"></label>
+                        <textarea asp-for="AssistAddress" class="form-control" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Active" class="form-label"></label>
+                        <div class="form-check form-switch">
+                            <input asp-for="Active" class="form-check-input" type="checkbox" />
+                            <label class="form-check-label" asp-for="Active"></label>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> Save Update</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Return To list</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

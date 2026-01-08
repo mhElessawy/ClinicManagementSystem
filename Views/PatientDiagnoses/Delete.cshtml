@@ -1,0 +1,37 @@
+@model ClinicManagementSystem.Models.PatientDiagnosis
+@{
+    ViewData["Title"] = "حذف تشخيص";
+}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0"><i class="fas fa-trash"></i> @ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>تحذير!</strong> هل أنت متأكد من حذف هذا التشخيص؟
+                </div>
+                <dl class="row">
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Patient)</dt>
+                    <dd class="col-sm-8">@Model.Patient.PatientName</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Doctor)</dt>
+                    <dd class="col-sm-8">@(Model.Doctor?.DoctorName ?? "غير محدد")</dd>
+
+                    <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DiagnosisDate)</dt>
+                    <dd class="col-sm-8">@Model.DiagnosisDate.ToString("yyyy-MM-dd")</dd>
+                </dl>
+                <form asp-action="Delete" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> تأكيد الحذف</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-times"></i> إلغاء</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

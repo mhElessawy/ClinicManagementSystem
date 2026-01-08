@@ -1,0 +1,138 @@
+@model ClinicManagementSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "Appointment Details";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-calendar-alt"></i> Appointment Details</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-info-circle"></i> Appointment Information
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Patient</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-user-injured text-info"></i>
+                        @Model.Patient?.PatientName
+                    </dd>
+
+                    <dt class="col-sm-4">Doctor</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-user-md text-success"></i>
+                        @Model.Doctor?.DoctorName
+                    </dd>
+
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-calendar"></i>
+                        @Model.AppointmentDate.ToString("dddd, MMMM dd, yyyy")
+                    </dd>
+
+                    <dt class="col-sm-4">Time</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-clock"></i>
+                        @Model.AppointmentTime.ToString(@"hh\:mm")
+                    </dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Status)
+                        {
+                            case "Scheduled":
+                                <span class="badge bg-primary">Scheduled</span>
+                                break;
+                            case "Completed":
+                                <span class="badge bg-success">Completed</span>
+                                break;
+                            case "Cancelled":
+                                <span class="badge bg-danger">Cancelled</span>
+                                break;
+                            case "NoShow":
+                                <span class="badge bg-warning">No Show</span>
+                                break;
+                        }
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-notes-medical"></i> Details
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-12">Reason for Appointment</dt>
+                    <dd class="col-sm-12">
+                        <div class="alert alert-info">
+                            @Model.Reason
+                        </div>
+                    </dd>
+
+                    @if (!string.IsNullOrEmpty(Model.Notes))
+                    {
+                        <dt class="col-sm-12">Additional Notes</dt>
+                        <dd class="col-sm-12">
+                            <div class="alert alert-secondary">
+                                @Model.Notes
+                            </div>
+                        </dd>
+                    }
+                </dl>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <i class="fas fa-user"></i> Created By
+            </div>
+            <div class="card-body">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Created By</dt>
+                    <dd class="col-sm-8">@Model.CreatedByType</dd>
+
+                    <dt class="col-sm-4">Created Date</dt>
+                    <dd class="col-sm-8">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</dd>
+                </dl>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            @if (Model.Status == "Scheduled")
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> Edit
+                </a>
+                
+                @if (Context.Session.GetString("UserType") == "Doctor" || Context.Session.GetString("UserType") == "Admin")
+                {
+                    <form asp-action="Complete" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Mark as Completed
+                        </button>
+                    </form>
+                }
+                
+                <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this appointment?')">
+                        <i class="fas fa-times"></i> Cancel Appointment
+                    </button>
+                </form>
+            }
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>

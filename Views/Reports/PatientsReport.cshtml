@@ -1,0 +1,54 @@
+@model IEnumerable<ClinicManagementSystem.Models.Patient>
+
+@{
+    ViewData["Title"] = "Patients Report";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-procedures"></i> Patients Report</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <a asp-action="ExportPatients" class="btn btn-success">
+            <i class="fas fa-file-excel"></i> Export to Excel
+        </a>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead class="table-info">
+                <tr>
+                    <th>Patient Name</th>
+                    <th>Civil ID</th>
+                    <th>Phone 1</th>
+                    <th>Phone 2</th>
+                    <th>Doctor</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var patient in Model)
+                {
+                    <tr>
+                        <td><strong>@patient.PatientName</strong></td>
+                        <td>@patient.PatientCivilID</td>
+                        <td>@patient.PatientTel1</td>
+                        <td>@patient.PatientTel2</td>
+                        <td>@patient.Doctor?.DoctorName</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="alert alert-success">
+            <strong>Total Patients:</strong> @Model.Count()
+        </div>
+    </div>
+</div>

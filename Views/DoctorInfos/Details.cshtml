@@ -1,0 +1,143 @@
+@model ClinicManagementSystem.Models.DoctorInfo
+
+@{
+    ViewData["Title"] = "Doctor Details";
+}
+
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h4 class="mb-0"><i class="fas fa-user-md"></i> @ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        @if (Model.DoctorPicture != null)
+                        {
+                            <img src="@Url.Action("GetDoctorImage", new { id = Model.Id })" 
+                                 alt="@Model.DoctorName" 
+                                 class="img-fluid rounded" 
+                                 style="max-width: 200px;" />
+                        }
+                        else
+                        {
+                            <div class="bg-light p-5 rounded">
+                                <i class="fas fa-user-md fa-5x text-muted"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="col-md-9">
+                        <dl class="row">
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorName)</dt>
+                            <dd class="col-sm-8"><strong>@Html.DisplayFor(model => model.DoctorName)</strong></dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorTitle)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorTitle)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorCivilId)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorCivilId)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Gender)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.Gender)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Specialist)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.Specialist != null)
+                                {
+                                    <span class="badge bg-info">@Model.Specialist.SpecialistName</span>
+                                    @if (Model.Specialist.Department != null)
+                                    {
+                                        <br /><small class="text-muted">@Model.Specialist.Department.DepartmentName</small>
+                                    }
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorTel1)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorTel1)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorTel2)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorTel2)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorAddress)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorAddress)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.User)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.User != null)
+                                {
+                                    @Model.User.UserFullName
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.DoctorDetails)</dt>
+                            <dd class="col-sm-8">@Html.DisplayFor(model => model.DoctorDetails)</dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.RegDate)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.RegDate.HasValue)
+                                {
+                                    @Model.RegDate.Value.ToString("yyyy-MM-dd")
+                                }
+                            </dd>
+
+                            <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Active)</dt>
+                            <dd class="col-sm-8">
+                                @if (Model.Active)
+                                {
+                                    <span class="badge bg-success">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Not Active</span>
+                                }
+                            </dd>
+                        </dl>
+                    </div>
+                </div>
+
+                <hr />
+
+                <h5 class="mt-3"><i class="fas fa-user-nurse"></i> Assists:</h5>
+                @if (Model.DoctorAssists.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var assist in Model.DoctorAssists)
+                                {
+                                    <tr>
+                                        <td>@assist.AssistName</td>
+                                        <td>@assist.AssistTel1</td>
+                                        <td>@assist.AssistAddress</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted">No Assist Exist</p>
+                }
+
+                <div class="mt-4">
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Update
+                    </a>
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Return To list
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,80 @@
+@model ClinicManagementSystem.Models.PatientDiagnosis
+@{
+    ViewData["Title"] = "تعديل التشخيص";
+}
+<div class="row">
+    <div class="col-md-10 offset-md-1">
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                <h4 class="mb-0"><i class="fas fa-edit"></i> @ViewData["Title"]</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="PatientId" class="form-label"></label>
+                                <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control">
+                                    <option value="">-- اختر المريض --</option>
+                                </select>
+                                <span asp-validation-for="PatientId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DoctorId" class="form-label"></label>
+                                <select asp-for="DoctorId" asp-items="ViewBag.DoctorId" class="form-control">
+                                    <option value="">-- اختر الطبيب --</option>
+                                </select>
+                                <span asp-validation-for="DoctorId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DiagnosisDate" class="form-label"></label>
+                                <input asp-for="DiagnosisDate" type="date" class="form-control" />
+                                <span asp-validation-for="DiagnosisDate" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Active" class="form-label"></label>
+                                <div class="form-check form-switch">
+                                    <input asp-for="Active" class="form-check-input" type="checkbox" />
+                                    <label class="form-check-label" asp-for="Active"></label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DiagnosisDetails" class="form-label"></label>
+                        <textarea asp-for="DiagnosisDetails" class="form-control" rows="5"></textarea>
+                        <span asp-validation-for="DiagnosisDetails" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">تغيير ملف التشخيص (PDF)</label>
+                        <input type="file" name="DiagnosisFileUpload" class="form-control" accept=".pdf" />
+                        <small class="text-muted">اترك فارغاً للإبقاء على الملف الحالي</small>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> حفظ التعديلات</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

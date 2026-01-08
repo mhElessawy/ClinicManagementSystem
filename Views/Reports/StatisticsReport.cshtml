@@ -1,0 +1,134 @@
+@{
+    ViewData["Title"] = "Statistics Report";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-chart-line"></i> Statistics Report</h2>
+        <p class="text-muted">Overall system statistics and metrics</p>
+        <hr />
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-user-md fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalDoctors</h2>
+                <p>Total Doctors</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-procedures fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalPatients</h2>
+                <p>Total Patients</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-notes-medical fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalDiagnoses</h2>
+                <p>Total Diagnoses</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body text-center">
+                <i class="fas fa-user-nurse fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalAssistants</h2>
+                <p>Total Assistants</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-building fa-2x text-secondary mb-2"></i>
+                <h3>@ViewBag.TotalDepartments</h3>
+                <p class="text-muted">Departments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="fas fa-stethoscope fa-2x text-secondary mb-2"></i>
+                <h3>@ViewBag.TotalSpecialists</h3>
+                <p class="text-muted">Specialists</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-success">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-success mb-2"></i>
+                <h3 class="text-success">@ViewBag.TodayDiagnoses</h3>
+                <p class="text-muted">Today's Diagnoses</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-info">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-week fa-2x text-info mb-2"></i>
+                <h3 class="text-info">@ViewBag.ThisWeekDiagnoses</h3>
+                <p class="text-muted">This Week</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-chart-pie"></i> Top 10 Doctors by Patient Count
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Doctor Name</th>
+                            <th>Patients Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int rank = 1; }
+                        @foreach (dynamic item in ViewBag.PatientsByDoctor)
+                        {
+                            <tr>
+                                <td>@rank</td>
+                                <td>@item.DoctorName</td>
+                                <td><span class="badge bg-primary">@item.Count</span></td>
+                            </tr>
+                            rank++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Reports
+    </a>
+</div>

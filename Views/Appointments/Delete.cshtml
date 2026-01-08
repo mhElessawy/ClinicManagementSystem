@@ -1,0 +1,133 @@
+@model ClinicManagementSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "Delete Appointment";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2 class="text-danger"><i class="fas fa-exclamation-triangle"></i> Delete Appointment</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="alert alert-danger">
+    <h4><i class="fas fa-exclamation-circle"></i> Warning!</h4>
+    <p>Are you sure you want to delete this appointment? You must provide a reason for deletion.</p>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card border-danger mb-3">
+            <div class="card-header bg-danger text-white">
+                <i class="fas fa-calendar-times"></i> Appointment Information
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Patient</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-user-injured text-info"></i>
+                        <strong>@Model.Patient?.PatientName</strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Doctor</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-user-md text-success"></i>
+                        @Model.Doctor?.DoctorName
+                    </dd>
+
+                    <dt class="col-sm-4">Date</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-calendar"></i>
+                        @Model.AppointmentDate.ToString("dddd, MMMM dd, yyyy")
+                    </dd>
+
+                    <dt class="col-sm-4">Time</dt>
+                    <dd class="col-sm-8">
+                        <i class="fas fa-clock"></i>
+                        @Model.AppointmentTime.ToString(@"hh\:mm")
+                    </dd>
+
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8">
+                        @switch (Model.Status)
+                        {
+                            case "Scheduled":
+                                <span class="badge bg-primary">Scheduled</span>
+                                break;
+                            case "Completed":
+                                <span class="badge bg-success">Completed</span>
+                                break;
+                            case "Cancelled":
+                                <span class="badge bg-danger">Cancelled</span>
+                                break;
+                            case "NoShow":
+                                <span class="badge bg-warning">No Show</span>
+                                break;
+                        }
+                    </dd>
+
+                    <dt class="col-sm-4">Reason</dt>
+                    <dd class="col-sm-8">
+                        <div class="alert alert-info mb-0">
+                            @Model.Reason
+                        </div>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            
+            <div class="card border-warning mb-3">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-edit"></i> Deletion Reason (Required)
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="deletionReason" class="form-label">
+                            <strong>Why are you deleting this appointment?</strong>
+                        </label>
+                        <textarea id="deletionReason" name="deletionReason" class="form-control" rows="3" 
+                                  placeholder="E.g., Patient cancelled, Rescheduled to another date, Doctor unavailable, etc." 
+                                  required></textarea>
+                        <small class="text-muted">This reason will be saved and displayed in the deleted appointments list</small>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Important:</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>This is a soft delete - the appointment will be marked as deleted but not removed from database</li>
+                            <li>The deletion reason will be logged with your username and timestamp</li>
+                            <li>Deleted appointments can be viewed separately</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(ViewBag.Error as string))
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Error
+                </div>
+            }
+
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Yes, Delete Appointment
+            </button>
+            <a asp-action="Index" class="btn btn-secondary">
+                <i class="fas fa-times"></i> No, Cancel
+            </a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-focus on reason textarea
+        document.getElementById('deletionReason').focus();
+    </script>
+}

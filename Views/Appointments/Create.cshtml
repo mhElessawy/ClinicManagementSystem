@@ -1,0 +1,113 @@
+@model ClinicManagementSystem.Models.Appointment
+
+@{
+    ViewData["Title"] = "New Appointment";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-calendar-plus"></i> New Appointment</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-user-injured"></i> Patient & Doctor
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PatientId" class="form-label"></label>
+                            <select asp-for="PatientId" class="form-select" asp-items="ViewBag.PatientId" required>
+                                <option value="">-- Select Patient --</option>
+                            </select>
+                            <span asp-validation-for="PatientId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DoctorId" class="form-label"></label>
+                            <select asp-for="DoctorId" class="form-select" asp-items="ViewBag.DoctorId" required>
+                                <option value="">-- Select Doctor --</option>
+                            </select>
+                            <span asp-validation-for="DoctorId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-clock"></i> Date & Time
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AppointmentDate" class="form-label"></label>
+                            <input asp-for="AppointmentDate" type="date" class="form-control" 
+                                   value="@ViewBag.DefaultDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                            <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AppointmentTime" class="form-label"></label>
+                            <input asp-for="AppointmentTime" type="time" class="form-control" required />
+                            <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                            <small class="text-muted">Select appointment time</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-notes-medical"></i> Appointment Details
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Reason" class="form-label"></label>
+                        <textarea asp-for="Reason" class="form-control" rows="3" 
+                                  placeholder="E.g., Regular checkup, Follow-up consultation, etc." required></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                        <small class="text-muted">Explain why the patient needs this appointment</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" rows="2" 
+                                  placeholder="Any additional notes (optional)"></textarea>
+                        <small class="text-muted">Optional: Add any special instructions or notes</small>
+                    </div>
+
+                    <div class="form-check">
+                        <input asp-for="Active" class="form-check-input" type="checkbox" checked />
+                        <label asp-for="Active" class="form-check-label"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Note:</strong> The system will check for time conflicts automatically
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-success">
+                    <i class="fas fa-save"></i> Book Appointment
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

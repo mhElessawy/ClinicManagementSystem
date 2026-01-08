@@ -1,0 +1,142 @@
+@{
+    ViewData["Title"] = "My Reports";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-chart-line"></i> My Reports & Statistics</h2>
+        <p class="text-muted">View your personal statistics and reports</p>
+        <hr />
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-procedures fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalPatients</h2>
+                <p>My Patients</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalAppointments</h2>
+                <p>Total Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x mb-2"></i>
+                <h2>@ViewBag.ScheduledAppointments</h2>
+                <p>Scheduled</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-3x mb-2"></i>
+                <h2>@ViewBag.CompletedAppointments</h2>
+                <p>Completed</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-success mb-2"></i>
+                <h3 class="text-success">@ViewBag.TodayAppointments</h3>
+                <p class="text-muted">Today's Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-week fa-2x text-info mb-2"></i>
+                <h3 class="text-info">@ViewBag.ThisWeekAppointments</h3>
+                <p class="text-muted">This Week</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-primary h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-notes-medical fa-2x text-primary mb-2"></i>
+                <h3 class="text-primary">@ViewBag.TotalDiagnoses</h3>
+                <p class="text-muted">Total Diagnoses</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-file-medical"></i> My Reports
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a asp-action="MyPatients" class="list-group-item list-group-item-action">
+                        <i class="fas fa-procedures text-primary"></i> My Patients Report
+                    </a>
+                    <a asp-action="MyAppointments" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-alt text-success"></i> My Appointments Report
+                    </a>
+                    <a asp-action="MyDiagnoses" class="list-group-item list-group-item-action">
+                        <i class="fas fa-notes-medical text-info"></i> My Diagnoses Report
+                    </a>
+                    <a asp-action="MyAssistantsReport" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user-nurse text-warning"></i> My Assistants Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card h-100 bg-light">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-info-circle text-primary"></i> Quick Stats
+                </h5>
+                <dl class="row mb-0">
+                    <dt class="col-sm-8">Team Size:</dt>
+                    <dd class="col-sm-4 text-end">
+                        <span class="badge bg-warning">@ViewBag.TotalAssistants Assistants</span>
+                    </dd>
+
+                    <dt class="col-sm-8">Patient Load:</dt>
+                    <dd class="col-sm-4 text-end">
+                        <span class="badge bg-primary">@ViewBag.TotalPatients Patients</span>
+                    </dd>
+
+                    <dt class="col-sm-8">Success Rate:</dt>
+                    <dd class="col-sm-4 text-end">
+                        @{
+                            var successRate = ViewBag.TotalAppointments > 0 
+                                ? (int)((double)ViewBag.CompletedAppointments / ViewBag.TotalAppointments * 100) 
+                                : 0;
+                        }
+                        <span class="badge bg-success">@successRate%</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>

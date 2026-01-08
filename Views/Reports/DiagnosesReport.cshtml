@@ -1,0 +1,107 @@
+@model IEnumerable<ClinicManagementSystem.Models.PatientDiagnosis>
+
+@{
+    ViewData["Title"] = "Diagnoses Report";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-notes-medical"></i> Diagnoses Report</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-warning">
+        <i class="fas fa-filter"></i> Filters
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="DiagnosesReport" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" name="fromDate" value="@ViewBag.FromDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" name="toDate" value="@ViewBag.ToDate" />
+            </div>
+            @if (Context.Session.GetString("UserType") == "Admin")
+            {
+                <div class="col-md-4">
+                    <label class="form-label">Doctor</label>
+                    <select class="form-select" name="doctorId">
+                        <option value="">All Doctors</option>
+                        @foreach (var doctor in ViewBag.Doctors)
+                        {
+                            <option value="@doctor.Id" selected="@(ViewBag.SelectedDoctorId == doctor.Id)">
+                                @doctor.DoctorName
+                            </option>
+                        }
+                    </select>
+                </div>
+            }
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="ExportDiagnoses" asp-route-fromDate="@ViewBag.FromDate" asp-route-toDate="@ViewBag.ToDate" asp-route-doctorId="@ViewBag.SelectedDoctorId" class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Export to Excel
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead class="table-warning">
+                <tr>
+                    <th>Date</th>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var diagnosis in Model)
+                {
+                    <tr>
+                        <td>@diagnosis.DiagnosisDate.ToString("yyyy-MM-dd")</td>
+                        <td>@diagnosis.Patient?.PatientName</td>
+                        <td>@diagnosis.Doctor?.DoctorName</td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(diagnosis.DiagnosisDetails))
+                            {
+                                @(diagnosis.DiagnosisDetails.Length > 50
+                                    ? diagnosis.DiagnosisDetails.Substring(0, 50) + "..."
+                                    : diagnosis.DiagnosisDetails)
+                            }
+                        </td>
+                        <td>
+                            @if (diagnosis.Active)
+                            {
+                                <span class="badge bg-success">Active</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">Inactive</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="alert alert-info">
+            <strong>Total Diagnoses:</strong> @Model.Count()
+        </div>
+    </div>
+</div>

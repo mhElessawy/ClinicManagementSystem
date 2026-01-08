@@ -1,0 +1,103 @@
+@{
+    ViewData["Title"] = "My Reports";
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2><i class="fas fa-chart-bar"></i> My Reports & Statistics</h2>
+        <p class="text-muted">View doctor's statistics and your contributions</p>
+        <hr />
+    </div>
+</div>
+
+<div class="alert alert-info">
+    <i class="fas fa-user-md"></i> 
+    <strong>Working for:</strong> Dr. @ViewBag.DoctorName (@ViewBag.DoctorSpecialist)
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-procedures fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalPatients</h2>
+                <p>Doctor's Patients</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-check fa-3x mb-2"></i>
+                <h2>@ViewBag.TotalAppointments</h2>
+                <p>Total Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card bg-warning text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-3x mb-2"></i>
+                <h2>@ViewBag.ScheduledAppointments</h2>
+                <p>Scheduled</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card border-success h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-day fa-2x text-success mb-2"></i>
+                <h3 class="text-success">@ViewBag.TodayAppointments</h3>
+                <p class="text-muted">Today's Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-info h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-calendar-week fa-2x text-info mb-2"></i>
+                <h3 class="text-info">@ViewBag.ThisWeekAppointments</h3>
+                <p class="text-muted">This Week</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-warning h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-user-plus fa-2x text-warning mb-2"></i>
+                <h3 class="text-warning">@ViewBag.MyAppointmentsCreated</h3>
+                <p class="text-muted">Created by Me</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <i class="fas fa-file-alt"></i> Available Reports
+            </div>
+            <div class="card-body">
+                <div class="list-group">
+                    <a asp-action="DoctorPatients" class="list-group-item list-group-item-action">
+                        <i class="fas fa-procedures text-primary"></i> Doctor's Patients Report
+                    </a>
+                    <a asp-action="DoctorAppointments" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-alt text-success"></i> Doctor's Appointments Report
+                    </a>
+                    <a asp-action="MyCreatedAppointments" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user-plus text-warning"></i> Appointments I Created
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

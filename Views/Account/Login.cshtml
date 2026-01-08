@@ -1,0 +1,183 @@
+@{
+    ViewData["Title"] = "Login";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Doctor Management System</title>
+    
+    <!-- Bootstrap 5 CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+        }
+        .login-body {
+            padding: 40px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-login {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .user-type-icons {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .user-type-icon {
+            text-align: center;
+            opacity: 0.6;
+            transition: all 0.3s;
+        }
+        .user-type-icon.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <i class="fas fa-hospital-user fa-3x mb-3"></i>
+            <h2 class="mb-0">Doctor Management System</h2>
+            <p class="mb-0 mt-2">Login to your account</p>
+        </div>
+        <div class="login-body">
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle"></i> @TempData["Success"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <form method="post" asp-action="Login">
+                @Html.AntiForgeryToken()
+                
+                <div class="mb-4">
+                    <label for="userType" class="form-label">
+                        <i class="fas fa-user-tag"></i> User Type
+                    </label>
+                    <select class="form-select form-select-lg" id="userType" name="userType" required>
+                        <option value="">-- Select User Type --</option>
+                        <option value="Admin">
+                            <i class="fas fa-user-shield"></i> Administrator
+                        </option>
+                        <option value="Doctor">
+                            <i class="fas fa-user-md"></i> Doctor
+                        </option>
+                        <option value="Assistant">
+                            <i class="fas fa-user-nurse"></i> Assistant
+                        </option>
+                    </select>
+                </div>
+
+                <div class="user-type-icons" id="userIcons">
+                    <div class="user-type-icon" data-type="Admin">
+                        <i class="fas fa-user-shield fa-2x text-primary"></i>
+                        <div><small>Admin</small></div>
+                    </div>
+                    <div class="user-type-icon" data-type="Doctor">
+                        <i class="fas fa-user-md fa-2x text-success"></i>
+                        <div><small>Doctor</small></div>
+                    </div>
+                    <div class="user-type-icon" data-type="Assistant">
+                        <i class="fas fa-user-nurse fa-2x text-info"></i>
+                        <div><small>Assistant</small></div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user"></i> Username
+                    </label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           placeholder="Enter your username" required />
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock"></i> Password
+                    </label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="Enter your password" required />
+                </div>
+
+                <button type="submit" class="btn btn-login w-100">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </form>
+
+            
+        </div>
+    </div>
+
+    <!-- jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Bootstrap 5 JS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Highlight selected user type icon
+        $('#userType').on('change', function() {
+            var selectedType = $(this).val();
+            $('.user-type-icon').removeClass('active');
+            if (selectedType) {
+                $('.user-type-icon[data-type="' + selectedType + '"]').addClass('active');
+            }
+        });
+
+        // Click on icon to select user type
+        $('.user-type-icon').on('click', function() {
+            var type = $(this).data('type');
+            $('#userType').val(type).trigger('change');
+        });
+    </script>
+</body>
+</html>

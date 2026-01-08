@@ -1,0 +1,102 @@
+@model IEnumerable<ClinicManagementSystem.Models.Appointment>
+
+@{
+    ViewData["Title"] = "My Appointments Report";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-calendar-alt"></i> My Appointments Report</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header bg-info text-white">
+        <i class="fas fa-filter"></i> Filters
+    </div>
+    <div class="card-body">
+        <form method="get" asp-action="MyAppointments" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" name="fromDate" value="@ViewBag.FromDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" name="toDate" value="@ViewBag.ToDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select class="form-select" name="status">
+                    <option value="All" selected="@(ViewBag.SelectedStatus == "All")">All</option>
+                    <option value="Scheduled" selected="@(ViewBag.SelectedStatus == "Scheduled")">Scheduled</option>
+                    <option value="Completed" selected="@(ViewBag.SelectedStatus == "Completed")">Completed</option>
+                    <option value="Cancelled" selected="@(ViewBag.SelectedStatus == "Cancelled")">Cancelled</option>
+                    <option value="NoShow" selected="@(ViewBag.SelectedStatus == "NoShow")">No Show</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="mb-3">
+    <a asp-action="ExportMyAppointments" asp-route-fromDate="@ViewBag.FromDate" asp-route-toDate="@ViewBag.ToDate" asp-route-status="@ViewBag.SelectedStatus" class="btn btn-success">
+        <i class="fas fa-file-excel"></i> Export to Excel
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead class="table-success">
+                <tr>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Patient</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var appt in Model)
+                {
+                    <tr>
+                        <td>@appt.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                        <td>@appt.AppointmentTime.ToString(@"hh\:mm")</td>
+                        <td>@appt.Patient?.PatientName</td>
+                        <td>@(appt.Reason.Length > 40 ? appt.Reason.Substring(0, 40) + "..." : appt.Reason)</td>
+                        <td>
+                            @switch (appt.Status)
+                            {
+                                case "Scheduled":
+                                    <span class="badge bg-primary">Scheduled</span>
+                                    break;
+                                case "Completed":
+                                    <span class="badge bg-success">Completed</span>
+                                    break;
+                                case "Cancelled":
+                                    <span class="badge bg-danger">Cancelled</span>
+                                    break;
+                                case "NoShow":
+                                    <span class="badge bg-warning">No Show</span>
+                                    break;
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <div class="alert alert-info">
+            <strong>Total Appointments:</strong> @Model.Count()
+        </div>
+    </div>
+</div>
