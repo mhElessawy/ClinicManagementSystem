@@ -15,7 +15,7 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -37,6 +37,16 @@ namespace ClinicManagementSystem.Controllers
                 diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
             }
 
+            // Search by patient name
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                diagnosesQuery = diagnosesQuery.Where(d => d.Patient.PatientName.Contains(searchTerm));
+            }
+
+            // Sort by date - newest first
+            diagnosesQuery = diagnosesQuery.OrderByDescending(d => d.DiagnosisDate);
+
+            ViewBag.SearchTerm = searchTerm;
             return View(await diagnosesQuery.ToListAsync());
         }
 
