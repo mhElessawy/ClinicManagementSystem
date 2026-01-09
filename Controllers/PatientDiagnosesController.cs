@@ -74,16 +74,166 @@ namespace ClinicManagementSystem.Controllers
                 }
             }
 
+            // Remove navigation properties from validation
+            ModelState.Remove("Patient");
+            ModelState.Remove("Doctor");
+
             if (ModelState.IsValid)
             {
-                _context.Add(diagnosis);
-                await _context.SaveChangesAsync();
-                TempData["Success"] = "Diagnosis created successfully";
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    _context.Add(diagnosis);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Diagnosis created successfully";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error saving diagnosis: {ex.Message}");
+                }
             }
 
             PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
             return View(diagnosis);
+        }
+
+        // GET: PatientDiagnoses/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (id == null)
+                return NotFound();
+
+            var diagnosis = await _context.PatientDiagnoses
+                .Include(p => p.Patient)
+                .Include(p => p.Doctor)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (diagnosis == null)
+                return NotFound();
+
+            return View(diagnosis);
+        }
+
+        // GET: PatientDiagnoses/Edit/5
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (id == null)
+                return NotFound();
+
+            var diagnosis = await _context.PatientDiagnoses.FindAsync(id);
+            if (diagnosis == null)
+                return NotFound();
+
+            PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
+            return View(diagnosis);
+        }
+
+        // POST: PatientDiagnoses/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, PatientDiagnosis diagnosis, IFormFile? DiagnosisFileUpload)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (id != diagnosis.Id)
+                return NotFound();
+
+            if (DiagnosisFileUpload != null && DiagnosisFileUpload.Length > 0)
+            {
+                using (var ms = new MemoryStream())
+                {
+                    await DiagnosisFileUpload.CopyToAsync(ms);
+                    diagnosis.DiagnosisFile = ms.ToArray();
+                }
+            }
+            else
+            {
+                // Keep existing file if no new file uploaded
+                var existingDiagnosis = await _context.PatientDiagnoses
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(d => d.Id == id);
+                diagnosis.DiagnosisFile = existingDiagnosis?.DiagnosisFile;
+            }
+
+            // Remove navigation properties from validation
+            ModelState.Remove("Patient");
+            ModelState.Remove("Doctor");
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    _context.Update(diagnosis);
+                    await _context.SaveChangesAsync();
+                    TempData["Success"] = "Diagnosis updated successfully";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!DiagnosisExists(diagnosis.Id))
+                        return NotFound();
+                    else
+                        throw;
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error updating diagnosis: {ex.Message}");
+                }
+            }
+
+            PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
+            return View(diagnosis);
+        }
+
+        // GET: PatientDiagnoses/Delete/5
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (id == null)
+                return NotFound();
+
+            var diagnosis = await _context.PatientDiagnoses
+                .Include(p => p.Patient)
+                .Include(p => p.Doctor)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (diagnosis == null)
+                return NotFound();
+
+            return View(diagnosis);
+        }
+
+        // POST: PatientDiagnoses/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(int id)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            var diagnosis = await _context.PatientDiagnoses.FindAsync(id);
+            if (diagnosis != null)
+            {
+                _context.PatientDiagnoses.Remove(diagnosis);
+                await _context.SaveChangesAsync();
+                TempData["Success"] = "Diagnosis deleted successfully";
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private bool DiagnosisExists(int id)
+        {
+            return _context.PatientDiagnoses.Any(e => e.Id == id);
         }
 
         private void PopulateDropdowns(int? selectedPatient = null, int? selectedDoctor = null)

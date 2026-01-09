@@ -23,7 +23,7 @@ namespace ClinicManagementSystem.Services
             {
                 // TEMPORARY: Accept both BCrypt and plain text for testing
                 bool isValid = false;
-                
+
                 try
                 {
                     // Try BCrypt first
@@ -34,7 +34,7 @@ namespace ClinicManagementSystem.Services
                     // If BCrypt fails, try plain text comparison (TEMPORARY)
                     isValid = user.UserPassword == password;
                 }
-                
+
                 if (isValid)
                 {
                     return new LoginResult
@@ -51,7 +51,7 @@ namespace ClinicManagementSystem.Services
 
             // Try DoctorInfo
             var doctor = await _context.DoctorInfos
-                .Include(d => d.Subscriptions)  // ? ÊÍãíá ÇáÇÔÊÑÇßÇÊ
+                .Include(d => d.Subscriptions)
                 .FirstOrDefaultAsync(d => d.LoginUsername == username && d.CanLogin && d.Active);
 
             if (doctor != null && !string.IsNullOrEmpty(doctor.LoginPassword))
@@ -69,15 +69,59 @@ namespace ClinicManagementSystem.Services
 
                 if (isValid)
                 {
-                    // ÇáÊÍÞÞ ãä ÕáÇÍíÉ ÇáÇÔÊÑÇß ? ÌÏíÏ
+                    // Check if doctor has valid subscription
                     var today = DateTime.Today;
-                    var hasValidSubscription = doctor.Subscriptions != null &&
-                                              doctor.Subscriptions.Any(s => s.IsActive &&
-                                                                           s.StartDate <= today &&
-                                                                           s.EndDate >= today);
+
+                    // Debug: Check subscriptions
+                    if (doctor.Subscriptions == null || !doctor.Subscriptions.Any())
+                    {
+                        return new LoginResult
+                        {
+                            Success = false,
+                            ErrorMessage = "No subscription found. Please contact administration to add a subscription for your account."
+                        };
+                    }
+
+                    var hasValidSubscription = doctor.Subscriptions.Any(s =>
+                        s.IsActive &&
+                        s.StartDate <= today &&
+                        s.EndDate >= today);
 
                     if (!hasValidSubscription)
                     {
+                        // Find the most recent subscription to provide better error message
+                        var latestSubscription = doctor.Subscriptions
+                            .OrderByDescending(s => s.EndDate)
+                            .FirstOrDefault();
+
+                        if (latestSubscription != null)
+                        {
+                            if (!latestSubscription.IsActive)
+                            {
+                                return new LoginResult
+                                {
+                                    Success = false,
+                                    ErrorMessage = "Your subscription is inactive. Please contact administration to activate your subscription."
+                                };
+                            }
+                            else if (latestSubscription.StartDate > today)
+                            {
+                                return new LoginResult
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"Your subscription will start on {latestSubscription.StartDate:yyyy-MM-dd}. Please contact administration if this is incorrect."
+                                };
+                            }
+                            else if (latestSubscription.EndDate < today)
+                            {
+                                return new LoginResult
+                                {
+                                    Success = false,
+                                    ErrorMessage = $"Your subscription expired on {latestSubscription.EndDate:yyyy-MM-dd}. Please contact administration to renew your subscription."
+                                };
+                            }
+                        }
+
                         return new LoginResult
                         {
                             Success = false,
@@ -101,7 +145,6 @@ namespace ClinicManagementSystem.Services
                 }
             }
 
-
             // Try DoctorAssist
             var assistant = await _context.DoctorAssists
                 .Include(a => a.Doctor)
@@ -110,7 +153,7 @@ namespace ClinicManagementSystem.Services
             if (assistant != null && !string.IsNullOrEmpty(assistant.LoginPassword))
             {
                 bool isValid = false;
-                
+
                 try
                 {
                     isValid = BCrypt.Net.BCrypt.Verify(password, assistant.LoginPassword);
@@ -119,7 +162,7 @@ namespace ClinicManagementSystem.Services
                 {
                     isValid = assistant.LoginPassword == password;
                 }
-                
+
                 if (isValid)
                 {
                     // Update last login
