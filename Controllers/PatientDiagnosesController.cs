@@ -15,27 +15,69 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm)
+
         {
+
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+
                 return RedirectToAction("Login", "Account");
 
+
+
             var userType = SessionHelper.GetUserType(HttpContext.Session);
+
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
+
+
             IQueryable<PatientDiagnosis> diagnosesQuery = _context.PatientDiagnoses
+
                 .Include(p => p.Patient)
+
                 .Include(p => p.Doctor);
 
+
+
             // Filter by doctor
+
             if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+
             {
+
                 diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
+
             }
+
             else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
+
             {
+
                 diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
+
             }
+
+
+
+            // Search by patient name
+
+            if (!string.IsNullOrEmpty(searchTerm))
+
+            {
+
+                diagnosesQuery = diagnosesQuery.Where(d => d.Patient.PatientName.Contains(searchTerm));
+
+            }
+
+
+
+            // Sort by date - newest first
+
+            diagnosesQuery = diagnosesQuery.OrderByDescending(d => d.DiagnosisDate);
+
+
+
+            ViewBag.SearchTerm = searchTerm;
 
             return View(await diagnosesQuery.ToListAsync());
         }
@@ -65,12 +107,34 @@ namespace ClinicManagementSystem.Controllers
                 diagnosis.DoctorId = doctorId.Value;
             }
 
+            // Handle file upload to PatientFile folder
             if (DiagnosisFileUpload != null && DiagnosisFileUpload.Length > 0)
             {
-                using (var ms = new MemoryStream())
+                try
                 {
-                    await DiagnosisFileUpload.CopyToAsync(ms);
-                    diagnosis.DiagnosisFile = ms.ToArray();
+                    // Create PatientFile directory if it doesn't exist
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PatientFile");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    // Generate unique filename
+                    var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(DiagnosisFileUpload.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    // Save file to disk
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await DiagnosisFileUpload.CopyToAsync(stream);
+                    }
+
+                    // Store relative path in database
+                    diagnosis.DiagnosisFilePath = $"/PatientFile/{fileName}";
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error uploading file: {ex.Message}");
                 }
             }
 
@@ -145,21 +209,57 @@ namespace ClinicManagementSystem.Controllers
             if (id != diagnosis.Id)
                 return NotFound();
 
+            // Handle file upload to PatientFile folder
             if (DiagnosisFileUpload != null && DiagnosisFileUpload.Length > 0)
             {
-                using (var ms = new MemoryStream())
+                try
                 {
-                    await DiagnosisFileUpload.CopyToAsync(ms);
-                    diagnosis.DiagnosisFile = ms.ToArray();
+                    // Delete old file if exists
+                    var existingDiagnosis = await _context.PatientDiagnoses
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(d => d.Id == id);
+
+                    if (!string.IsNullOrEmpty(existingDiagnosis?.DiagnosisFilePath))
+                    {
+                        var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", existingDiagnosis.DiagnosisFilePath.TrimStart('/'));
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
+
+                    // Create PatientFile directory if it doesn't exist
+                    var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PatientFile");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+
+                    // Generate unique filename
+                    var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(DiagnosisFileUpload.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    // Save file to disk
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await DiagnosisFileUpload.CopyToAsync(stream);
+                    }
+
+                    // Store relative path in database
+                    diagnosis.DiagnosisFilePath = $"/PatientFile/{fileName}";
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", $"Error uploading file: {ex.Message}");
                 }
             }
             else
             {
-                // Keep existing file if no new file uploaded
+                // Keep existing file path if no new file uploaded
                 var existingDiagnosis = await _context.PatientDiagnoses
                     .AsNoTracking()
                     .FirstOrDefaultAsync(d => d.Id == id);
-                diagnosis.DiagnosisFile = existingDiagnosis?.DiagnosisFile;
+                diagnosis.DiagnosisFilePath = existingDiagnosis?.DiagnosisFilePath;
             }
 
             // Remove navigation properties from validation
@@ -229,6 +329,30 @@ namespace ClinicManagementSystem.Controllers
             }
 
             return RedirectToAction(nameof(Index));
+        }
+
+        // GET: PatientDiagnoses/GetDiagnosisFile/5
+        public async Task<IActionResult> GetDiagnosisFile(int? id)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            if (id == null)
+                return NotFound();
+
+            var diagnosis = await _context.PatientDiagnoses.FindAsync(id);
+            if (diagnosis == null || string.IsNullOrEmpty(diagnosis.DiagnosisFilePath))
+                return NotFound();
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", diagnosis.DiagnosisFilePath.TrimStart('/'));
+
+            if (!System.IO.File.Exists(filePath))
+                return NotFound();
+
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+            var fileName = Path.GetFileName(filePath);
+
+            return File(fileBytes, "application/pdf", fileName);
         }
 
         private bool DiagnosisExists(int id)

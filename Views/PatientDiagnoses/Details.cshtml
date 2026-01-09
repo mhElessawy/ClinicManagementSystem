@@ -52,10 +52,13 @@
 
                     <dt class="col-sm-3">ملف التشخيص</dt>
                     <dd class="col-sm-9">
-                        @if (Model.DiagnosisFile != null)
+                        @if (!string.IsNullOrEmpty(Model.DiagnosisFilePath))
                         {
                             <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-primary" target="_blank">
-                                <i class="fas fa-file-pdf"></i> تحميل الملف
+                                <i class="fas fa-file-pdf"></i> عرض الملف
+                            </a>
+                            <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-success" download>
+                                <i class="fas fa-download"></i> تحميل
                             </a>
                         }
                         else

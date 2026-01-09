@@ -13,7 +13,7 @@
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -61,9 +61,18 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">تغيير ملف التشخيص (PDF)</label>
+                        <label class="form-label">ملف التشخيص (PDF)</label>
+                        @if (!string.IsNullOrEmpty(Model.DiagnosisFilePath))
+                        {
+                            <div class="alert alert-info mb-2">
+                                <i class="fas fa-file-pdf"></i> يوجد ملف محفوظ حالياً.
+                                <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-primary" target="_blank">
+                                    <i class="fas fa-eye"></i> عرض الملف
+                                </a>
+                            </div>
+                        }
                         <input type="file" name="DiagnosisFileUpload" class="form-control" accept=".pdf" />
-                        <small class="text-muted">اترك فارغاً للإبقاء على الملف الحالي</small>
+                        <small class="text-muted">اختر ملف جديد لاستبدال الملف الحالي، أو اترك فارغاً للإبقاء على الملف الحالي</small>
                     </div>
 
                     <div class="mt-4">
@@ -76,5 +85,7 @@
     </div>
 </div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
