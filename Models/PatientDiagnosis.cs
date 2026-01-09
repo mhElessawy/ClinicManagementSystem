@@ -23,8 +23,9 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Diagnosis Details")]
         public string? DiagnosisDetails { get; set; }
 
-        [Display(Name = "Diagnosis File")]
-        public byte[]? DiagnosisFile { get; set; }
+        [StringLength(500)]
+        [Display(Name = "Diagnosis File Path")]
+        public string? DiagnosisFilePath { get; set; }
 
         [Display(Name = "Active")]
         public bool Active { get; set; } = true;
