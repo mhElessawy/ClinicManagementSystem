@@ -1,4 +1,5 @@
 @model ClinicManagementSystem.Models.PatientDiagnosis
+@using System.IO
 @{
     ViewData["Title"] = "تفاصيل التشخيص";
     var fileExtension = !string.IsNullOrEmpty(Model.DiagnosisFilePath) ? Path.GetExtension(Model.DiagnosisFilePath).ToLower() : "";
