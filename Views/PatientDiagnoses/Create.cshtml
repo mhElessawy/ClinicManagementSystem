@@ -25,7 +25,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="PatientId" class="form-label"></label>
-                                <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control">
+                                <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control" id="patientSelect">
                                     <option value="">-- اختر المريض --</option>
                                 </select>
                                 <span asp-validation-for="PatientId" class="text-danger"></span>
@@ -38,6 +38,19 @@
                                     <option value="">-- اختر الطبيب --</option>
                                 </select>
                                 <span asp-validation-for="DoctorId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Patient Info Display -->
+                    <div id="patientInfoCard" class="alert alert-info" style="display:none;">
+                        <h6><i class="fas fa-user-circle"></i> معلومات المريض:</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>الرقم المدني:</strong> <span id="patientCivilId">-</span>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>هاتف 1:</strong> <span id="patientTel1">-</span>
                             </div>
                         </div>
                     </div>
@@ -86,4 +99,37 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script>
+        // Parse patients data from ViewBag
+        var patientsData = @Html.Raw(ViewBag.PatientsJson ?? "[]");
+
+        $(document).ready(function() {
+            // When patient is selected
+            $('#patientSelect').change(function() {
+                var patientId = $(this).val();
+
+                if (patientId) {
+                    // Find patient data
+                    var patient = patientsData.find(p => p.id == patientId);
+
+                    if (patient) {
+                        // Show patient info card
+                        $('#patientInfoCard').show();
+
+                        // Update patient info
+                        $('#patientCivilId').text(patient.civilId || 'غير محدد');
+                        $('#patientTel1').text(patient.tel1 || 'غير محدد');
+                    }
+                } else {
+                    // Hide patient info card
+                    $('#patientInfoCard').hide();
+                }
+            });
+
+            // Trigger change event on page load if patient is pre-selected
+            if ($('#patientSelect').val()) {
+                $('#patientSelect').trigger('change');
+            }
+        });
+    </script>
 }
