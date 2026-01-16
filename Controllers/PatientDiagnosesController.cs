@@ -190,6 +190,19 @@ namespace ClinicManagementSystem.Controllers
             if (diagnosis == null)
                 return NotFound();
 
+            // Determine file type for display
+            if (!string.IsNullOrEmpty(diagnosis.DiagnosisFilePath))
+            {
+                var fileExtension = Path.GetExtension(diagnosis.DiagnosisFilePath).ToLower();
+                ViewBag.IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }.Contains(fileExtension);
+                ViewBag.IsPdf = fileExtension == ".pdf";
+            }
+            else
+            {
+                ViewBag.IsImage = false;
+                ViewBag.IsPdf = false;
+            }
+
             return View(diagnosis);
         }
 
