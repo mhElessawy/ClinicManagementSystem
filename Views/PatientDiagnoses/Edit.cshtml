@@ -2,6 +2,11 @@
 @{
     ViewData["Title"] = "تعديل التشخيص";
 }
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+
 <div class="row">
     <div class="col-md-10 offset-md-1">
         <div class="card">
@@ -18,7 +23,7 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="PatientId" class="form-label"></label>
-                                <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control">
+                                <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control" id="patientSelect">
                                     <option value="">-- اختر المريض --</option>
                                 </select>
                                 <span asp-validation-for="PatientId" class="text-danger"></span>
@@ -88,4 +93,31 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <!-- Select2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Initialize Select2 on patient dropdown
+            $('#patientSelect').select2({
+                theme: 'bootstrap-5',
+                placeholder: '-- ابحث عن مريض أو اختر من القائمة --',
+                allowClear: true,
+                dir: 'rtl',
+                language: {
+                    noResults: function() {
+                        return "لا توجد نتائج";
+                    },
+                    searching: function() {
+                        return "جاري البحث...";
+                    },
+                    inputTooShort: function() {
+                        return "الرجاء إدخال حرف أو أكثر";
+                    }
+                },
+                width: '100%'
+            });
+        });
+    </script>
 }
