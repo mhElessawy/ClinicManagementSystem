@@ -82,13 +82,25 @@ namespace ClinicManagementSystem.Controllers
             return View(await diagnosesQuery.ToListAsync());
         }
 
-        public IActionResult Create()
+        public IActionResult Create(int? patientId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            PopulateDropdowns();
-            return View();
+            var diagnosis = new PatientDiagnosis
+            {
+                DiagnosisDate = DateTime.Now,
+                Active = true
+            };
+
+            // Pre-fill patient if patientId is provided
+            if (patientId.HasValue)
+            {
+                diagnosis.PatientId = patientId.Value;
+            }
+
+            PopulateDropdowns(patientId);
+            return View(diagnosis);
         }
 
         [HttpPost]
@@ -351,8 +363,20 @@ namespace ClinicManagementSystem.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
             var fileName = Path.GetFileName(filePath);
+            var fileExtension = Path.GetExtension(filePath).ToLower();
 
-            return File(fileBytes, "application/pdf", fileName);
+            // Determine content type based on file extension
+            var contentType = fileExtension switch
+            {
+                ".pdf" => "application/pdf",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                _ => "application/octet-stream"
+            };
+
+            return File(fileBytes, contentType, fileName);
         }
 
         private bool DiagnosisExists(int id)

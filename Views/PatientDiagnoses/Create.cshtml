@@ -13,6 +13,14 @@
                     @Html.AntiForgeryToken()
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
 
+                    @if (Model.PatientId > 0)
+                    {
+                        var selectedPatient = (ViewBag.PatientId as SelectList)?.FirstOrDefault(p => p.Value == Model.PatientId.ToString());
+                        <div class="alert alert-info">
+                            <i class="fas fa-user"></i> <strong>المريض المحدد:</strong> @selectedPatient?.Text
+                        </div>
+                    }
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
@@ -60,8 +68,9 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">ملف التشخيص (PDF)</label>
-                        <input type="file" name="DiagnosisFileUpload" class="form-control" accept=".pdf" />
+                        <label class="form-label">ملف التشخيص (PDF أو صورة)</label>
+                        <input type="file" name="DiagnosisFileUpload" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp" />
+                        <small class="form-text text-muted">الملفات المدعومة: PDF, JPG, PNG, GIF, BMP</small>
                     </div>
 
                     <div class="mt-4">

@@ -1,21 +1,50 @@
 @model ClinicManagementSystem.Models.PatientDiagnosis
 @{
     ViewData["Title"] = "تفاصيل التشخيص";
+    var fileExtension = !string.IsNullOrEmpty(Model.DiagnosisFilePath) ? Path.GetExtension(Model.DiagnosisFilePath).ToLower() : "";
+    var isImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }.Contains(fileExtension);
+    var isPdf = fileExtension == ".pdf";
 }
 <div class="row">
-    <div class="col-md-10 offset-md-1">
-        <div class="card">
+    <div class="col-md-12">
+        <!-- Patient Information Card -->
+        <div class="card mb-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-user"></i> معلومات المريض</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>الاسم:</strong>
+                        <p>@Model.Patient.PatientName</p>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>الرقم المدني:</strong>
+                        <p>@(Model.Patient.PatientCivilID ?? "غير محدد")</p>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>هاتف 1:</strong>
+                        <p>@(Model.Patient.PatientTel1 ?? "غير محدد")</p>
+                    </div>
+                    <div class="col-md-3">
+                        <strong>هاتف 2:</strong>
+                        <p>@(Model.Patient.PatientTel2 ?? "غير محدد")</p>
+                    </div>
+                    <div class="col-md-12">
+                        <strong>العنوان:</strong>
+                        <p>@(Model.Patient.PatientAddress ?? "غير محدد")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Diagnosis Details Card -->
+        <div class="card mb-3">
             <div class="card-header bg-info text-white">
-                <h4 class="mb-0"><i class="fas fa-info-circle"></i> @ViewData["Title"]</h4>
+                <h4 class="mb-0"><i class="fas fa-stethoscope"></i> @ViewData["Title"]</h4>
             </div>
             <div class="card-body">
                 <dl class="row">
-                    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Patient)</dt>
-                    <dd class="col-sm-9">
-                        <strong>@Model.Patient.PatientName</strong><br />
-                        <small class="text-muted">الرقم المدني: @Model.Patient.PatientCivilID</small>
-                    </dd>
-
                     <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Doctor)</dt>
                     <dd class="col-sm-9">
                         @if (Model.Doctor != null)
@@ -49,23 +78,6 @@
                             @Html.DisplayFor(model => model.DiagnosisDetails)
                         </div>
                     </dd>
-
-                    <dt class="col-sm-3">ملف التشخيص</dt>
-                    <dd class="col-sm-9">
-                        @if (!string.IsNullOrEmpty(Model.DiagnosisFilePath))
-                        {
-                            <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-primary" target="_blank">
-                                <i class="fas fa-file-pdf"></i> عرض الملف
-                            </a>
-                            <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-success" download>
-                                <i class="fas fa-download"></i> تحميل
-                            </a>
-                        }
-                        else
-                        {
-                            <span class="text-muted">لا يوجد ملف مرفق</span>
-                        }
-                    </dd>
                 </dl>
 
                 <div class="mt-4">
@@ -74,5 +86,43 @@
                 </div>
             </div>
         </div>
+
+        <!-- File Viewer Card -->
+        @if (!string.IsNullOrEmpty(Model.DiagnosisFilePath))
+        {
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-file"></i> ملف التشخيص</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-primary" download>
+                            <i class="fas fa-download"></i> تحميل الملف
+                        </a>
+                    </div>
+
+                    @if (isImage)
+                    {
+                        <div class="text-center">
+                            <img src="@Model.DiagnosisFilePath" alt="Diagnosis File" class="img-fluid" style="max-height: 800px; border: 1px solid #ddd; border-radius: 4px; padding: 5px;" />
+                        </div>
+                    }
+                    else if (isPdf)
+                    {
+                        <div class="embed-responsive" style="height: 800px;">
+                            <iframe src="@Model.DiagnosisFilePath" width="100%" height="100%" style="border: 1px solid #ddd;">
+                                <p>متصفحك لا يدعم عرض ملفات PDF. يمكنك <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id">تحميل الملف</a> بدلاً من ذلك.</p>
+                            </iframe>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> نوع الملف غير مدعوم للعرض المباشر. يمكنك تحميل الملف لعرضه.
+                        </div>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </div>
