@@ -8,6 +8,31 @@
         <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> إضافة مريض جديد</a>
     </div>
 </div>
+
+<!-- Search Form -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">اسم المريض</label>
+                <input type="text" name="searchName" class="form-control" value="@ViewBag.SearchName" placeholder="البحث بالاسم..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">الرقم المدني</label>
+                <input type="text" name="searchCivilID" class="form-control" value="@ViewBag.SearchCivilID" placeholder="البحث بالرقم المدني..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">رقم الهاتف</label>
+                <input type="text" name="searchTel" class="form-control" value="@ViewBag.SearchTel" placeholder="البحث برقم الهاتف..." />
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> بحث</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-redo"></i> إعادة</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -23,7 +48,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @{ int counter = 1; }
+                    @{
+                        int counter = 1;
+                    }
                     @foreach (var item in Model)
                     {
                         <tr>
@@ -34,9 +61,10 @@
                             <td>@(item.Doctor?.DoctorName ?? "غير محدد")</td>
                             <td>
                                 <div class="btn-group-actions">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info"><i class="fas fa-eye"></i></a>
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning"><i class="fas fa-edit"></i></a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="التفاصيل"><i class="fas fa-eye"></i></a>
+                                    <a asp-controller="PatientDiagnoses" asp-action="Create" asp-route-patientId="@item.Id" class="btn btn-sm btn-primary" title="إضافة تشخيص"><i class="fas fa-stethoscope"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="تعديل"><i class="fas fa-edit"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="حذف"><i class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>

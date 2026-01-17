@@ -15,80 +15,99 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(string searchTerm)
-
+        public async Task<IActionResult> Index(string searchName, string searchCivilID, string searchTel)
         {
-
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
-
                 return RedirectToAction("Login", "Account");
 
-
-
             var userType = SessionHelper.GetUserType(HttpContext.Session);
-
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
-
-
             IQueryable<PatientDiagnosis> diagnosesQuery = _context.PatientDiagnoses
-
                 .Include(p => p.Patient)
-
                 .Include(p => p.Doctor);
 
-
-
             // Filter by doctor
-
             if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
-
             {
-
                 diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
-
             }
-
             else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
-
             {
-
                 diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
-
             }
 
-
-
-            // Search by patient name
-
-            if (!string.IsNullOrEmpty(searchTerm))
-
+            // Apply search filters
+            if (!string.IsNullOrEmpty(searchName))
             {
-
-                diagnosesQuery = diagnosesQuery.Where(d => d.Patient.PatientName.Contains(searchTerm));
-
+                diagnosesQuery = diagnosesQuery.Where(d => d.Patient.PatientName.Contains(searchName));
             }
 
+            if (!string.IsNullOrEmpty(searchCivilID))
+            {
+                diagnosesQuery = diagnosesQuery.Where(d => d.Patient.PatientCivilID != null && d.Patient.PatientCivilID.Contains(searchCivilID));
+            }
 
+            if (!string.IsNullOrEmpty(searchTel))
+            {
+                diagnosesQuery = diagnosesQuery.Where(d =>
+                    (d.Patient.PatientTel1 != null && d.Patient.PatientTel1.Contains(searchTel)) ||
+                    (d.Patient.PatientTel2 != null && d.Patient.PatientTel2.Contains(searchTel)));
+            }
 
             // Sort by date - newest first
-
             diagnosesQuery = diagnosesQuery.OrderByDescending(d => d.DiagnosisDate);
 
-
-
-            ViewBag.SearchTerm = searchTerm;
+            // Store search values in ViewBag for display
+            ViewBag.SearchName = searchName;
+            ViewBag.SearchCivilID = searchCivilID;
+            ViewBag.SearchTel = searchTel;
 
             return View(await diagnosesQuery.ToListAsync());
         }
 
-        public IActionResult Create()
+        public IActionResult Create(int? patientId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            PopulateDropdowns();
-            return View();
+            var diagnosis = new PatientDiagnosis
+            {
+                DiagnosisDate = DateTime.Now,
+                Active = true
+            };
+
+            // Pre-fill patient if patientId is provided
+            if (patientId.HasValue)
+            {
+                diagnosis.PatientId = patientId.Value;
+            }
+
+            PopulateDropdowns(patientId);
+            // Send patients data as JSON for JavaScript use
+            var userType = SessionHelper.GetUserType(HttpContext.Session);
+            var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
+            IQueryable<Patient> patientsQuery = _context.Patients;
+
+            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+            {
+                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
+            }
+            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
+            {
+                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
+            }
+
+            var patientsData = patientsQuery.Select(p => new {
+                id = p.Id,
+                name = p.PatientName,
+                civilId = p.PatientCivilID ?? "",
+                tel1 = p.PatientTel1 ?? "",
+                tel2 = p.PatientTel2 ?? ""
+            }).ToList();
+
+            ViewBag.PatientsJson = System.Text.Json.JsonSerializer.Serialize(patientsData);
+            return View(diagnosis);
         }
 
         [HttpPost]
@@ -177,7 +196,18 @@ namespace ClinicManagementSystem.Controllers
 
             if (diagnosis == null)
                 return NotFound();
-
+            // Determine file type for display
+            if (!string.IsNullOrEmpty(diagnosis.DiagnosisFilePath))
+            {
+                var fileExtension = Path.GetExtension(diagnosis.DiagnosisFilePath).ToLower();
+                ViewBag.IsImage = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp" }.Contains(fileExtension);
+                ViewBag.IsPdf = fileExtension == ".pdf";
+            }
+            else
+            {
+                ViewBag.IsImage = false;
+                ViewBag.IsPdf = false;
+            }
             return View(diagnosis);
         }
 
@@ -351,8 +381,20 @@ namespace ClinicManagementSystem.Controllers
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
             var fileName = Path.GetFileName(filePath);
+            var fileExtension = Path.GetExtension(filePath).ToLower();
 
-            return File(fileBytes, "application/pdf", fileName);
+            // Determine content type based on file extension
+            var contentType = fileExtension switch
+            {
+                ".pdf" => "application/pdf",
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".bmp" => "image/bmp",
+                _ => "application/octet-stream"
+            };
+
+            return File(fileBytes, contentType, fileName);
         }
 
         private bool DiagnosisExists(int id)

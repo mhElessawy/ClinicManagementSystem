@@ -16,7 +16,7 @@ namespace ClinicManagementSystem.Controllers
         }
 
         // GET: Patients
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchName, string searchCivilID, string searchTel)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -38,6 +38,29 @@ namespace ClinicManagementSystem.Controllers
                     return View(new List<Patient>());
                 }
             }
+
+            // Apply search filters
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                patientsQuery = patientsQuery.Where(p => p.PatientName.Contains(searchName));
+            }
+
+            if (!string.IsNullOrEmpty(searchCivilID))
+            {
+                patientsQuery = patientsQuery.Where(p => p.PatientCivilID != null && p.PatientCivilID.Contains(searchCivilID));
+            }
+
+            if (!string.IsNullOrEmpty(searchTel))
+            {
+                patientsQuery = patientsQuery.Where(p =>
+                    (p.PatientTel1 != null && p.PatientTel1.Contains(searchTel)) ||
+                    (p.PatientTel2 != null && p.PatientTel2.Contains(searchTel)));
+            }
+
+            // Store search values in ViewBag for display
+            ViewBag.SearchName = searchName;
+            ViewBag.SearchCivilID = searchCivilID;
+            ViewBag.SearchTel = searchTel;
 
             return View(await patientsQuery.ToListAsync());
         }
@@ -215,7 +238,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction("Login", "Account");
 
             var patient = await _context.Patients.FindAsync(id);
-            
+
             if (patient == null) return NotFound();
 
             // Check access
@@ -228,7 +251,7 @@ namespace ClinicManagementSystem.Controllers
             _context.Patients.Remove(patient);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Patient deleted successfully";
-            
+
             return RedirectToAction(nameof(Index));
         }
 
