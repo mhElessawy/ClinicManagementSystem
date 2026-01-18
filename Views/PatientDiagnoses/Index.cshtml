@@ -5,7 +5,7 @@
 <div class="row mb-3">
     <div class="col"><h2><i class="fas fa-notes-medical"></i> @ViewData["Title"]</h2></div>
     <div class="col text-end">
-        <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> إضافة تشخيص جديد</a>
+        <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Add New Dignosis</a>
     </div>
 </div>
 <!-- Search Form -->
@@ -14,19 +14,19 @@
         <form asp-action="Index" method="get" class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">اسم المريض</label>
-                <input type="text" name="searchName" class="form-control" value="@ViewBag.SearchName" placeholder="البحث بالاسم..." />
+                <input type="text" name="searchName" class="form-control" value="@ViewBag.SearchName" placeholder="Search By Name..." />
             </div>
             <div class="col-md-3">
                 <label class="form-label">الرقم المدني</label>
-                <input type="text" name="searchCivilID" class="form-control" value="@ViewBag.SearchCivilID" placeholder="البحث بالرقم المدني..." />
+                <input type="text" name="searchCivilID" class="form-control" value="@ViewBag.SearchCivilID" placeholder="Search By Civil ID..." />
             </div>
             <div class="col-md-3">
                 <label class="form-label">رقم الهاتف</label>
-                <input type="text" name="searchTel" class="form-control" value="@ViewBag.SearchTel" placeholder="البحث برقم الهاتف..." />
+                <input type="text" name="searchTel" class="form-control" value="@ViewBag.SearchTel" placeholder="Search By Phone Number..." />
             </div>
             <div class="col-md-2 d-flex align-items-end">
-                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> بحث</button>
-                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-redo"></i> إعادة</a>
+                <button type="submit" class="btn btn-primary me-2"><i class="fas fa-search"></i> Search</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-redo"></i> Reset</a>
             </div>
         </form>
     </div>
@@ -43,9 +43,9 @@
                         <th>التاريخ</th>
                         <th>@Html.DisplayNameFor(model => model.Patient)</th>
                         <th>@Html.DisplayNameFor(model => model.Doctor)</th>
-                        <th>التفاصيل</th>
-                        <th>الحالة</th>
-                        <th>الإجراءات</th>
+                        <th>Details</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -58,27 +58,27 @@
                             <td>@counter</td>
                             <td>@item.DiagnosisDate.ToString("yyyy-MM-dd")</td>
                             <td>@item.Patient.PatientName</td>
-                            <td>@(item.Doctor?.DoctorName ?? "غير محدد")</td>
+                            <td>@(item.Doctor?.DoctorName ?? "Undefined")</td>
                             <td>@(item.DiagnosisDetails?.Substring(0, Math.Min(50, item.DiagnosisDetails?.Length ?? 0)) + (item.DiagnosisDetails?.Length > 50 ? "..." : ""))</td>
                             <td>
                                 @if (item.Active)
                                 {
-                                    <span class="badge bg-success">نشط</span>
+                                    <span class="badge bg-success">Active</span>
                                 }
                                 else
                                 {
-                                    <span class="badge bg-secondary">غير نشط</span>
+                                    <span class="badge bg-secondary">Not Active</span>
                                 }
                             </td>
                             <td>
                                 <div class="btn-group-actions">
-                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="التفاصيل"><i class="fas fa-eye"></i></a>
+                                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info" title="Details"><i class="fas fa-eye"></i></a>
                                     @if (!string.IsNullOrEmpty(item.DiagnosisFilePath))
                                     {
-                                        <a asp-action="GetDiagnosisFile" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="عرض الملف" target="_blank"><i class="fas fa-file-pdf"></i></a>
+                                        <a asp-action="GetDiagnosisFile" asp-route-id="@item.Id" class="btn btn-sm btn-primary" title="View File" target="_blank"><i class="fas fa-file-pdf"></i></a>
                                     }
-                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="تعديل"><i class="fas fa-edit"></i></a>
-                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="حذف"><i class="fas fa-trash"></i></a>
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning" title="Edit"><i class="fas fa-edit"></i></a>
+                                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger" title="Delete"><i class="fas fa-trash"></i></a>
                                 </div>
                             </td>
                         </tr>
