@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260108120325_AddDoctorSubscriptionModel")]
-    partial class AddDoctorSubscriptionModel
+    [Migration("20260119130823_AllDataBase")]
+    partial class AllDataBase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -381,8 +381,9 @@ namespace ClinicManagementSystem.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<byte[]>("DiagnosisFile")
-                        .HasColumnType("varbinary(max)");
+                    b.Property<string>("DiagnosisFilePath")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int?>("DoctorId")
                         .HasColumnType("int");
