@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ملف web.config لنشر ASP.NET Core 8.0 على IIS
+  Web.config for deploying ASP.NET Core 8.0 on IIS
+
+  إذا ظهر خطأ 500.19 (Error Code: 0x8007000d):
+  - ثبّت .NET 8.0 Hosting Bundle
+  - أعد تشغيل Windows Server
+
+  If you get error 500.19 (Error Code: 0x8007000d):
+  - Install .NET 8.0 Hosting Bundle
+  - Restart Windows Server
+-->
+<configuration>
+  <system.webServer>
+
+    <!-- Handler لتوجيه الطلبات إلى ASP.NET Core Module -->
+    <handlers>
+      <!--
+        AspNetCoreModuleV2: أحدث إصدار، يتطلب .NET 8.0 Hosting Bundle
+        AspNetCoreModule: الإصدار القديم، استخدمه إذا V2 غير متاح
+      -->
+      <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
+    </handlers>
+
+    <!-- إعدادات ASP.NET Core -->
+    <aspNetCore
+        processPath="dotnet"
+        arguments=".\ClinicManagementSystem.dll"
+        stdoutLogEnabled="true"
+        stdoutLogFile=".\logs\stdout"
+        hostingModel="inprocess">
+      <!--
+        processPath="dotnet": استخدام dotnet.exe لتشغيل التطبيق
+        arguments: اسم ملف DLL الخاص بالتطبيق
+        stdoutLogEnabled="true": تفعيل سجل الأخطاء
+        stdoutLogFile: مسار حفظ السجلات
+        hostingModel="inprocess": التشغيل داخل IIS (أسرع)
+      -->
+
+      <environmentVariables>
+        <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
+        <!--
+          لعرض أخطاء مفصلة أثناء التطوير، استخدم "Development"
+          For detailed errors during development, use "Development"
+        -->
+      </environmentVariables>
+    </aspNetCore>
+
+    <!-- عرض أخطاء مفصلة (للتطوير فقط - أزله في الإنتاج) -->
+    <httpErrors errorMode="Detailed" />
+
+  </system.webServer>
+</configuration>

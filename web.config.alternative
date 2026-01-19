@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ملف web.config بديل يستخدم AspNetCoreModule V1
+  Alternative web.config using AspNetCoreModule V1
+
+  استخدم هذا الملف إذا:
+  - AspNetCoreModuleV2 غير متاح
+  - استمر خطأ 500.19 بعد تثبيت Hosting Bundle
+
+  Use this file if:
+  - AspNetCoreModuleV2 is not available
+  - Error 500.19 persists after installing Hosting Bundle
+-->
+<configuration>
+  <system.webServer>
+    <handlers>
+      <!-- استخدام AspNetCoreModule (V1) بدلاً من V2 -->
+      <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModule" resourceType="Unspecified" />
+    </handlers>
+
+    <aspNetCore
+        processPath="dotnet"
+        arguments=".\ClinicManagementSystem.dll"
+        stdoutLogEnabled="true"
+        stdoutLogFile=".\logs\stdout"
+        hostingModel="outofprocess">
+      <!-- ملاحظة: hostingModel="outofprocess" للعمل مع V1 -->
+
+      <environmentVariables>
+        <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
+      </environmentVariables>
+    </aspNetCore>
+
+    <httpErrors errorMode="Detailed" />
+  </system.webServer>
+</configuration>
