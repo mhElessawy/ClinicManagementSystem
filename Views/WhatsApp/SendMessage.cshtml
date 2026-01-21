@@ -61,10 +61,10 @@
                 </form>
             </div>
             <div class="card-footer bg-light">
-                <small class="text-muted">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    ملاحظة: سيتم فتح تطبيق واتساب على جهازك لإرسال الرسالة
-                </small>
+                <div class="alert alert-info mb-0" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>ملاحظة مهمة:</strong> سيتم فتح واتساب ويب مع الرسالة جاهزة. اضغط <kbd>Enter</kbd> أو زر الإرسال لإرسال الرسالة مباشرة!
+                </div>
             </div>
         </div>
 
@@ -84,7 +84,10 @@
                         <strong>اكتب الرسالة:</strong> الرسالة التي تريد إرسالها
                     </li>
                     <li class="mb-2">
-                        <strong>اضغط إرسال:</strong> سيتم فتح واتساب تلقائياً مع الرسالة جاهزة للإرسال
+                        <strong>اضغط إرسال:</strong> سيتم فتح واتساب ويب في نافذة جديدة
+                    </li>
+                    <li class="mb-2">
+                        <strong>أرسل الرسالة:</strong> اضغط <kbd>Enter</kbd> أو زر الإرسال في واتساب لإتمام الإرسال
                     </li>
                 </ol>
             </div>
@@ -119,17 +122,38 @@
                 return;
             }
 
+            // Show loading message
+            var submitBtn = document.querySelector('button[type="submit"]');
+            var originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري فتح واتساب...';
+            submitBtn.disabled = true;
+
             // Encode the message for URL
             var encodedMessage = encodeURIComponent(message);
 
-            // Create WhatsApp URL
-            var whatsappUrl = 'https://wa.me/' + phoneNumber + '?text=' + encodedMessage;
+            // Create WhatsApp Web URL
+            var whatsappUrl = 'https://web.whatsapp.com/send?phone=' + phoneNumber + '&text=' + encodedMessage;
 
-            // Open WhatsApp in new tab
-            window.open(whatsappUrl, '_blank');
+            // Open WhatsApp Web in new window
+            var whatsappWindow = window.open(whatsappUrl, '_blank', 'width=1000,height=700');
 
-            // Optional: Clear form after sending
-            // document.getElementById('whatsappForm').reset();
+            // Show success message
+            setTimeout(function() {
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> تم فتح واتساب!';
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-primary');
+
+                // Show instruction alert
+                alert('تم فتح واتساب ويب في نافذة جديدة!\n\nاضغط Enter أو زر الإرسال في واتساب لإرسال الرسالة.');
+
+                // Reset button after 3 seconds
+                setTimeout(function() {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+                }, 3000);
+            }, 1000);
         });
     </script>
 }
@@ -171,5 +195,20 @@
 
     .shadow-lg {
         box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+
+    kbd {
+        background-color: #333;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
     }
 </style>
