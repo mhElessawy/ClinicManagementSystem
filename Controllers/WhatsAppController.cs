@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using ClinicManagementSystem.Helpers;
 
 namespace ClinicManagementSystem.Controllers
 {
-    [Authorize]
     public class WhatsAppController : Controller
     {
         public IActionResult SendMessage()
         {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
             return View();
         }
     }
