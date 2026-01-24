@@ -49,6 +49,6 @@ namespace ClinicManagementSystem.Models
 
         // Navigation Properties
         [ForeignKey("DoctorId")]
-        public virtual DoctorInfo Doctor { get; set; } = null!;
+        public virtual DoctorInfo? Doctor { get; set; } = null!;
     }
 }

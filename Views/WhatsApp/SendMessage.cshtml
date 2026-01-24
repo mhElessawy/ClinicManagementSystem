@@ -1,0 +1,214 @@
+﻿@{
+    ViewData["Title"] = "إرسال رسالة واتساب";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-lg border-0">
+            <div class="card-header bg-success text-white">
+                <h3 class="mb-0">
+                    <i class="fab fa-whatsapp"></i> إرسال رسالة واتساب
+                </h3>
+            </div>
+            <div class="card-body p-4">
+                <p class="text-muted mb-4">
+                    <i class="fas fa-info-circle"></i> أدخل رقم الهاتف والرسالة التي تريد إرسالها عبر واتساب
+                </p>
+
+                <form id="whatsappForm">
+                    <div class="mb-4">
+                        <label for="phoneNumber" class="form-label">
+                            <i class="fas fa-phone"></i> رقم الهاتف
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-mobile-alt"></i>
+                            </span>
+                            <input type="text"
+                                   class="form-control form-control-lg"
+                                   id="phoneNumber"
+                                   placeholder="مثال: 201234567890 (الكود الدولي + الرقم بدون +)"
+                                   required
+                                   dir="ltr">
+                        </div>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-lightbulb"></i> أدخل الرقم بالكود الدولي بدون علامة + (مثال: 201234567890 لمصر)
+                        </small>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="message" class="form-label">
+                            <i class="fas fa-comment-dots"></i> الرسالة
+                        </label>
+                        <textarea class="form-control form-control-lg"
+                                  id="message"
+                                  rows="5"
+                                  placeholder="اكتب رسالتك هنا..."
+                                  required></textarea>
+                        <small class="form-text text-muted">
+                            <i class="fas fa-info-circle"></i> يمكنك كتابة رسالتك بأي لغة
+                        </small>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fab fa-whatsapp"></i> إرسال عبر واتساب
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> رجوع
+                        </a>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light">
+                <div class="alert alert-info mb-0" role="alert">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>ملاحظة مهمة:</strong> سيتم فتح واتساب ويب مع الرسالة جاهزة. اضغط <kbd>Enter</kbd> أو زر الإرسال لإرسال الرسالة مباشرة!
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions Card -->
+        <div class="card mt-4 border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-question-circle"></i> كيف تستخدم هذه الصفحة؟
+                </h5>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li class="mb-2">
+                        <strong>أدخل رقم الهاتف:</strong> بالكود الدولي بدون علامة + (مثال: 201234567890)
+                    </li>
+                    <li class="mb-2">
+                        <strong>اكتب الرسالة:</strong> الرسالة التي تريد إرسالها
+                    </li>
+                    <li class="mb-2">
+                        <strong>اضغط إرسال:</strong> سيتم فتح واتساب ويب في نافذة جديدة
+                    </li>
+                    <li class="mb-2">
+                        <strong>أرسل الرسالة:</strong> اضغط <kbd>Enter</kbd> أو زر الإرسال في واتساب لإتمام الإرسال
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('whatsappForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var phoneNumber = document.getElementById('phoneNumber').value.trim();
+            var message = document.getElementById('message').value.trim();
+
+            // Validate phone number
+            if (!phoneNumber) {
+                alert('الرجاء إدخال رقم الهاتف');
+                return;
+            }
+
+            // Remove any non-numeric characters
+            phoneNumber = phoneNumber.replace(/\D/g, '');
+
+            if (phoneNumber.length < 10) {
+                alert('رقم الهاتف غير صحيح. تأكد من إدخال الكود الدولي والرقم كاملاً');
+                return;
+            }
+
+            if (!message) {
+                alert('الرجاء كتابة الرسالة');
+                return;
+            }
+
+            // Show loading message
+            var submitBtn = document.querySelector('button[type="submit"]');
+            var originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري فتح واتساب...';
+            submitBtn.disabled = true;
+
+            // Encode the message for URL
+            var encodedMessage = encodeURIComponent(message);
+
+            // Create WhatsApp Web URL
+            var whatsappUrl = 'https://web.whatsapp.com/send?phone=' + phoneNumber + '&text=' + encodedMessage;
+
+            // Open WhatsApp Web in new window
+            var whatsappWindow = window.open(whatsappUrl, '_blank', 'width=1000,height=700');
+
+            // Show success message
+            setTimeout(function() {
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> تم فتح واتساب!';
+                submitBtn.classList.remove('btn-success');
+                submitBtn.classList.add('btn-primary');
+
+                // Show instruction alert
+                alert('تم فتح واتساب ويب في نافذة جديدة!\n\nاضغط Enter أو زر الإرسال في واتساب لإرسال الرسالة.');
+
+                // Reset button after 3 seconds
+                setTimeout(function() {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('btn-primary');
+                    submitBtn.classList.add('btn-success');
+                }, 3000);
+            }, 1000);
+        });
+    </script>
+}
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .card-header {
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .form-control:focus {
+        border-color: #25D366;
+        box-shadow: 0 0 0 0.2rem rgba(37, 211, 102, 0.25);
+    }
+
+    .btn-success {
+        background-color: #25D366;
+        border-color: #25D366;
+    }
+
+        .btn-success:hover {
+            background-color: #128C7E;
+            border-color: #128C7E;
+        }
+
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+
+    .form-control {
+        border-left: none;
+    }
+
+    .shadow-lg {
+        box-shadow: 0 1rem 3rem rgba(0,0,0,.175) !important;
+    }
+
+    kbd {
+        background-color: #333;
+        color: #fff;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 0.9em;
+        font-weight: bold;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+    }
+</style>
