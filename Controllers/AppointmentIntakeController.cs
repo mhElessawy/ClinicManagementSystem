@@ -199,9 +199,32 @@ namespace ClinicManagementSystem.Controllers
             }
             else
             {
-                // Create new
-                intake.IntakeDate = DateTime.Now;
-                _context.AppointmentIntakes.Add(intake);
+                // Create new - must create fresh object to avoid Id conflict
+                var newIntake = new AppointmentIntake
+                {
+                    AppointmentId = id,
+                    BloodPressure = intake.BloodPressure,
+                    HeartRate = intake.HeartRate,
+                    Temperature = intake.Temperature,
+                    Weight = intake.Weight,
+                    Height = intake.Height,
+                    ChiefComplaint = intake.ChiefComplaint,
+                    CurrentSymptoms = intake.CurrentSymptoms,
+                    SymptomDuration = intake.SymptomDuration,
+                    PainLevel = intake.PainLevel,
+                    CurrentMedications = intake.CurrentMedications,
+                    Allergies = intake.Allergies,
+                    PreviousConditions = intake.PreviousConditions,
+                    SpecialtyQuestionsJson = intake.SpecialtyQuestionsJson,
+                    AdditionalNotes = intake.AdditionalNotes,
+                    PatientArrived = true,
+                    ArrivalTime = intake.ArrivalTime ?? DateTime.Now,
+                    ReadyForDoctor = intake.ReadyForDoctor,
+                    PerformedBy = userId ?? 0,
+                    PerformedByName = userName,
+                    IntakeDate = DateTime.Now
+                };
+                _context.AppointmentIntakes.Add(newIntake);
             }
 
             await _context.SaveChangesAsync();
