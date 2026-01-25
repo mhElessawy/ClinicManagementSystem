@@ -66,7 +66,7 @@ namespace ClinicManagementSystem.Controllers
             return View(await diagnosesQuery.ToListAsync());
         }
 
-        public IActionResult Create(int? patientId)
+        public async Task<IActionResult> Create(int? patientId, int? appointmentId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -83,7 +83,26 @@ namespace ClinicManagementSystem.Controllers
                 diagnosis.PatientId = patientId.Value;
             }
 
-            PopulateDropdowns(patientId);
+            // If appointmentId is provided, load appointment and intake data
+            AppointmentIntake? intake = null;
+            if (appointmentId.HasValue)
+            {
+                var appointment = await _context.Appointments
+                    .Include(a => a.Patient)
+                    .Include(a => a.Intake)
+                    .FirstOrDefaultAsync(a => a.Id == appointmentId.Value);
+
+                if (appointment != null)
+                {
+                    diagnosis.PatientId = appointment.PatientId;
+                    intake = appointment.Intake;
+                    ViewBag.Appointment = appointment;
+                }
+            }
+            ViewBag.Intake = intake;
+            ViewBag.AppointmentId = appointmentId;
+
+            PopulateDropdowns(patientId ?? diagnosis.PatientId);
             // Send patients data as JSON for JavaScript use
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);

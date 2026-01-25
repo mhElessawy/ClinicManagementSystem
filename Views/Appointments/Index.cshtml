@@ -53,9 +53,13 @@
                             <th>Date</th>
                             <th>Time</th>
                             <th>Patient</th>
-                            <th>Doctor</th>
+                            @if (ViewBag.IsDoctorOrAssistant != true)
+                            {
+                                <th>Doctor</th>
+                            }
                             <th>Reason</th>
                             <th>Status</th>
+                            <th>Intake</th>
                             @if (ViewBag.ShowDeleted == true)
                             {
                                 <th>Deletion Info</th>
@@ -73,10 +77,13 @@
                                     <i class="fas fa-user-injured text-info"></i>
                                     @appointment.Patient?.PatientName
                                 </td>
-                                <td>
-                                    <i class="fas fa-user-md text-success"></i>
-                                    @appointment.Doctor?.DoctorName
-                                </td>
+                                @if (ViewBag.IsDoctorOrAssistant != true)
+                                {
+                                    <td>
+                                        <i class="fas fa-user-md text-success"></i>
+                                        @appointment.Doctor?.DoctorName
+                                    </td>
+                                }
                                 <td>
                                     <span data-bs-toggle="tooltip" title="@appointment.Reason">
                                         @(appointment.Reason.Length > 30 ? appointment.Reason.Substring(0, 30) + "..." : appointment.Reason)
@@ -106,6 +113,42 @@
                                                 <span class="badge bg-warning">No Show</span>
                                                 break;
                                         }
+                                    }
+                                </td>
+                                <td>
+                                    @if (appointment.Intake != null)
+                                    {
+                                        if (appointment.Intake.ReadyForDoctor)
+                                        {
+                                            <span class="badge bg-success" title="Patient ready for doctor">
+                                                <i class="fas fa-check-circle"></i> Ready
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark" title="Intake in progress">
+                                                <i class="fas fa-hourglass-half"></i> In Progress
+                                            </span>
+                                        }
+                                        <a asp-controller="AppointmentIntake" asp-action="Details" asp-route-id="@appointment.Intake.Id" class="btn btn-sm btn-link p-0" title="View Intake">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    }
+                                    else if (appointment.Status == "Scheduled" && !appointment.IsDeleted)
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-clock"></i> Waiting
+                                        </span>
+                                        @if (ViewBag.IsAssistant == true)
+                                        {
+                                            <a asp-controller="AppointmentIntake" asp-action="Perform" asp-route-id="@appointment.Id" class="btn btn-sm btn-link p-0" title="Start Intake">
+                                                <i class="fas fa-clipboard-check"></i>
+                                            </a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
                                     }
                                 </td>
                                 @if (ViewBag.ShowDeleted == true && appointment.IsDeleted)

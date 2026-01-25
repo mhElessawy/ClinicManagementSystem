@@ -26,13 +26,18 @@ namespace ClinicManagementSystem.Controllers
 
             IQueryable<Appointment> appointmentsQuery = _context.Appointments
                 .Include(a => a.Patient)
-                .Include(a => a.Doctor);
+                .Include(a => a.Doctor)
+                .Include(a => a.Intake);
 
-            // Filter by doctor/assistant
+            // Filter by doctor/assistant - MUST have doctorId to see appointments
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
             {
-                if (doctorId.HasValue)
-                    appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
+                if (!doctorId.HasValue)
+                {
+                    // Doctor/Assistant without valid DoctorId - return empty list
+                    return View(new List<Appointment>());
+                }
+                appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
             }
 
             // Filter deleted
@@ -47,6 +52,8 @@ namespace ClinicManagementSystem.Controllers
                 .ToListAsync();
 
             ViewBag.ShowDeleted = showDeleted;
+            ViewBag.IsDoctorOrAssistant = (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT);
+            ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
             return View(appointments);
         }
 
@@ -61,6 +68,7 @@ namespace ClinicManagementSystem.Controllers
             var appointment = await _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
+                .Include(a => a.Intake)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (appointment == null) return NotFound();
@@ -370,12 +378,17 @@ namespace ClinicManagementSystem.Controllers
 
             IQueryable<Appointment> appointmentsQuery = _context.Appointments
                 .Include(a => a.Patient)
-                .Include(a => a.Doctor);
+                .Include(a => a.Doctor)
+                .Include(a => a.Intake);
 
+            // Filter by doctor/assistant - MUST have doctorId to see appointments
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
             {
-                if (doctorId.HasValue)
-                    appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
+                if (!doctorId.HasValue)
+                {
+                    return View(new List<Appointment>());
+                }
+                appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
             }
 
             var appointments = await appointmentsQuery

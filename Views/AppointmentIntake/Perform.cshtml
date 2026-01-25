@@ -1,0 +1,260 @@
+@model ClinicManagementSystem.Models.AppointmentIntake
+
+@{
+    ViewData["Title"] = "Patient Intake";
+    var appointment = ViewBag.Appointment as ClinicManagementSystem.Models.Appointment;
+    var questions = ViewBag.Questions as List<ClinicManagementSystem.Models.IntakeQuestion> ?? new List<ClinicManagementSystem.Models.IntakeQuestion>();
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-clipboard-check"></i> Patient Intake Form</h2>
+        <p class="text-muted">Record patient pre-visit information</p>
+        <hr />
+    </div>
+</div>
+
+@if (appointment != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-user-injured"></i> Patient Information
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th style="width: 40%;">Patient Name:</th>
+                            <td><strong>@appointment.Patient?.PatientName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Civil ID:</th>
+                            <td>@appointment.Patient?.PatientCivilID</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>@appointment.Patient?.PatientTel1</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-calendar-check"></i> Appointment Details
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th style="width: 40%;">Date:</th>
+                            <td>@appointment.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                        <tr>
+                            <th>Time:</th>
+                            <td>@appointment.AppointmentTime.ToString(@"hh\:mm")</td>
+                        </tr>
+                        <tr>
+                            <th>Reason:</th>
+                            <td>@appointment.Reason</td>
+                        </tr>
+                        <tr>
+                            <th>Doctor:</th>
+                            <td>Dr. @appointment.Doctor?.DoctorName (@appointment.Doctor?.Specialist?.SpecialistName)</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<form asp-action="Perform" asp-route-id="@appointment?.Id" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="AppointmentId" />
+    <input type="hidden" asp-for="ArrivalTime" value="@(Model.ArrivalTime?.ToString("yyyy-MM-ddTHH:mm") ?? DateTime.Now.ToString("yyyy-MM-ddTHH:mm"))" />
+
+    <div class="row">
+        <!-- Vital Signs -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-heartbeat"></i> Vital Signs
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BloodPressure" class="form-label"></label>
+                            <input asp-for="BloodPressure" class="form-control" placeholder="e.g., 120/80" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HeartRate" class="form-label"></label>
+                            <input asp-for="HeartRate" class="form-control" type="number" placeholder="bpm" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Temperature" class="form-label"></label>
+                            <input asp-for="Temperature" class="form-control" type="number" step="0.1" placeholder="C" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Weight" class="form-label"></label>
+                            <input asp-for="Weight" class="form-control" type="number" step="0.1" placeholder="kg" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label asp-for="Height" class="form-label"></label>
+                            <input asp-for="Height" class="form-control" type="number" step="0.1" placeholder="cm" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Current Symptoms -->
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-notes-medical"></i> Current Symptoms
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="ChiefComplaint" class="form-label"></label>
+                        <input asp-for="ChiefComplaint" class="form-control" placeholder="Main reason for visit" />
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="CurrentSymptoms" class="form-label"></label>
+                        <textarea asp-for="CurrentSymptoms" class="form-control" rows="2" placeholder="Describe current symptoms"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SymptomDuration" class="form-label"></label>
+                            <input asp-for="SymptomDuration" class="form-control" placeholder="e.g., 3 days" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="PainLevel" class="form-label"></label>
+                            <select asp-for="PainLevel" class="form-select">
+                                <option value="">-- Select --</option>
+                                @for (int i = 1; i <= 10; i++)
+                                {
+                                    <option value="@i">@i - @(i <= 3 ? "Mild" : i <= 6 ? "Moderate" : "Severe")</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical History -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <i class="fas fa-history"></i> Medical History
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CurrentMedications" class="form-label"></label>
+                    <textarea asp-for="CurrentMedications" class="form-control" rows="2" placeholder="List current medications"></textarea>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Allergies" class="form-label"></label>
+                    <textarea asp-for="Allergies" class="form-control" rows="2" placeholder="Known allergies (medications, food, etc.)"></textarea>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="PreviousConditions" class="form-label"></label>
+                    <textarea asp-for="PreviousConditions" class="form-control" rows="2" placeholder="Previous medical conditions"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Specialty-Specific Questions -->
+    @if (questions.Any())
+    {
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <i class="fas fa-question-circle"></i> Specialty Questions (@appointment?.Doctor?.Specialist?.SpecialistName)
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    @foreach (var question in questions)
+                    {
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">
+                                @(string.IsNullOrEmpty(question.QuestionAr) ? question.QuestionEn : question.QuestionAr)
+                                @if (question.IsRequired)
+                                {
+                                    <span class="text-danger">*</span>
+                                }
+                            </label>
+                            @if (question.QuestionType == "YesNo")
+                            {
+                                <div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="questionResponses[@question.Id]" value="Yes" id="q@(question.Id)_yes">
+                                        <label class="form-check-label" for="q@(question.Id)_yes">Yes / نعم</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="questionResponses[@question.Id]" value="No" id="q@(question.Id)_no">
+                                        <label class="form-check-label" for="q@(question.Id)_no">No / لا</label>
+                                    </div>
+                                </div>
+                            }
+                            else if (question.QuestionType == "Text")
+                            {
+                                <input type="text" name="questionResponses[@question.Id]" class="form-control" />
+                            }
+                            else if (question.QuestionType == "MultipleChoice" && !string.IsNullOrEmpty(question.Options))
+                            {
+                                <select name="questionResponses[@question.Id]" class="form-select">
+                                    <option value="">-- Select --</option>
+                                    @foreach (var option in question.Options.Split(','))
+                                    {
+                                        <option value="@option.Trim()">@option.Trim()</option>
+                                    }
+                                </select>
+                            }
+                            else if (question.QuestionType == "Scale")
+                            {
+                                <input type="range" name="questionResponses[@question.Id]" class="form-range" min="1" max="10" />
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Additional Notes -->
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-sticky-note"></i> Additional Notes
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="AdditionalNotes" class="form-label">Notes for the Doctor</label>
+                <textarea asp-for="AdditionalNotes" class="form-control" rows="4" placeholder="Any additional observations or notes for the doctor..."></textarea>
+                <div class="form-text">These notes will be visible to the doctor during the consultation.</div>
+            </div>
+            <div class="form-check">
+                <input asp-for="ReadyForDoctor" class="form-check-input" type="checkbox" />
+                <label asp-for="ReadyForDoctor" class="form-check-label">
+                    <strong>Mark patient as ready for doctor</strong>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <button type="submit" class="btn btn-success btn-lg">
+                <i class="fas fa-save"></i> Save Intake
+            </button>
+            <a asp-action="Index" class="btn btn-secondary btn-lg">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</form>

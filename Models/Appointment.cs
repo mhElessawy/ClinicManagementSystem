@@ -74,5 +74,8 @@ namespace ClinicManagementSystem.Models
 
         [Display(Name = "Deletion Date")]
         public DateTime? DeletionDate { get; set; }
+
+        // Navigation property for intake
+        public virtual AppointmentIntake? Intake { get; set; }
     }
 }
