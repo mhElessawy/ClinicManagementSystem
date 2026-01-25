@@ -16,13 +16,19 @@ namespace ClinicManagementSystem.Controllers
         }
 
         // GET: Appointments
-        public async Task<IActionResult> Index(bool showDeleted = false)
+        public async Task<IActionResult> Index(bool showDeleted = false, DateTime? filterDate = null, bool showAll = false)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
+
+            // Default to today's date for doctors and assistants
+            if (!showAll && !filterDate.HasValue && (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT))
+            {
+                filterDate = DateTime.Today;
+            }
 
             IQueryable<Appointment> appointmentsQuery = _context.Appointments
                 .Include(a => a.Patient)
@@ -34,10 +40,22 @@ namespace ClinicManagementSystem.Controllers
             {
                 if (!doctorId.HasValue)
                 {
-                    // Doctor/Assistant without valid DoctorId - return empty list
+                    // Doctor/Assistant without valid DoctorId - return empty list with ViewBag set
+                    ViewBag.ShowDeleted = showDeleted;
+                    ViewBag.FilterDate = filterDate ?? DateTime.Today;
+                    ViewBag.ShowAll = showAll;
+                    ViewBag.IsDoctorOrAssistant = true;
+                    ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
+                    ViewBag.IsDoctor = (userType == SessionHelper.TYPE_DOCTOR);
                     return View(new List<Appointment>());
                 }
                 appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
+            }
+
+            // Filter by date if specified
+            if (filterDate.HasValue && !showAll)
+            {
+                appointmentsQuery = appointmentsQuery.Where(a => a.AppointmentDate == filterDate.Value);
             }
 
             // Filter deleted
@@ -52,8 +70,11 @@ namespace ClinicManagementSystem.Controllers
                 .ToListAsync();
 
             ViewBag.ShowDeleted = showDeleted;
+            ViewBag.FilterDate = filterDate ?? DateTime.Today;
+            ViewBag.ShowAll = showAll;
             ViewBag.IsDoctorOrAssistant = (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT);
             ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
+            ViewBag.IsDoctor = (userType == SessionHelper.TYPE_DOCTOR);
             return View(appointments);
         }
 
@@ -72,10 +93,12 @@ namespace ClinicManagementSystem.Controllers
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (appointment == null) return NotFound();
+
             // Check if diagnosis exists for this appointment
             var existingDiagnosis = await _context.PatientDiagnoses
                 .FirstOrDefaultAsync(d => d.AppointmentId == id);
             ViewBag.ExistingDiagnosisId = existingDiagnosis?.Id;
+
             // Check access
             if (!CanAccessAppointment(appointment))
             {
