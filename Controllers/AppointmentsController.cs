@@ -40,7 +40,13 @@ namespace ClinicManagementSystem.Controllers
             {
                 if (!doctorId.HasValue)
                 {
-                    // Doctor/Assistant without valid DoctorId - return empty list
+                    // Doctor/Assistant without valid DoctorId - return empty list with ViewBag set
+                    ViewBag.ShowDeleted = showDeleted;
+                    ViewBag.FilterDate = filterDate ?? DateTime.Today;
+                    ViewBag.ShowAll = showAll;
+                    ViewBag.IsDoctorOrAssistant = true;
+                    ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
+                    ViewBag.IsDoctor = (userType == SessionHelper.TYPE_DOCTOR);
                     return View(new List<Appointment>());
                 }
                 appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
