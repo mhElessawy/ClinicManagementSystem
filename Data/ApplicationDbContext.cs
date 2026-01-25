@@ -20,6 +20,10 @@ namespace ClinicManagementSystem.Models
         public DbSet<Appointment> Appointments { get; set; }
 
         public DbSet<DoctorSubscription> DoctorSubscriptions { get; set; }
+
+        public DbSet<Location> Locations { get; set; }
+        public DbSet<AppointmentIntake> AppointmentIntakes { get; set; }
+        public DbSet<IntakeQuestion> IntakeQuestions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -87,6 +91,20 @@ namespace ClinicManagementSystem.Models
                 .HasOne(ds => ds.Doctor)
                 .WithMany(d => d.Subscriptions)
                 .HasForeignKey(ds => ds.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Appointment -> AppointmentIntake (One-to-One)
+            modelBuilder.Entity<AppointmentIntake>()
+                .HasOne(ai => ai.Appointment)
+                .WithOne(a => a.Intake)
+                .HasForeignKey<AppointmentIntake>(ai => ai.AppointmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Specialist -> IntakeQuestion (One-to-Many)
+            modelBuilder.Entity<IntakeQuestion>()
+                .HasOne(iq => iq.Specialist)
+                .WithMany()
+                .HasForeignKey(iq => iq.SpecialistId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Unique constraints

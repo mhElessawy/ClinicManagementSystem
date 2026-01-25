@@ -1,0 +1,68 @@
+﻿@model ClinicManagementSystem.Models.Location
+
+@{
+    ViewData["Title"] = "Add New Location";
+}
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-plus"></i> Add New Location</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="LocationName" class="form-label"></label>
+                        <input asp-for="LocationName" class="form-control" placeholder="e.g., Main Clinic, Branch Office" required />
+                        <span asp-validation-for="LocationName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Address" class="form-label"></label>
+                        <textarea asp-for="Address" class="form-control" rows="2" placeholder="Full address of this location"></textarea>
+                        <span asp-validation-for="Address" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Phone" class="form-label"></label>
+                        <input asp-for="Phone" class="form-control" placeholder="Contact phone number" />
+                        <span asp-validation-for="Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3" placeholder="Additional notes or description"></textarea>
+                        <span asp-validation-for="Description" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check form-switch">
+                            <input asp-for="Active" class="form-check-input" type="checkbox" checked />
+                            <label asp-for="Active" class="form-check-label"></label>
+                        </div>
+                        <small class="text-muted">Active locations will be available for appointment scheduling</small>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Save Location
+                        </button>
+                        <a asp-action="Index" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

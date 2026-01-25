@@ -13,14 +13,14 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <a asp-action="Create" class="btn btn-success">
             <i class="fas fa-plus"></i> New Appointment
         </a>
         <a asp-action="Calendar" class="btn btn-info">
             <i class="fas fa-calendar"></i> Calendar View
         </a>
-        
+
         @if (ViewBag.ShowDeleted == true)
         {
             <a asp-action="Index" asp-route-showDeleted="false" class="btn btn-primary">
@@ -34,7 +34,46 @@
             </a>
         }
     </div>
+    @if (ViewBag.IsDoctorOrAssistant == true)
+    {
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2 justify-content-end">
+                <input type="date" name="filterDate" class="form-control" style="width: auto;"
+                       value="@(((DateTime)ViewBag.FilterDate).ToString("yyyy-MM-dd"))" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a asp-action="Index" class="btn btn-secondary" title="Today">
+                    <i class="fas fa-calendar-day"></i>
+                </a>
+                @if (ViewBag.ShowAll != true)
+                {
+                    <a asp-action="Index" asp-route-showAll="true" class="btn btn-outline-primary" title="Show All Appointments">
+                        <i class="fas fa-list-alt"></i> All
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-primary" title="Show Today Only">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </a>
+                }
+            </form>
+        </div>
+    }
 </div>
+
+@if (ViewBag.IsDoctorOrAssistant == true && ViewBag.ShowAll != true)
+{
+    <div class="alert alert-info py-2 mb-3">
+        <i class="fas fa-calendar-check"></i>
+        Showing appointments for: <strong>@(((DateTime)ViewBag.FilterDate).ToString("dddd, yyyy-MM-dd"))</strong>
+        @if (((DateTime)ViewBag.FilterDate).Date == DateTime.Today)
+        {
+            <span class="badge bg-success ms-2">Today</span>
+        }
+    </div>
+}
 
 <div class="card">
     <div class="card-body">
@@ -53,9 +92,13 @@
                             <th>Date</th>
                             <th>Time</th>
                             <th>Patient</th>
-                            <th>Doctor</th>
+                            @if (ViewBag.IsDoctorOrAssistant != true)
+                            {
+                                <th>Doctor</th>
+                            }
                             <th>Reason</th>
                             <th>Status</th>
+                            <th>Intake</th>
                             @if (ViewBag.ShowDeleted == true)
                             {
                                 <th>Deletion Info</th>
@@ -73,10 +116,13 @@
                                     <i class="fas fa-user-injured text-info"></i>
                                     @appointment.Patient?.PatientName
                                 </td>
-                                <td>
-                                    <i class="fas fa-user-md text-success"></i>
-                                    @appointment.Doctor?.DoctorName
-                                </td>
+                                @if (ViewBag.IsDoctorOrAssistant != true)
+                                {
+                                    <td>
+                                        <i class="fas fa-user-md text-success"></i>
+                                        @appointment.Doctor?.DoctorName
+                                    </td>
+                                }
                                 <td>
                                     <span data-bs-toggle="tooltip" title="@appointment.Reason">
                                         @(appointment.Reason.Length > 30 ? appointment.Reason.Substring(0, 30) + "..." : appointment.Reason)
@@ -108,13 +154,49 @@
                                         }
                                     }
                                 </td>
+                                <td>
+                                    @if (appointment.Intake != null)
+                                    {
+                                        if (appointment.Intake.ReadyForDoctor)
+                                        {
+                                            <span class="badge bg-success" title="Patient ready for doctor">
+                                                <i class="fas fa-check-circle"></i> Ready
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark" title="Intake in progress">
+                                                <i class="fas fa-hourglass-half"></i> In Progress
+                                            </span>
+                                        }
+                                        <a asp-controller="AppointmentIntake" asp-action="Details" asp-route-id="@appointment.Intake.Id" class="btn btn-sm btn-link p-0" title="View Intake">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    }
+                                    else if (appointment.Status == "Scheduled" && !appointment.IsDeleted)
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-clock"></i> Waiting
+                                        </span>
+                                        @if (ViewBag.IsAssistant == true)
+                                        {
+                                            <a asp-controller="AppointmentIntake" asp-action="Perform" asp-route-id="@appointment.Id" class="btn btn-sm btn-link p-0" title="Start Intake">
+                                                <i class="fas fa-clipboard-check"></i>
+                                            </a>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
                                 @if (ViewBag.ShowDeleted == true && appointment.IsDeleted)
                                 {
                                     <td>
                                         <small>
-                                            <strong>Reason:</strong><br/>
-                                            <span class="text-danger">@appointment.DeletionReason</span><br/>
-                                            <strong>By:</strong> @appointment.DeletedByType<br/>
+                                            <strong>Reason:</strong><br />
+                                            <span class="text-danger">@appointment.DeletionReason</span><br />
+                                            <strong>By:</strong> @appointment.DeletedByType<br />
                                             <strong>Date:</strong> @appointment.DeletionDate?.ToString("yyyy-MM-dd HH:mm")
                                         </small>
                                     </td>

@@ -15,7 +15,7 @@
     <div class="col-md-8">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-            
+
             <div class="card mb-3">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-user-injured"></i> Patient & Doctor
@@ -29,7 +29,7 @@
                             </select>
                             <span asp-validation-for="PatientId" class="text-danger"></span>
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label asp-for="DoctorId" class="form-label"></label>
                             <select asp-for="DoctorId" class="form-select" asp-items="ViewBag.DoctorId" required>
@@ -37,6 +37,14 @@
                             </select>
                             <span asp-validation-for="DoctorId" class="text-danger"></span>
                         </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="LocationId" class="form-label"></label>
+                        <select asp-for="LocationId" class="form-select" asp-items="ViewBag.LocationId">
+                            <option value="">-- Select Location --</option>
+                        </select>
+                        <small class="text-muted">«Œ — «·„ﬂ«‰ «·–Ì ”Ì „ ›ÌÂ «·„Ê⁄œ («Œ Ì«—Ì)</small>
                     </div>
                 </div>
             </div>
@@ -49,11 +57,11 @@
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label asp-for="AppointmentDate" class="form-label"></label>
-                            <input asp-for="AppointmentDate" type="date" class="form-control" 
+                            <input asp-for="AppointmentDate" type="date" class="form-control"
                                    value="@ViewBag.DefaultDate" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
                             <span asp-validation-for="AppointmentDate" class="text-danger"></span>
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label asp-for="AppointmentTime" class="form-label"></label>
                             <input asp-for="AppointmentTime" type="time" class="form-control" required />
@@ -71,7 +79,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <label asp-for="Reason" class="form-label"></label>
-                        <textarea asp-for="Reason" class="form-control" rows="3" 
+                        <textarea asp-for="Reason" class="form-control" rows="3"
                                   placeholder="E.g., Regular checkup, Follow-up consultation, etc." required></textarea>
                         <span asp-validation-for="Reason" class="text-danger"></span>
                         <small class="text-muted">Explain why the patient needs this appointment</small>
@@ -79,7 +87,7 @@
 
                     <div class="mb-3">
                         <label asp-for="Notes" class="form-label"></label>
-                        <textarea asp-for="Notes" class="form-control" rows="2" 
+                        <textarea asp-for="Notes" class="form-control" rows="2"
                                   placeholder="Any additional notes (optional)"></textarea>
                         <small class="text-muted">Optional: Add any special instructions or notes</small>
                     </div>
@@ -92,7 +100,7 @@
             </div>
 
             <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> 
+                <i class="fas fa-info-circle"></i>
                 <strong>Note:</strong> The system will check for time conflicts automatically
             </div>
 
@@ -109,5 +117,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

@@ -66,10 +66,23 @@ namespace ClinicManagementSystem.Controllers
             return View(await diagnosesQuery.ToListAsync());
         }
 
-        public IActionResult Create(int? patientId)
+        public async Task<IActionResult> Create(int? patientId, int? appointmentId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
+
+            // Check if diagnosis already exists for this appointment
+            if (appointmentId.HasValue)
+            {
+                var existingDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.AppointmentId == appointmentId.Value);
+
+                if (existingDiagnosis != null)
+                {
+                    TempData["Info"] = "A diagnosis already exists for this appointment. Redirecting to edit.";
+                    return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
 
             var diagnosis = new PatientDiagnosis
             {
@@ -83,7 +96,27 @@ namespace ClinicManagementSystem.Controllers
                 diagnosis.PatientId = patientId.Value;
             }
 
-            PopulateDropdowns(patientId);
+            // If appointmentId is provided, load appointment and intake data
+            AppointmentIntake? intake = null;
+            if (appointmentId.HasValue)
+            {
+                var appointment = await _context.Appointments
+                    .Include(a => a.Patient)
+                    .Include(a => a.Intake)
+                    .FirstOrDefaultAsync(a => a.Id == appointmentId.Value);
+
+                if (appointment != null)
+                {
+                    diagnosis.PatientId = appointment.PatientId;
+                    diagnosis.AppointmentId = appointmentId;
+                    intake = appointment.Intake;
+                    ViewBag.Appointment = appointment;
+                }
+            }
+            ViewBag.Intake = intake;
+            ViewBag.AppointmentId = appointmentId;
+
+            PopulateDropdowns(patientId ?? diagnosis.PatientId);
             // Send patients data as JSON for JavaScript use
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -160,6 +193,20 @@ namespace ClinicManagementSystem.Controllers
             // Remove navigation properties from validation
             ModelState.Remove("Patient");
             ModelState.Remove("Doctor");
+            ModelState.Remove("Appointment");
+
+            // Check if diagnosis already exists for this appointment (prevent duplicates)
+            if (diagnosis.AppointmentId.HasValue)
+            {
+                var existingDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.AppointmentId == diagnosis.AppointmentId.Value);
+
+                if (existingDiagnosis != null)
+                {
+                    TempData["Error"] = "A diagnosis already exists for this appointment.";
+                    return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
 
             if (ModelState.IsValid)
             {

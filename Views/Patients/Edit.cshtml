@@ -16,7 +16,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
             <input type="hidden" asp-for="Id" />
-            
+
             <div class="card mb-3">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-user"></i> Personal Information
@@ -28,9 +28,20 @@
                         <span asp-validation-for="PatientName" class="text-danger"></span>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="PatientCivilID" class="form-label"></label>
-                        <input asp-for="PatientCivilID" class="form-control" />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="PatientCivilID" class="form-label"></label>
+                                <input asp-for="PatientCivilID" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="BirthDate" class="form-label"></label>
+                                <input asp-for="BirthDate" type="date" class="form-control" />
+                                <span asp-validation-for="BirthDate" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -45,7 +56,7 @@
                             <label asp-for="PatientTel1" class="form-label"></label>
                             <input asp-for="PatientTel1" class="form-control" />
                         </div>
-                        
+
                         <div class="col-md-6 mb-3">
                             <label asp-for="PatientTel2" class="form-label"></label>
                             <input asp-for="PatientTel2" class="form-control" />
@@ -86,5 +97,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

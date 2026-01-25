@@ -22,6 +22,12 @@ namespace ClinicManagementSystem.Models
         [ForeignKey("DoctorId")]
         public DoctorInfo? Doctor { get; set; }
 
+        [Display(Name = "Location")]
+        public int? LocationId { get; set; }
+
+        [ForeignKey("LocationId")]
+        public Location? Location { get; set; }
+
         [Required]
         [Display(Name = "Appointment Date")]
         [DataType(DataType.Date)]
@@ -74,5 +80,10 @@ namespace ClinicManagementSystem.Models
 
         [Display(Name = "Deletion Date")]
         public DateTime? DeletionDate { get; set; }
+
+
+        // Navigation property for intake
+        public virtual AppointmentIntake? Intake { get; set; }
+
     }
 }

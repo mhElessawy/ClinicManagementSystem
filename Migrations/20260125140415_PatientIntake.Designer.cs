@@ -4,6 +4,7 @@ using ClinicManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260125140415_PatientIntake")]
+    partial class PatientIntake
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -553,9 +556,6 @@ namespace ClinicManagementSystem.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("AppointmentId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("DiagnosisDate")
                         .HasColumnType("datetime2");
 
@@ -574,8 +574,6 @@ namespace ClinicManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId");
 
                     b.HasIndex("DoctorId");
 
@@ -954,10 +952,6 @@ namespace ClinicManagementSystem.Migrations
 
             modelBuilder.Entity("ClinicManagementSystem.Models.PatientDiagnosis", b =>
                 {
-                    b.HasOne("ClinicManagementSystem.Models.Appointment", "Appointment")
-                        .WithMany()
-                        .HasForeignKey("AppointmentId");
-
                     b.HasOne("ClinicManagementSystem.Models.DoctorInfo", "Doctor")
                         .WithMany("PatientDiagnoses")
                         .HasForeignKey("DoctorId")
@@ -968,8 +962,6 @@ namespace ClinicManagementSystem.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Appointment");
 
                     b.Navigation("Doctor");
 

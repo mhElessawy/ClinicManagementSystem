@@ -41,8 +41,9 @@
                     <tr>
                         <th>م</th>
                         <th>التاريخ</th>
-                        <th>@Html.DisplayNameFor(model => model.Patient)</th>
-                        <th>@Html.DisplayNameFor(model => model.Doctor)</th>
+                        <th>Patient Name</th>
+                        <th>العمر</th>
+                        <th>Doctor Name</th>
                         <th>Details</th>
                         <th>Status</th>
                         <th>Actions</th>
@@ -58,6 +59,16 @@
                             <td>@counter</td>
                             <td>@item.DiagnosisDate.ToString("yyyy-MM-dd")</td>
                             <td>@item.Patient.PatientName</td>
+                            <td>
+                                @if (item.Patient.Age.HasValue)
+                                {
+                                    <span class="badge bg-info">@item.Patient.Age سنة</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
                             <td>@(item.Doctor?.DoctorName ?? "Undefined")</td>
                             <td>@(item.DiagnosisDetails?.Substring(0, Math.Min(50, item.DiagnosisDetails?.Length ?? 0)) + (item.DiagnosisDetails?.Length > 50 ? "..." : ""))</td>
                             <td>
@@ -89,3 +100,4 @@
         </div>
     </div>
 </div>
+

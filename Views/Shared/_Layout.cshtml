@@ -94,8 +94,13 @@
 
                         @if (userType == "Assistant")
                         {
+                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="AppointmentIntake" asp-action="Index">
+                                    <i class="fas fa-clipboard-check"></i> Patient Intake
+                                </a>
+                            </li>
                             <li class="nav-item">
-                                <a class="nav-link" asp-controller="AssistantReports" asp-action="Index">
+                                <a class="nav-link" asp-controller="AppointmentReports" asp-action="Index">
                                     <i class="fas fa-chart-bar"></i> My Reports
                                 </a>
                             </li>
@@ -214,6 +219,13 @@
         {
             <div class="alert alert-danger alert-dismissible fade show">
                 <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Info"] != null)
+        {
+            <div class="alert alert-info alert-dismissible fade show">
+                <i class="fas fa-info-circle"></i> @TempData["Info"]
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         }

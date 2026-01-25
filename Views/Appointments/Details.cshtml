@@ -106,13 +106,93 @@
             </div>
         </div>
 
+        @if (Model.Intake != null)
+        {
+            <div class="card mt-3 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <i class="fas fa-clipboard-list"></i> Patient Intake Notes
+                    @if (Model.Intake.ReadyForDoctor)
+                    {
+                        <span class="badge bg-success float-end">
+                            <i class="fas fa-check-circle"></i> Ready for Doctor
+                        </span>
+                    }
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-success"><i class="fas fa-heartbeat"></i> Vital Signs</h6>
+                            <table class="table table-sm">
+                                <tr><th style="width:50%">Blood Pressure</th><td>@(Model.Intake.BloodPressure ?? "-")</td></tr>
+                                <tr><th>Heart Rate</th><td>@(Model.Intake.HeartRate.HasValue ? $"{Model.Intake.HeartRate} bpm" : "-")</td></tr>
+                                <tr><th>Temperature</th><td>@(Model.Intake.Temperature.HasValue ? $"{Model.Intake.Temperature} C" : "-")</td></tr>
+                                <tr><th>Weight</th><td>@(Model.Intake.Weight.HasValue ? $"{Model.Intake.Weight} kg" : "-")</td></tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-warning"><i class="fas fa-notes-medical"></i> Symptoms</h6>
+                            <table class="table table-sm">
+                                <tr><th style="width:40%">Chief Complaint</th><td>@(Model.Intake.ChiefComplaint ?? "-")</td></tr>
+                                <tr><th>Symptoms</th><td>@(Model.Intake.CurrentSymptoms ?? "-")</td></tr>
+                                <tr><th>Duration</th><td>@(Model.Intake.SymptomDuration ?? "-")</td></tr>
+                                <tr>
+                                    <th>Pain Level</th>
+                                    <td>
+                                        @if (Model.Intake.PainLevel.HasValue)
+                                        {
+                                            <span class="badge @(Model.Intake.PainLevel <= 3 ? "bg-success" : Model.Intake.PainLevel <= 6 ? "bg-warning text-dark" : "bg-danger")">
+                                                @Model.Intake.PainLevel / 10
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <text>-</text>
+                                        }
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-pills"></i> Medications:</strong><br />
+                            <span class="text-muted">@(Model.Intake.CurrentMedications ?? "None")</span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong class="text-danger"><i class="fas fa-allergies"></i> Allergies:</strong><br />
+                            <span class="@(!string.IsNullOrEmpty(Model.Intake.Allergies) ? "text-danger" : "text-muted")">
+                                @(Model.Intake.Allergies ?? "None")
+                            </span>
+                        </div>
+                        <div class="col-md-4">
+                            <strong><i class="fas fa-history"></i> Previous Conditions:</strong><br />
+                            <span class="text-muted">@(Model.Intake.PreviousConditions ?? "None")</span>
+                        </div>
+                    </div>
+                    @if (!string.IsNullOrEmpty(Model.Intake.AdditionalNotes))
+                    {
+                        <div class="alert alert-info mt-3 mb-0">
+                            <strong><i class="fas fa-sticky-note"></i> Assistant Notes:</strong><br />
+                            @Model.Intake.AdditionalNotes
+                        </div>
+                    }
+                    <div class="text-muted mt-2">
+                        <small>
+                            <i class="fas fa-clock"></i> Arrived: @Model.Intake.ArrivalTime?.ToString("HH:mm") |
+                            Performed by: @Model.Intake.PerformedByName at @Model.Intake.IntakeDate.ToString("HH:mm")
+                        </small>
+                    </div>
+                </div>
+            </div>
+        }
+
         <div class="mt-3">
             @if (Model.Status == "Scheduled")
             {
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
                     <i class="fas fa-edit"></i> Edit
                 </a>
-                
+
                 @if (Context.Session.GetString("UserType") == "Doctor" || Context.Session.GetString("UserType") == "Admin")
                 {
                     <form asp-action="Complete" asp-route-id="@Model.Id" method="post" style="display: inline;">
@@ -122,7 +202,7 @@
                         </button>
                     </form>
                 }
-                
+
                 <form asp-action="Cancel" asp-route-id="@Model.Id" method="post" style="display: inline;">
                     @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-danger" onclick="return confirm('Cancel this appointment?')">
@@ -130,6 +210,33 @@
                     </button>
                 </form>
             }
+
+            @if (Context.Session.GetString("UserType") == "Doctor")
+            {
+                @if (ViewBag.ExistingDiagnosisId != null)
+                {
+                    <a asp-controller="PatientDiagnoses" asp-action="Edit" asp-route-id="@ViewBag.ExistingDiagnosisId" class="btn btn-info">
+                        <i class="fas fa-edit"></i> Edit Diagnosis
+                    </a>
+                    <a asp-controller="PatientDiagnoses" asp-action="Details" asp-route-id="@ViewBag.ExistingDiagnosisId" class="btn btn-secondary">
+                        <i class="fas fa-eye"></i> View Diagnosis
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="PatientDiagnoses" asp-action="Create" asp-route-appointmentId="@Model.Id" class="btn btn-warning">
+                        <i class="fas fa-stethoscope"></i> Create Diagnosis
+                    </a>
+                }
+            }
+
+            @if (Context.Session.GetString("UserType") == "Assistant" && Model.Status == "Scheduled")
+            {
+                <a asp-controller="AppointmentIntake" asp-action="Perform" asp-route-id="@Model.Id" class="btn btn-info">
+                    <i class="fas fa-clipboard-check"></i> @(Model.Intake != null ? "Edit Intake" : "Start Intake")
+                </a>
+            }
+
             <a asp-action="Index" class="btn btn-secondary">
                 <i class="fas fa-arrow-left"></i> Back to List
             </a>

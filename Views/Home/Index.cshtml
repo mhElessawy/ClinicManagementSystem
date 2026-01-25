@@ -92,6 +92,33 @@
             </div>
         </div>
     }
+
+    <!-- Quick Actions for Doctor -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a asp-controller="Locations" asp-action="Index" class="btn btn-outline-primary">
+                            <i class="fas fa-map-marker-alt"></i> My Locations
+                        </a>
+                        <a asp-controller="Appointments" asp-action="Create" class="btn btn-outline-success">
+                            <i class="fas fa-calendar-plus"></i> New Appointment
+                        </a>
+                        <a asp-controller="Patients" asp-action="Create" class="btn btn-outline-info">
+                            <i class="fas fa-user-plus"></i> New Patient
+                        </a>
+                        <a asp-controller="MyAssistants" asp-action="Index" class="btn btn-outline-warning">
+                            <i class="fas fa-user-nurse"></i> My Assistants
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }
 
 <div class="row g-4">

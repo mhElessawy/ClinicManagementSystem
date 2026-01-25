@@ -1,6 +1,6 @@
 @model IEnumerable<ClinicManagementSystem.Models.Patient>
 @{
-    ViewData["Title"] = "المرضى";
+    ViewData["Title"] = "Patient";
 }
 <div class="row mb-3">
     <div class="col"><h2><i class="fas fa-procedures"></i> @ViewData["Title"]</h2></div>
@@ -14,15 +14,15 @@
     <div class="card-body">
         <form asp-action="Index" method="get" class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">اسم المريض</label>
+                <label class="form-label">Patient Name</label>
                 <input type="text" name="searchName" class="form-control" value="@ViewBag.SearchName" placeholder="Search By Name..." />
             </div>
             <div class="col-md-3">
-                <label class="form-label">الرقم المدني</label>
+                <label class="form-label">Civil ID</label>
                 <input type="text" name="searchCivilID" class="form-control" value="@ViewBag.SearchCivilID" placeholder="Search By Civil ID..." />
             </div>
             <div class="col-md-3">
-                <label class="form-label">رقم الهاتف</label>
+                <label class="form-label">Phone No.</label>
                 <input type="text" name="searchTel" class="form-control" value="@ViewBag.SearchTel" placeholder="Search By Phone Number..." />
             </div>
             <div class="col-md-2 d-flex align-items-end">
@@ -42,9 +42,11 @@
                         <th>م</th>
                         <th>@Html.DisplayNameFor(model => model.PatientName)</th>
                         <th>@Html.DisplayNameFor(model => model.PatientCivilID)</th>
+                        <th>@Html.DisplayNameFor(model => model.BirthDate)</th>
+                        <th>Age</th>
                         <th>@Html.DisplayNameFor(model => model.PatientTel1)</th>
                         <th>@Html.DisplayNameFor(model => model.Doctor)</th>
-                        <th>الإجراءات</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,6 +59,17 @@
                             <td>@counter</td>
                             <td>@Html.DisplayFor(modelItem => item.PatientName)</td>
                             <td>@Html.DisplayFor(modelItem => item.PatientCivilID)</td>
+                            <td>@(item.BirthDate?.ToString("yyyy-MM-dd") ?? "-")</td>
+                            <td>
+                                @if (item.Age.HasValue)
+                                {
+                                    <span class="badge bg-info">@item.Age سنة</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
                             <td>@Html.DisplayFor(modelItem => item.PatientTel1)</td>
                             <td>@(item.Doctor?.DoctorName ?? "Undefine")</td>
                             <td>

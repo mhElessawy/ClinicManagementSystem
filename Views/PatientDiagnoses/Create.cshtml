@@ -16,6 +16,7 @@
             <div class="card-body">
                 <form asp-action="Create" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="AppointmentId" />
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
 
                     @if (Model.PatientId > 0)
@@ -59,6 +60,112 @@
                             </div>
                         </div>
                     </div>
+
+                    @{
+                        var intake = ViewBag.Intake as ClinicManagementSystem.Models.AppointmentIntake;
+                        var appointment = ViewBag.Appointment as ClinicManagementSystem.Models.Appointment;
+                    }
+
+                    @if (intake != null)
+                    {
+                        <div class="card mb-4 border-warning">
+                            <div class="card-header bg-warning text-dark">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-clipboard-list"></i>
+                                    ملاحظات المساعد (Intake Notes)
+                                    <small class="float-end">
+                                        Performed by: @intake.PerformedByName at @intake.IntakeDate.ToString("HH:mm")
+                                    </small>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <!-- Vital Signs -->
+                                    <div class="col-md-6">
+                                        <h6 class="text-success"><i class="fas fa-heartbeat"></i> Vital Signs</h6>
+                                        <table class="table table-sm table-bordered">
+                                            <tr>
+                                                <th style="width:50%">Blood Pressure</th>
+                                                <td>@(intake.BloodPressure ?? "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Heart Rate</th>
+                                                <td>@(intake.HeartRate.HasValue ? $"{intake.HeartRate} bpm" : "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Temperature</th>
+                                                <td>@(intake.Temperature.HasValue ? $"{intake.Temperature} C" : "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Weight</th>
+                                                <td>@(intake.Weight.HasValue ? $"{intake.Weight} kg" : "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Height</th>
+                                                <td>@(intake.Height.HasValue ? $"{intake.Height} cm" : "-")</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <!-- Symptoms -->
+                                    <div class="col-md-6">
+                                        <h6 class="text-warning"><i class="fas fa-notes-medical"></i> Current Symptoms</h6>
+                                        <table class="table table-sm table-bordered">
+                                            <tr>
+                                                <th style="width:40%">Chief Complaint</th>
+                                                <td>@(intake.ChiefComplaint ?? "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Symptoms</th>
+                                                <td>@(intake.CurrentSymptoms ?? "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Duration</th>
+                                                <td>@(intake.SymptomDuration ?? "-")</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Pain Level</th>
+                                                <td>
+                                                    @if (intake.PainLevel.HasValue)
+                                                    {
+                                                        <span class="badge @(intake.PainLevel <= 3 ? "bg-success" : intake.PainLevel <= 6 ? "bg-warning text-dark" : "bg-danger")">
+                                                            @intake.PainLevel / 10
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <text>-</text>
+                                                    }
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-4">
+                                        <h6><i class="fas fa-pills"></i> Current Medications</h6>
+                                        <p class="border p-2 rounded">@(intake.CurrentMedications ?? "None reported")</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6 class="text-danger"><i class="fas fa-allergies"></i> Allergies</h6>
+                                        <p class="border p-2 rounded @(!string.IsNullOrEmpty(intake.Allergies) ? "border-danger text-danger" : "")">
+                                            @(intake.Allergies ?? "None reported")
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <h6><i class="fas fa-history"></i> Previous Conditions</h6>
+                                        <p class="border p-2 rounded">@(intake.PreviousConditions ?? "None reported")</p>
+                                    </div>
+                                </div>
+                                @if (!string.IsNullOrEmpty(intake.AdditionalNotes))
+                                {
+                                    <div class="alert alert-info mt-3">
+                                        <h6><i class="fas fa-sticky-note"></i> Additional Notes from Assistant</h6>
+                                        <p class="mb-0">@intake.AdditionalNotes</p>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
 
                     <div class="row">
                         <div class="col-md-6">
@@ -154,7 +261,7 @@
                     $('#patientInfoCard').hide();
                 }
             });
-               
+
             // Trigger change event on page load if patient is pre-selected
             if ($('#patientSelect').val()) {
                 $('#patientSelect').trigger('change');

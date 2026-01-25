@@ -1,0 +1,254 @@
+﻿@model ClinicManagementSystem.Models.AppointmentIntake
+
+@{
+    ViewData["Title"] = "Intake Details";
+    var questions = ViewBag.Questions as List<ClinicManagementSystem.Models.IntakeQuestion> ?? new List<ClinicManagementSystem.Models.IntakeQuestion>();
+    var questionResponses = ViewBag.QuestionResponses as Dictionary<string, string> ?? new Dictionary<string, string>();
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-clipboard-list"></i> Intake Details</h2>
+        <p class="text-muted">Patient pre-visit information recorded by assistant</p>
+        <hr />
+    </div>
+</div>
+
+@if (Model.Appointment != null)
+{
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-user-injured"></i> Patient Information
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th style="width: 40%;">Patient Name:</th>
+                            <td><strong>@Model.Appointment.Patient?.PatientName</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Civil ID:</th>
+                            <td>@Model.Appointment.Patient?.PatientCivilID</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>@Model.Appointment.Patient?.PatientTel1</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-calendar-check"></i> Appointment Details
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless mb-0">
+                        <tr>
+                            <th style="width: 40%;">Date:</th>
+                            <td>@Model.Appointment.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                        </tr>
+                        <tr>
+                            <th>Time:</th>
+                            <td>@Model.Appointment.AppointmentTime.ToString(@"hh\:mm")</td>
+                        </tr>
+                        <tr>
+                            <th>Doctor:</th>
+                            <td>Dr. @Model.Appointment.Doctor?.DoctorName</td>
+                        </tr>
+                        <tr>
+                            <th>Reason:</th>
+                            <td>@Model.Appointment.Reason</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card @(Model.ReadyForDoctor ? "border-success" : "border-warning")">
+            <div class="card-header @(Model.ReadyForDoctor ? "bg-success" : "bg-warning") @(Model.ReadyForDoctor ? "text-white" : "text-dark")">
+                <i class="fas @(Model.ReadyForDoctor ? "fa-check-circle" : "fa-hourglass-half")"></i>
+                Status: @(Model.ReadyForDoctor ? "Ready for Doctor" : "Intake In Progress")
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>Arrival Time:</strong> @Model.ArrivalTime?.ToString("HH:mm")
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Performed By:</strong> @Model.PerformedByName
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Intake Date:</strong> @Model.IntakeDate.ToString("yyyy-MM-dd HH:mm")
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Vital Signs -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white">
+                <i class="fas fa-heartbeat"></i> Vital Signs
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 50%;">Blood Pressure:</th>
+                        <td>@(Model.BloodPressure ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Heart Rate:</th>
+                        <td>@(Model.HeartRate.HasValue ? $"{Model.HeartRate} bpm" : "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Temperature:</th>
+                        <td>@(Model.Temperature.HasValue ? $"{Model.Temperature} C" : "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Weight:</th>
+                        <td>@(Model.Weight.HasValue ? $"{Model.Weight} kg" : "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Height:</th>
+                        <td>@(Model.Height.HasValue ? $"{Model.Height} cm" : "-")</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Symptoms -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <i class="fas fa-notes-medical"></i> Current Symptoms
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 40%;">Chief Complaint:</th>
+                        <td>@(Model.ChiefComplaint ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Symptoms:</th>
+                        <td>@(Model.CurrentSymptoms ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Duration:</th>
+                        <td>@(Model.SymptomDuration ?? "-")</td>
+                    </tr>
+                    <tr>
+                        <th>Pain Level:</th>
+                        <td>
+                            @if (Model.PainLevel.HasValue)
+                            {
+                                <span class="badge @(Model.PainLevel <= 3 ? "bg-success" : Model.PainLevel <= 6 ? "bg-warning text-dark" : "bg-danger")">
+                                    @Model.PainLevel / 10
+                                </span>
+                            }
+                            else
+                            {
+                                <text>-</text>
+                            }
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Medical History -->
+<div class="card mb-4">
+    <div class="card-header bg-secondary text-white">
+        <i class="fas fa-history"></i> Medical History
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <h6>Current Medications:</h6>
+                <p>@(Model.CurrentMedications ?? "None reported")</p>
+            </div>
+            <div class="col-md-4">
+                <h6>Known Allergies:</h6>
+                <p class="@(!string.IsNullOrEmpty(Model.Allergies) ? "text-danger" : "")">
+                    @(Model.Allergies ?? "None reported")
+                </p>
+            </div>
+            <div class="col-md-4">
+                <h6>Previous Conditions:</h6>
+                <p>@(Model.PreviousConditions ?? "None reported")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Specialty Questions -->
+@if (questions.Any() && questionResponses.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-question-circle"></i> Specialty Questions
+        </div>
+        <div class="card-body">
+            <div class="row">
+                @foreach (var question in questions)
+                {
+                    var questionIdStr = question.Id.ToString();
+                    var response = questionResponses.ContainsKey(questionIdStr) ? questionResponses[questionIdStr] : null;
+                    if (!string.IsNullOrEmpty(response))
+                    {
+                        <div class="col-md-6 mb-2">
+                            <strong>@(string.IsNullOrEmpty(question.QuestionAr) ? question.QuestionEn : question.QuestionAr)</strong>
+                            <br />
+                            <span class="text-primary">@response</span>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Additional Notes -->
+@if (!string.IsNullOrEmpty(Model.AdditionalNotes))
+{
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            <i class="fas fa-sticky-note"></i> Additional Notes from Assistant
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info mb-0">
+                @Model.AdditionalNotes
+            </div>
+        </div>
+    </div>
+}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        @if (Context.Session.GetString("UserType") == "Assistant")
+        {
+            <a asp-action="Perform" asp-route-id="@Model.AppointmentId" class="btn btn-primary">
+                <i class="fas fa-edit"></i> Edit Intake
+            </a>
+        }
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to List
+        </a>
+        <a asp-controller="Appointments" asp-action="Details" asp-route-id="@Model.AppointmentId" class="btn btn-info">
+            <i class="fas fa-calendar-alt"></i> View Appointment
+        </a>
+    </div>
+</div>

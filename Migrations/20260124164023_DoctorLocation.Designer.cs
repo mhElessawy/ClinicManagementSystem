@@ -4,6 +4,7 @@ using ClinicManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ClinicManagementSystem.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124164023_DoctorLocation")]
+    partial class DoctorLocation
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -99,97 +102,6 @@ namespace ClinicManagementSystem.Migrations
                     b.HasIndex("PatientId");
 
                     b.ToTable("Appointments");
-                });
-
-            modelBuilder.Entity("ClinicManagementSystem.Models.AppointmentIntake", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AdditionalNotes")
-                        .HasMaxLength(2000)
-                        .HasColumnType("nvarchar(2000)");
-
-                    b.Property<string>("Allergies")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<int>("AppointmentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("ArrivalTime")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("BloodPressure")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("ChiefComplaint")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("CurrentMedications")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("CurrentSymptoms")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<int?>("HeartRate")
-                        .HasColumnType("int");
-
-                    b.Property<decimal?>("Height")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<DateTime>("IntakeDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("LastUpdated")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("PainLevel")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("PatientArrived")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("PerformedBy")
-                        .HasColumnType("int");
-
-                    b.Property<string>("PerformedByName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PreviousConditions")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<bool>("ReadyForDoctor")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("SpecialtyQuestionsJson")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SymptomDuration")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<decimal?>("Temperature")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal?>("Weight")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId")
-                        .IsUnique();
-
-                    b.ToTable("AppointmentIntakes");
                 });
 
             modelBuilder.Entity("ClinicManagementSystem.Models.Department", b =>
@@ -417,51 +329,6 @@ namespace ClinicManagementSystem.Migrations
                     b.ToTable("DoctorSubscriptions");
                 });
 
-            modelBuilder.Entity("ClinicManagementSystem.Models.IntakeQuestion", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Active")
-                        .HasColumnType("bit");
-
-                    b.Property<int>("DisplayOrder")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("IsRequired")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Options")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("QuestionAr")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("QuestionEn")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("QuestionType")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("SpecialistId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("SpecialistId");
-
-                    b.ToTable("IntakeQuestions");
-                });
-
             modelBuilder.Entity("ClinicManagementSystem.Models.Location", b =>
                 {
                     b.Property<int>("Id")
@@ -553,9 +420,6 @@ namespace ClinicManagementSystem.Migrations
                     b.Property<bool>("Active")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("AppointmentId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("DiagnosisDate")
                         .HasColumnType("datetime2");
 
@@ -574,8 +438,6 @@ namespace ClinicManagementSystem.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AppointmentId");
 
                     b.HasIndex("DoctorId");
 
@@ -870,17 +732,6 @@ namespace ClinicManagementSystem.Migrations
                     b.Navigation("Patient");
                 });
 
-            modelBuilder.Entity("ClinicManagementSystem.Models.AppointmentIntake", b =>
-                {
-                    b.HasOne("ClinicManagementSystem.Models.Appointment", "Appointment")
-                        .WithOne("Intake")
-                        .HasForeignKey("ClinicManagementSystem.Models.AppointmentIntake", "AppointmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Appointment");
-                });
-
             modelBuilder.Entity("ClinicManagementSystem.Models.DoctorAssist", b =>
                 {
                     b.HasOne("ClinicManagementSystem.Models.DoctorInfo", "Doctor")
@@ -920,17 +771,6 @@ namespace ClinicManagementSystem.Migrations
                     b.Navigation("Doctor");
                 });
 
-            modelBuilder.Entity("ClinicManagementSystem.Models.IntakeQuestion", b =>
-                {
-                    b.HasOne("ClinicManagementSystem.Models.Specialist", "Specialist")
-                        .WithMany()
-                        .HasForeignKey("SpecialistId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Specialist");
-                });
-
             modelBuilder.Entity("ClinicManagementSystem.Models.Location", b =>
                 {
                     b.HasOne("ClinicManagementSystem.Models.DoctorInfo", "Doctor")
@@ -954,10 +794,6 @@ namespace ClinicManagementSystem.Migrations
 
             modelBuilder.Entity("ClinicManagementSystem.Models.PatientDiagnosis", b =>
                 {
-                    b.HasOne("ClinicManagementSystem.Models.Appointment", "Appointment")
-                        .WithMany()
-                        .HasForeignKey("AppointmentId");
-
                     b.HasOne("ClinicManagementSystem.Models.DoctorInfo", "Doctor")
                         .WithMany("PatientDiagnoses")
                         .HasForeignKey("DoctorId")
@@ -968,8 +804,6 @@ namespace ClinicManagementSystem.Migrations
                         .HasForeignKey("PatientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Appointment");
 
                     b.Navigation("Doctor");
 
@@ -995,11 +829,6 @@ namespace ClinicManagementSystem.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("ClinicManagementSystem.Models.Appointment", b =>
-                {
-                    b.Navigation("Intake");
                 });
 
             modelBuilder.Entity("ClinicManagementSystem.Models.Department", b =>

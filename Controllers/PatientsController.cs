@@ -78,7 +78,7 @@ namespace ClinicManagementSystem.Controllers
         // POST: Patients/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,PatientName,PatientCivilID,PatientTel1,PatientTel2,PatientAddress,DoctorId")] Patient patient)
+        public async Task<IActionResult> Create( Patient patient)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -168,7 +168,7 @@ namespace ClinicManagementSystem.Controllers
         // POST: Patients/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PatientName,PatientCivilID,PatientTel1,PatientTel2,PatientAddress,DoctorId")] Patient patient)
+        public async Task<IActionResult> Edit(int id, Patient patient)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
