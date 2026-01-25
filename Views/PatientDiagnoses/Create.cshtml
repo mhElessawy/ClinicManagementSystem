@@ -16,6 +16,7 @@
             <div class="card-body">
                 <form asp-action="Create" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="AppointmentId" />
                     <div asp-validation-summary="All" class="alert alert-danger"></div>
 
                     @if (Model.PatientId > 0)

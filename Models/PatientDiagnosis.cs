@@ -15,6 +15,9 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Doctor")]
         public int? DoctorId { get; set; }
 
+        [Display(Name = "Appointment")]
+        public int? AppointmentId { get; set; }
+
         [Required(ErrorMessage = "Diagnosis date is required")]
         [Display(Name = "Diagnosis Date")]
         public DateTime DiagnosisDate { get; set; } = DateTime.Now;
@@ -36,5 +39,8 @@ namespace ClinicManagementSystem.Models
 
         [ForeignKey("DoctorId")]
         public virtual DoctorInfo? Doctor { get; set; }
+
+        [ForeignKey("AppointmentId")]
+        public virtual Appointment? Appointment { get; set; }
     }
 }

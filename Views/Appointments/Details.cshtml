@@ -213,9 +213,21 @@
 
             @if (Context.Session.GetString("UserType") == "Doctor")
             {
-                <a asp-controller="PatientDiagnoses" asp-action="Create" asp-route-appointmentId="@Model.Id" class="btn btn-warning">
-                    <i class="fas fa-stethoscope"></i> Create Diagnosis
-                </a>
+                @if (ViewBag.ExistingDiagnosisId != null)
+                {
+                    <a asp-controller="PatientDiagnoses" asp-action="Edit" asp-route-id="@ViewBag.ExistingDiagnosisId" class="btn btn-info">
+                        <i class="fas fa-edit"></i> Edit Diagnosis
+                    </a>
+                    <a asp-controller="PatientDiagnoses" asp-action="Details" asp-route-id="@ViewBag.ExistingDiagnosisId" class="btn btn-secondary">
+                        <i class="fas fa-eye"></i> View Diagnosis
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="PatientDiagnoses" asp-action="Create" asp-route-appointmentId="@Model.Id" class="btn btn-warning">
+                        <i class="fas fa-stethoscope"></i> Create Diagnosis
+                    </a>
+                }
             }
 
             @if (Context.Session.GetString("UserType") == "Assistant" && Model.Status == "Scheduled")

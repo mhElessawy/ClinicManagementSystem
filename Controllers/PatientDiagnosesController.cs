@@ -71,6 +71,19 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
+            // Check if diagnosis already exists for this appointment
+            if (appointmentId.HasValue)
+            {
+                var existingDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.AppointmentId == appointmentId.Value);
+
+                if (existingDiagnosis != null)
+                {
+                    TempData["Info"] = "A diagnosis already exists for this appointment. Redirecting to edit.";
+                    return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
+
             var diagnosis = new PatientDiagnosis
             {
                 DiagnosisDate = DateTime.Now,
@@ -95,6 +108,7 @@ namespace ClinicManagementSystem.Controllers
                 if (appointment != null)
                 {
                     diagnosis.PatientId = appointment.PatientId;
+                    diagnosis.AppointmentId = appointmentId;
                     intake = appointment.Intake;
                     ViewBag.Appointment = appointment;
                 }
@@ -179,6 +193,20 @@ namespace ClinicManagementSystem.Controllers
             // Remove navigation properties from validation
             ModelState.Remove("Patient");
             ModelState.Remove("Doctor");
+            ModelState.Remove("Appointment");
+
+            // Check if diagnosis already exists for this appointment (prevent duplicates)
+            if (diagnosis.AppointmentId.HasValue)
+            {
+                var existingDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.AppointmentId == diagnosis.AppointmentId.Value);
+
+                if (existingDiagnosis != null)
+                {
+                    TempData["Error"] = "A diagnosis already exists for this appointment.";
+                    return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
 
             if (ModelState.IsValid)
             {

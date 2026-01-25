@@ -13,14 +13,14 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-md-12">
+    <div class="col-md-6">
         <a asp-action="Create" class="btn btn-success">
             <i class="fas fa-plus"></i> New Appointment
         </a>
         <a asp-action="Calendar" class="btn btn-info">
             <i class="fas fa-calendar"></i> Calendar View
         </a>
-        
+
         @if (ViewBag.ShowDeleted == true)
         {
             <a asp-action="Index" asp-route-showDeleted="false" class="btn btn-primary">
@@ -34,7 +34,46 @@
             </a>
         }
     </div>
+    @if (ViewBag.IsDoctorOrAssistant == true)
+    {
+        <div class="col-md-6">
+            <form method="get" class="d-flex gap-2 justify-content-end">
+                <input type="date" name="filterDate" class="form-control" style="width: auto;"
+                       value="@(((DateTime)ViewBag.FilterDate).ToString("yyyy-MM-dd"))" />
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <a asp-action="Index" class="btn btn-secondary" title="Today">
+                    <i class="fas fa-calendar-day"></i>
+                </a>
+                @if (ViewBag.ShowAll != true)
+                {
+                    <a asp-action="Index" asp-route-showAll="true" class="btn btn-outline-primary" title="Show All Appointments">
+                        <i class="fas fa-list-alt"></i> All
+                    </a>
+                }
+                else
+                {
+                    <a asp-action="Index" class="btn btn-primary" title="Show Today Only">
+                        <i class="fas fa-calendar-day"></i> Today
+                    </a>
+                }
+            </form>
+        </div>
+    }
 </div>
+
+@if (ViewBag.IsDoctorOrAssistant == true && ViewBag.ShowAll != true)
+{
+    <div class="alert alert-info py-2 mb-3">
+        <i class="fas fa-calendar-check"></i>
+        Showing appointments for: <strong>@(((DateTime)ViewBag.FilterDate).ToString("dddd, yyyy-MM-dd"))</strong>
+        @if (((DateTime)ViewBag.FilterDate).Date == DateTime.Today)
+        {
+            <span class="badge bg-success ms-2">Today</span>
+        }
+    </div>
+}
 
 <div class="card">
     <div class="card-body">
