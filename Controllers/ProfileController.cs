@@ -2,16 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Helpers;
+using ClinicManagementSystem.Services;
 
 namespace ClinicManagementSystem.Controllers
 {
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IFileProcessingService _fileProcessingService;
 
-        public ProfileController(ApplicationDbContext context)
+        public ProfileController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
         {
             _context = context;
+            _fileProcessingService = fileProcessingService;
         }
 
         // GET: Profile
@@ -151,14 +154,12 @@ namespace ClinicManagementSystem.Controllers
                 {
                     var existingDoctor = await _context.DoctorInfos.AsNoTracking().FirstOrDefaultAsync(d => d.Id == doctorId);
 
-                    // Handle image
+                    // Handle image with resizing
                     if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            await DoctorPictureFile.CopyToAsync(ms);
-                            doctor.DoctorPicture = ms.ToArray();
-                        }
+                        // Resize image to max 400x400 pixels with 75% quality for doctor pictures
+                        doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
+                            DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
                     }
                     else
                     {

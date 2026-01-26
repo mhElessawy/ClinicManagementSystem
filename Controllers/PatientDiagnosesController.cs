@@ -3,16 +3,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Helpers;
+using ClinicManagementSystem.Services;
 
 namespace ClinicManagementSystem.Controllers
 {
     public class PatientDiagnosesController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IFileProcessingService _fileProcessingService;
 
-        public PatientDiagnosesController(ApplicationDbContext context)
+        public PatientDiagnosesController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
         {
             _context = context;
+            _fileProcessingService = fileProcessingService;
         }
 
         public async Task<IActionResult> Index(string searchName, string searchCivilID, string searchTel)
@@ -159,27 +162,16 @@ namespace ClinicManagementSystem.Controllers
                 diagnosis.DoctorId = doctorId.Value;
             }
 
-            // Handle file upload to PatientFile folder
+            // Handle file upload to PatientFile folder with resizing
             if (DiagnosisFileUpload != null && DiagnosisFileUpload.Length > 0)
             {
                 try
                 {
-                    // Create PatientFile directory if it doesn't exist
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PatientFile");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
 
-                    // Generate unique filename
-                    var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(DiagnosisFileUpload.FileName)}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    // Save file to disk
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await DiagnosisFileUpload.CopyToAsync(stream);
-                    }
+                    // Save file with automatic resizing for images (max 1200x1200, 80% quality)
+                    var fileName = await _fileProcessingService.SaveResizedFileAsync(
+                        DiagnosisFileUpload, uploadsFolder, maxWidth: 1200, maxHeight: 1200, quality: 80);
 
                     // Store relative path in database
                     diagnosis.DiagnosisFilePath = $"/PatientFile/{fileName}";
@@ -286,7 +278,7 @@ namespace ClinicManagementSystem.Controllers
             if (id != diagnosis.Id)
                 return NotFound();
 
-            // Handle file upload to PatientFile folder
+            // Handle file upload to PatientFile folder with resizing
             if (DiagnosisFileUpload != null && DiagnosisFileUpload.Length > 0)
             {
                 try
@@ -305,22 +297,11 @@ namespace ClinicManagementSystem.Controllers
                         }
                     }
 
-                    // Create PatientFile directory if it doesn't exist
                     var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "PatientFile");
-                    if (!Directory.Exists(uploadsFolder))
-                    {
-                        Directory.CreateDirectory(uploadsFolder);
-                    }
 
-                    // Generate unique filename
-                    var fileName = $"{Guid.NewGuid()}_{Path.GetFileName(DiagnosisFileUpload.FileName)}";
-                    var filePath = Path.Combine(uploadsFolder, fileName);
-
-                    // Save file to disk
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                    {
-                        await DiagnosisFileUpload.CopyToAsync(stream);
-                    }
+                    // Save file with automatic resizing for images (max 1200x1200, 80% quality)
+                    var fileName = await _fileProcessingService.SaveResizedFileAsync(
+                        DiagnosisFileUpload, uploadsFolder, maxWidth: 1200, maxHeight: 1200, quality: 80);
 
                     // Store relative path in database
                     diagnosis.DiagnosisFilePath = $"/PatientFile/{fileName}";

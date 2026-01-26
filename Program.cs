@@ -1,10 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
+using ClinicManagementSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// Add File Processing Service for image resizing
+builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>

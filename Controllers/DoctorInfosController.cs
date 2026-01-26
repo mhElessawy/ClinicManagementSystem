@@ -3,16 +3,19 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Helpers;
+using ClinicManagementSystem.Services;
 
 namespace ClinicManagementSystem.Controllers
 {
     public class DoctorInfosController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IFileProcessingService _fileProcessingService;
 
-        public DoctorInfosController(ApplicationDbContext context)
+        public DoctorInfosController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
         {
             _context = context;
+            _fileProcessingService = fileProcessingService;
         }
 
         public async Task<IActionResult> Index()
@@ -68,14 +71,12 @@ namespace ClinicManagementSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                // Handle image upload
+                // Handle image upload with resizing
                 if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                 {
-                    using (var ms = new MemoryStream())
-                    {
-                        await DoctorPictureFile.CopyToAsync(ms);
-                        doctor.DoctorPicture = ms.ToArray();
-                    }
+                    // Resize image to max 400x400 pixels with 75% quality for doctor pictures
+                    doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
+                        DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
                 }
 
                 // Hash password if provided
@@ -135,14 +136,12 @@ namespace ClinicManagementSystem.Controllers
                 {
                     var existingDoctor = await _context.DoctorInfos.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
 
-                    // Handle image
+                    // Handle image with resizing
                     if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            await DoctorPictureFile.CopyToAsync(ms);
-                            doctor.DoctorPicture = ms.ToArray();
-                        }
+                        // Resize image to max 400x400 pixels with 75% quality for doctor pictures
+                        doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
+                            DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
                     }
                     else
                     {
