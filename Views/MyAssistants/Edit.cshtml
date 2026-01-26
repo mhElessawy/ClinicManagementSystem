@@ -1,0 +1,121 @@
+@model ClinicManagementSystem.Models.DoctorAssist
+
+@{
+    ViewData["Title"] = "Edit Assistant";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h2><i class="fas fa-user-nurse"></i> Edit Assistant</h2>
+        <hr />
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            <input type="hidden" asp-for="Id" />
+
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-info-circle"></i> Basic Information
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="AssistName" class="form-label"></label>
+                        <input asp-for="AssistName" class="form-control" required />
+                        <span asp-validation-for="AssistName" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-phone"></i> Contact Information
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AssistTel1" class="form-label"></label>
+                            <input asp-for="AssistTel1" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="AssistTel2" class="form-label"></label>
+                            <input asp-for="AssistTel2" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="AssistAddress" class="form-label"></label>
+                        <textarea asp-for="AssistAddress" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-key"></i> Login Credentials
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Leave password empty to keep current password
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LoginUsername" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                <input asp-for="LoginUsername" class="form-control" placeholder="e.g., assist_sarah" />
+                            </div>
+                            <span asp-validation-for="LoginUsername" class="text-danger"></span>
+                            <small class="text-muted">Unique username</small>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LoginPassword" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input asp-for="LoginPassword" type="password" class="form-control" placeholder="New password (leave empty to keep current)" />
+                            </div>
+                            <span asp-validation-for="LoginPassword" class="text-danger"></span>
+                            <small class="text-muted">Min 6 characters (leave empty to keep current)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-check">
+                        <input asp-for="CanLogin" class="form-check-input" type="checkbox" />
+                        <label asp-for="CanLogin" class="form-check-label"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white">
+                    <i class="fas fa-toggle-on"></i> Status
+                </div>
+                <div class="card-body">
+                    <div class="form-check">
+                        <input asp-for="Active" class="form-check-input" type="checkbox" />
+                        <label asp-for="Active" class="form-check-label"></label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Update Assistant
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
