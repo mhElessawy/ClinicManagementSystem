@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using ClinicManagementSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,7 +22,18 @@ builder.Services.AddSession(options =>
 // Add HttpContextAccessor for accessing session in views
 builder.Services.AddHttpContextAccessor();
 
+// Configure forwarded headers for reverse proxy (VPS/IIS)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+// Use forwarded headers (must be first in pipeline for VPS/reverse proxy)
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -30,7 +42,12 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Only use HTTPS redirection in development or when HTTPS is configured
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
 app.UseStaticFiles();
 
 app.UseRouting();
