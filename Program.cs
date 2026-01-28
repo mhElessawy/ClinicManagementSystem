@@ -9,6 +9,10 @@ builder.WebHost.UseUrls("http://*:80", "http://*:5000");
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
+// Configure IIS Integration
+builder.WebHost.UseIISIntegration();
+
+
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -24,6 +28,14 @@ builder.Services.AddSession(options =>
 // Add HttpContextAccessor for accessing session in views
 builder.Services.AddHttpContextAccessor();
 
+// Add services
+builder.Services.AddControllersWithViews();
+builder.Services.AddHttpsRedirection(options =>
+{
+    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+    options.HttpsPort = 443;
+});
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -33,8 +45,9 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.UseHttpsRedirection();
+// «” Œœ«„ HTTPS
 
+app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
