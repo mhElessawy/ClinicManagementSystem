@@ -1,0 +1,229 @@
+@model ClinicManagementSystem.Models.DoctorInfo
+@{
+    ViewData["Title"] = "Doctor Registration";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Clinic Management System</title>
+
+    <!-- Bootstrap 5 CSS from CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 0;
+        }
+        .register-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .register-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            border-radius: 15px 15px 0 0;
+        }
+        .register-body {
+            padding: 40px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 12px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .section-title {
+            color: #667eea;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .required-field::after {
+            content: " *";
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="register-container">
+            <div class="register-header">
+                <i class="fas fa-user-md fa-3x mb-3"></i>
+                <h2 class="mb-0">Doctor Registration</h2>
+                <p class="mb-0 mt-2">Create your account to get started</p>
+            </div>
+            <div class="register-body">
+                @if (ViewBag.Error != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <i class="fas fa-exclamation-circle"></i> @ViewBag.Error
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <form method="post" asp-action="Register">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Personal Information -->
+                    <h5 class="section-title"><i class="fas fa-user me-2"></i>Personal Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DoctorName" class="form-label required-field"></label>
+                            <input asp-for="DoctorName" class="form-control" placeholder="Enter full name" />
+                            <span asp-validation-for="DoctorName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DoctorCivilId" class="form-label required-field"></label>
+                            <input asp-for="DoctorCivilId" class="form-control" placeholder="Enter Civil ID" />
+                            <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="Email" class="form-label required-field"></label>
+                            <input asp-for="Email" class="form-control" type="email" placeholder="Enter email address" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="Gender" class="form-label"></label>
+                            <select asp-for="Gender" class="form-select">
+                                <option value="">-- Select Gender --</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <span asp-validation-for="Gender" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Professional Information -->
+                    <h5 class="section-title mt-4"><i class="fas fa-stethoscope me-2"></i>Professional Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DoctorTitle" class="form-label"></label>
+                            <input asp-for="DoctorTitle" class="form-control" placeholder="e.g., Dr., Prof." />
+                            <span asp-validation-for="DoctorTitle" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="SpecialistId" class="form-label"></label>
+                            <select asp-for="SpecialistId" class="form-select" asp-items="ViewBag.Specialists">
+                                <option value="">-- Select Specialist --</option>
+                            </select>
+                            <span asp-validation-for="SpecialistId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <h5 class="section-title mt-4"><i class="fas fa-phone me-2"></i>Contact Information</h5>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="DoctorTel1" class="form-label"></label>
+                            <input asp-for="DoctorTel1" class="form-control" placeholder="Primary phone" />
+                            <span asp-validation-for="DoctorTel1" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DoctorTel2" class="form-label"></label>
+                            <input asp-for="DoctorTel2" class="form-control" placeholder="Secondary phone (optional)" />
+                            <span asp-validation-for="DoctorTel2" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DoctorAddress" class="form-label"></label>
+                        <textarea asp-for="DoctorAddress" class="form-control" rows="2" placeholder="Enter address"></textarea>
+                        <span asp-validation-for="DoctorAddress" class="text-danger"></span>
+                    </div>
+
+                    <!-- Login Credentials -->
+                    <h5 class="section-title mt-4"><i class="fas fa-lock me-2"></i>Login Credentials</h5>
+
+                    <div class="mb-3">
+                        <label asp-for="LoginUsername" class="form-label required-field"></label>
+                        <input asp-for="LoginUsername" class="form-control" placeholder="Choose a username" />
+                        <span asp-validation-for="LoginUsername" class="text-danger"></span>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label asp-for="LoginPassword" class="form-label required-field"></label>
+                            <input asp-for="LoginPassword" class="form-control" type="password" placeholder="Choose a password" />
+                            <span asp-validation-for="LoginPassword" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label required-field">Confirm Password</label>
+                            <input type="password" name="ConfirmPassword" class="form-control" placeholder="Confirm your password" />
+                            <span class="text-danger field-validation-valid" data-valmsg-for="ConfirmPassword" data-valmsg-replace="true"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Note:</strong> After registration, your account will be reviewed by an administrator.
+                        You will be able to login once your account is approved.
+                    </div>
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-register btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <span class="text-muted">Already have an account?</span>
+                        <a href="@Url.Action("Login", "Account")" class="text-decoration-none" style="color: #667eea;">
+                            Login here
+                        </a>
+                    </div>
+
+                    <div class="text-center mt-2">
+                        <a href="@Url.Action("Welcome", "Account")" class="text-decoration-none text-muted">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Welcome
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery from CDN -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <!-- Bootstrap 5 JS from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- jQuery Validation -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@4.0.0/dist/jquery.validate.unobtrusive.min.js"></script>
+</body>
+</html>
