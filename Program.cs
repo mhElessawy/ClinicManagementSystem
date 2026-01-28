@@ -3,8 +3,11 @@ using ClinicManagementSystem.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Kestrel to listen on port 80 (default HTTP)
-builder.WebHost.UseUrls("http://*:80", "http://*:5000");
+// Configure Kestrel URLs only in Production (not in Development)
+if (!builder.Environment.IsDevelopment())
+{
+    builder.WebHost.UseUrls("http://*:80", "http://*:5000");
+}
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -45,7 +48,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-// ÇÓÊÎÏÇã HTTPS
+// ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ HTTPS
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
