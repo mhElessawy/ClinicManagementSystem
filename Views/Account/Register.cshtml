@@ -115,7 +115,14 @@
                                 <option value="">-- Select Department --</option>
                                 @foreach (var dept in (SelectList)ViewBag.DepartmentId)
                                 {
-                                    <option value="@dept.Value">@dept.Text</option>
+                                    if (dept.Selected)
+                                    {
+                                        <option value="@dept.Value" selected>@dept.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dept.Value">@dept.Text</option>
+                                    }
                                 }
                             </select>
                             <small class="text-muted">Select department first to filter specialists</small>
