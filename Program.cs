@@ -1,21 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
+using ClinicManagementSystem.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//// Configure Kestrel to listen on port 80 (default HTTP)
-//builder.WebHost.UseUrls("http://*:80", "http://*:5000");
-// Configure Kestrel URLs only in Production (not in Development)
-if (!builder.Environment.IsDevelopment())
-{
-    builder.WebHost.UseUrls("http://*:80", "http://*:5000");
-}
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configure IIS Integration
-builder.WebHost.UseIISIntegration();
-
+// Add File Processing Service for image resizing
+builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -27,21 +20,10 @@ builder.Services.AddSession(options =>
     options.IdleTimeout = TimeSpan.FromMinutes(30);
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
-    options.Cookie.MaxAge = null; // Session cookie - expires when browser closes
-    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SameSite = SameSiteMode.Lax;
 });
 
 // Add HttpContextAccessor for accessing session in views
 builder.Services.AddHttpContextAccessor();
-
-// Add services
-builder.Services.AddControllersWithViews();
-builder.Services.AddHttpsRedirection(options =>
-{
-    options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-    options.HttpsPort = 443;
-});
 
 var app = builder.Build();
 
@@ -49,10 +31,9 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
+
     app.UseHsts();
 }
-
-// «” Œœ«„ HTTPS
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
@@ -66,5 +47,6 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     //pattern: "{controller=Account}/{action=Login}/{id?}");
-pattern: "{controller=Account}/{action=Welcome}/{id?}");
+    pattern: "{controller=Account}/{action=Welcome}/{id?}");
+
 app.Run();

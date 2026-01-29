@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ClinicManagementSystem.Helpers;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,120 +12,13 @@ namespace ClinicManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly LoginService _loginService;
+        private readonly IFileProcessingService _fileProcessingService;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
         {
             _context = context;
             _loginService = new LoginService(context);
-        }
-
-        // GET: Account/Welcome
-        public IActionResult Welcome()
-        {
-            // If already logged in, redirect to home
-            if (SessionHelper.IsLoggedIn(HttpContext.Session))
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            return View();
-        }
-
-        // GET: Account/Register
-        [HttpGet]
-        public IActionResult Register()
-        {
-            ViewBag.Specialists = new SelectList(_context.Specialists, "Id", "SpecialistName");
-            return View();
-        }
-
-        // POST: Account/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(DoctorInfo doctor, string ConfirmPassword)
-        {
-            ViewBag.Specialists = new SelectList(_context.Specialists, "Id", "SpecialistName", doctor.SpecialistId);
-
-            // Check if Civil ID already exists
-            if (!string.IsNullOrEmpty(doctor.DoctorCivilId))
-            {
-                var existingCivilId = await _context.DoctorInfos
-                    .AnyAsync(d => d.DoctorCivilId == doctor.DoctorCivilId);
-                if (existingCivilId)
-                {
-                    ModelState.AddModelError("DoctorCivilId", "This Civil ID is already registered");
-                }
-            }
-
-            // Check if Email already exists
-            if (!string.IsNullOrEmpty(doctor.Email))
-            {
-                var existingEmail = await _context.DoctorInfos
-                    .AnyAsync(d => d.Email == doctor.Email);
-                if (existingEmail)
-                {
-                    ModelState.AddModelError("Email", "This Email is already registered");
-                }
-            }
-
-            // Check if Username already exists
-            if (!string.IsNullOrEmpty(doctor.LoginUsername))
-            {
-                var existingUsername = await _context.DoctorInfos
-                    .AnyAsync(d => d.LoginUsername == doctor.LoginUsername);
-                if (existingUsername)
-                {
-                    ModelState.AddModelError("LoginUsername", "This Username is already taken");
-                }
-            }
-
-            // Check password confirmation
-            if (doctor.LoginPassword != ConfirmPassword)
-            {
-                ModelState.AddModelError("ConfirmPassword", "Passwords do not match");
-            }
-
-            // Validate required fields for registration
-            if (string.IsNullOrEmpty(doctor.DoctorCivilId))
-            {
-                ModelState.AddModelError("DoctorCivilId", "Civil ID is required for registration");
-            }
-
-            if (string.IsNullOrEmpty(doctor.Email))
-            {
-                ModelState.AddModelError("Email", "Email is required for registration");
-            }
-
-            if (string.IsNullOrEmpty(doctor.LoginUsername))
-            {
-                ModelState.AddModelError("LoginUsername", "Username is required for registration");
-            }
-
-            if (string.IsNullOrEmpty(doctor.LoginPassword))
-            {
-                ModelState.AddModelError("LoginPassword", "Password is required for registration");
-            }
-
-            if (ModelState.IsValid)
-            {
-                // Hash password
-                if (!string.IsNullOrEmpty(doctor.LoginPassword))
-                {
-                    doctor.LoginPassword = BCrypt.Net.BCrypt.HashPassword(doctor.LoginPassword);
-                }
-
-                // Set default values
-                doctor.CanLogin = true;
-                doctor.Active = false; // Requires admin approval
-                doctor.RegDate = DateTime.Now;
-
-                _context.Add(doctor);
-                await _context.SaveChangesAsync();
-
-                TempData["Success"] = "Registration successful! Please wait for admin approval before logging in.";
-                return RedirectToAction(nameof(Login));
-            }
-
-            return View(doctor);
+            _fileProcessingService = fileProcessingService;
         }
 
         [HttpGet]
@@ -190,6 +84,79 @@ namespace ClinicManagementSystem.Controllers
             SessionHelper.ClearSession(HttpContext.Session);
             TempData["Success"] = "You have been logged out successfully";
             return RedirectToAction("Login");
+        }
+
+        [HttpGet]
+        public IActionResult Register()
+        {
+            PopulateDropdowns();
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(DoctorInfo doctor, IFormFile? DoctorPictureFile, int? DepartmentId)
+        {
+            // Check if username already exists
+            if (!string.IsNullOrEmpty(doctor.LoginUsername))
+            {
+                var existingDoctor = await _context.DoctorInfos
+                    .FirstOrDefaultAsync(d => d.LoginUsername == doctor.LoginUsername);
+                if (existingDoctor != null)
+                {
+                    ModelState.AddModelError("LoginUsername", "Username already exists");
+                }
+            }
+
+            if (ModelState.IsValid)
+            {
+                // Handle image upload with resizing
+                if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
+                {
+                    doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
+                        DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
+                }
+
+                // Hash password if provided
+                if (!string.IsNullOrEmpty(doctor.LoginPassword))
+                {
+                    try
+                    {
+                        doctor.LoginPassword = BCrypt.Net.BCrypt.HashPassword(doctor.LoginPassword);
+                    }
+                    catch
+                    {
+                        // Keep plain text if BCrypt fails
+                    }
+                }
+
+                doctor.RegDate = DateTime.Now;
+                doctor.Active = true;
+                doctor.CanLogin = true;
+
+                _context.Add(doctor);
+                await _context.SaveChangesAsync();
+
+                TempData["Success"] = "Registration successful! You can now login.";
+                return RedirectToAction("Login");
+            }
+
+            PopulateDropdowns(doctor.SpecialistId, DepartmentId);
+            return View(doctor);
+        }
+
+        private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedDepartment = null)
+        {
+            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", selectedDepartment);
+            ViewBag.SpecialistId = new SelectList(_context.Specialists, "Id", "SpecialistName", selectedSpecialist);
+
+            // Pass specialists data as JSON for JavaScript filtering
+            var specialistsData = _context.Specialists.Select(s => new {
+                id = s.Id,
+                name = s.SpecialistName,
+                departmentId = s.DepartmentId
+            }).ToList();
+            ViewBag.SpecialistsJson = System.Text.Json.JsonSerializer.Serialize(specialistsData);
         }
     }
 }

@@ -22,6 +22,8 @@ namespace ClinicManagementSystem.Controllers
 
             var specialists = await _context.Specialists
                 .Include(s => s.Department)
+                .OrderBy(d=>d.Department.DepartmentName)
+                 .ThenBy(d => d.SpecialistName)
                 .ToListAsync();
 
             return View(specialists);
@@ -49,7 +51,7 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName");
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy (d=>d.DepartmentName), "Id", "DepartmentName");
             return View();
         }
 
@@ -68,7 +70,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", specialist.DepartmentId);
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", specialist.DepartmentId);
             return View(specialist);
         }
 
@@ -82,7 +84,7 @@ namespace ClinicManagementSystem.Controllers
             var specialist = await _context.Specialists.FindAsync(id);
             if (specialist == null) return NotFound();
 
-            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", specialist.DepartmentId);
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", specialist.DepartmentId);
             return View(specialist);
         }
 
@@ -113,7 +115,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", specialist.DepartmentId);
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", specialist.DepartmentId);
             return View(specialist);
         }
 
@@ -150,7 +152,6 @@ namespace ClinicManagementSystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
         private bool SpecialistExists(int id)
         {
             return _context.Specialists.Any(e => e.Id == id);

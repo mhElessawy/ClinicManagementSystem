@@ -84,14 +84,37 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label class="form-label">Department</label>
+                                <select id="DepartmentId" name="DepartmentId" class="form-control">
+                                    <option value="">-- Select Department --</option>
+                                    @foreach (var dept in (SelectList)ViewBag.DepartmentId)
+                                    {
+                                        if (dept.Selected)
+                                        {
+                                            <option value="@dept.Value" selected>@dept.Text</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@dept.Value">@dept.Text</option>
+                                        }
+                                    }
+                                </select>
+                                <small class="text-muted">Select department to filter specialists</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label asp-for="SpecialistId" class="form-label"></label>
-                                <select asp-for="SpecialistId" asp-items="ViewBag.SpecialistId" class="form-control">
-                                    <option value="">-- Select Specialist --</option>
+                                <select asp-for="SpecialistId" id="SpecialistId" class="form-control">
+                                    <option value="">-- Select Department First --</option>
                                 </select>
                                 <span asp-validation-for="SpecialistId" class="text-danger"></span>
                             </div>
                         </div>
+                    </div>
 
+                    <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="UserId" class="form-label"></label>
@@ -185,4 +208,55 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        // All specialists data for client-side filtering
+        var allSpecialists = @Html.Raw(ViewBag.SpecialistsJson);
+        var selectedSpecialistId = @(Model.SpecialistId.HasValue ? Model.SpecialistId.Value.ToString() : "null");
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var departmentSelect = document.getElementById('DepartmentId');
+            var specialistSelect = document.getElementById('SpecialistId');
+
+            // Function to populate specialists based on department
+            function populateSpecialists(departmentId, selectedId) {
+                // Clear current options
+                specialistSelect.innerHTML = '';
+
+                if (!departmentId) {
+                    specialistSelect.innerHTML = '<option value="">-- Select Department First --</option>';
+                    return;
+                }
+
+                // Add default option
+                specialistSelect.innerHTML = '<option value="">-- Select Specialist --</option>';
+
+                // Filter and add specialists for selected department
+                var filteredSpecialists = allSpecialists.filter(function(s) {
+                    return s.departmentId === parseInt(departmentId);
+                });
+
+                filteredSpecialists.forEach(function(specialist) {
+                    var option = document.createElement('option');
+                    option.value = specialist.id;
+                    option.textContent = specialist.name;
+                    if (selectedId && specialist.id === selectedId) {
+                        option.selected = true;
+                    }
+                    specialistSelect.appendChild(option);
+                });
+            }
+
+            // Filter specialists when department changes
+            departmentSelect.addEventListener('change', function() {
+                populateSpecialists(this.value, null);
+            });
+
+            // On page load, populate specialists for the selected department
+            var selectedDeptId = departmentSelect.value;
+            if (selectedDeptId) {
+                populateSpecialists(selectedDeptId, selectedSpecialistId);
+            }
+        });
+    </script>
 }

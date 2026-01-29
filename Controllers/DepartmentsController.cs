@@ -19,7 +19,7 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            return View(await _context.Departments.Include(d => d.Specialists).ToListAsync());
+            return View(await _context.Departments.Include(d => d.Specialists).OrderBy(d => d.DepartmentName ).ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
