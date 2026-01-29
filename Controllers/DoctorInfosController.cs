@@ -64,7 +64,7 @@ namespace ClinicManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(DoctorInfo doctor, IFormFile? DoctorPictureFile)
+        public async Task<IActionResult> Create(DoctorInfo doctor, IFormFile? DoctorPictureFile, int? DepartmentId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -99,7 +99,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDropdowns(doctor.SpecialistId, doctor.UserId);
+            PopulateDropdowns(doctor.SpecialistId, doctor.UserId, DepartmentId);
             return View(doctor);
         }
 
@@ -110,20 +110,24 @@ namespace ClinicManagementSystem.Controllers
 
             if (id == null) return NotFound();
 
-            var doctor = await _context.DoctorInfos.FindAsync(id);
+            var doctor = await _context.DoctorInfos
+                .Include(d => d.Specialist)
+                .FirstOrDefaultAsync(d => d.Id == id);
             if (doctor == null) return NotFound();
 
             // Clear password for security
             ViewBag.CurrentHasPassword = !string.IsNullOrEmpty(doctor.LoginPassword);
             doctor.LoginPassword = "";
 
-            PopulateDropdowns(doctor.SpecialistId, doctor.UserId);
+            // Get selected department from specialist
+            var selectedDepartment = doctor.Specialist?.DepartmentId;
+            PopulateDropdowns(doctor.SpecialistId, doctor.UserId, selectedDepartment);
             return View(doctor);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, DoctorInfo doctor, IFormFile? DoctorPictureFile)
+        public async Task<IActionResult> Edit(int id, DoctorInfo doctor, IFormFile? DoctorPictureFile, int? DepartmentId)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -181,7 +185,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDropdowns(doctor.SpecialistId, doctor.UserId);
+            PopulateDropdowns(doctor.SpecialistId, doctor.UserId, DepartmentId);
             return View(doctor);
         }
 
@@ -225,10 +229,31 @@ namespace ClinicManagementSystem.Controllers
             return _context.DoctorInfos.Any(e => e.Id == id);
         }
 
-        private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedUser = null)
+        private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedUser = null, int? selectedDepartment = null)
         {
+            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", selectedDepartment);
             ViewBag.SpecialistId = new SelectList(_context.Specialists, "Id", "SpecialistName", selectedSpecialist);
             ViewBag.UserId = new SelectList(_context.UserInfos.Where(u => u.Active), "Id", "UserFullName", selectedUser);
+
+            // Pass specialists data as JSON for JavaScript filtering
+            var specialistsData = _context.Specialists.Select(s => new {
+                id = s.Id,
+                name = s.SpecialistName,
+                departmentId = s.DepartmentId
+            }).ToList();
+            ViewBag.SpecialistsJson = System.Text.Json.JsonSerializer.Serialize(specialistsData);
+        }
+
+        // API endpoint to get specialists by department
+        [HttpGet]
+        public IActionResult GetSpecialistsByDepartment(int departmentId)
+        {
+            var specialists = _context.Specialists
+                .Where(s => s.DepartmentId == departmentId)
+                .Select(s => new { id = s.Id, name = s.SpecialistName })
+                .ToList();
+
+            return Json(specialists);
         }
     }
 }
