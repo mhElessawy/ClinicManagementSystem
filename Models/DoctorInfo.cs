@@ -39,6 +39,11 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Phone 2")]
         public string? DoctorTel2 { get; set; }
 
+        [StringLength(100)]
+        [Display(Name = "Email")]
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string? Email { get; set; }
+
         [Display(Name = "User")]
         public int? UserId { get; set; }
 
