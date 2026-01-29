@@ -87,8 +87,9 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorCivilId" class="form-label">Civil ID</label>
+                            <label asp-for="DoctorCivilId" class="form-label">Civil ID <span class="text-danger">*</span></label>
                             <input asp-for="DoctorCivilId" class="form-control" placeholder="Civil ID Number" />
+                            <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="Gender" class="form-label">Gender</label>
@@ -97,6 +98,17 @@
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" />
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -144,7 +156,7 @@
                     <hr class="my-4" />
                     <h5 class="mb-3 text-primary"><i class="fas fa-lock"></i> Login Credentials</h5>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="LoginUsername" class="form-label">Username <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-user"></i></span>
@@ -152,13 +164,21 @@
                             </div>
                             <span asp-validation-for="LoginUsername" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="LoginPassword" class="form-label">Password <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-lock"></i></span>
                                 <input asp-for="LoginPassword" type="password" class="form-control" placeholder="Minimum 6 characters" />
                             </div>
                             <span asp-validation-for="LoginPassword" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                                <input type="password" name="ConfirmPassword" class="form-control" placeholder="Confirm password" />
+                            </div>
+                            <span class="text-danger" asp-validation-for="ConfirmPassword"></span>
                         </div>
                     </div>
 
