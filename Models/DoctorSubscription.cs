@@ -29,6 +29,16 @@ namespace ClinicManagementSystem.Models
         [StringLength(500)]
        [Display(Name = "Notes")]
         public string? Notes { get; set; }
+
+        [Display(Name = "Cost Money")]
+        [DataType(DataType.Currency)]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal? CostMoney { get; set; }
+
+        [StringLength(100)]
+        [Display(Name = "Sales Man")]
+        public string? SalesMan { get; set; }
+
         // Navigation Properties
 
         [ForeignKey("DoctorId")]
