@@ -400,6 +400,16 @@ namespace ClinicManagementSystem.Controllers
             var diagnosis = await _context.PatientDiagnoses.FindAsync(id);
             if (diagnosis != null)
             {
+                // Delete the associated file if exists
+                if (!string.IsNullOrEmpty(diagnosis.DiagnosisFilePath))
+                {
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", diagnosis.DiagnosisFilePath.TrimStart('/'));
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
+
                 _context.PatientDiagnoses.Remove(diagnosis);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Diagnosis deleted successfully";
