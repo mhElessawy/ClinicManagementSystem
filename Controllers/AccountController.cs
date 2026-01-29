@@ -11,17 +11,18 @@ namespace ClinicManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly LoginService _loginService;
+        private readonly IFileProcessingService _fileProcessingService;
 
-        public AccountController(ApplicationDbContext context)
+        public AccountController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
         {
             _context = context;
             _loginService = new LoginService(context);
+            _fileProcessingService = fileProcessingService;
         }
 
         // GET: Account/Welcome
         public IActionResult Welcome()
         {
-            // If already logged in, redirect to home
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 return RedirectToAction("Index", "Home");
@@ -33,17 +34,15 @@ namespace ClinicManagementSystem.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            ViewBag.Specialists = new SelectList(_context.Specialists, "Id", "SpecialistName");
+            PopulateDropdowns();
             return View();
         }
 
         // POST: Account/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(DoctorInfo doctor, string ConfirmPassword)
+        public async Task<IActionResult> Register(DoctorInfo doctor, string ConfirmPassword, IFormFile? DoctorPictureFile, int? DepartmentId)
         {
-            ViewBag.Specialists = new SelectList(_context.Specialists, "Id", "SpecialistName", doctor.SpecialistId);
-
             // Check if Civil ID already exists
             if (!string.IsNullOrEmpty(doctor.DoctorCivilId))
             {
@@ -83,36 +82,34 @@ namespace ClinicManagementSystem.Controllers
                 ModelState.AddModelError("ConfirmPassword", "Passwords do not match");
             }
 
-            // Validate required fields for registration
+            // Validate required fields
             if (string.IsNullOrEmpty(doctor.DoctorCivilId))
-            {
-                ModelState.AddModelError("DoctorCivilId", "Civil ID is required for registration");
-            }
+                ModelState.AddModelError("DoctorCivilId", "Civil ID is required");
 
             if (string.IsNullOrEmpty(doctor.Email))
-            {
-                ModelState.AddModelError("Email", "Email is required for registration");
-            }
+                ModelState.AddModelError("Email", "Email is required");
 
             if (string.IsNullOrEmpty(doctor.LoginUsername))
-            {
-                ModelState.AddModelError("LoginUsername", "Username is required for registration");
-            }
+                ModelState.AddModelError("LoginUsername", "Username is required");
 
             if (string.IsNullOrEmpty(doctor.LoginPassword))
-            {
-                ModelState.AddModelError("LoginPassword", "Password is required for registration");
-            }
+                ModelState.AddModelError("LoginPassword", "Password is required");
 
             if (ModelState.IsValid)
             {
+                // Handle image upload with resizing
+                if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
+                {
+                    doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
+                        DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
+                }
+
                 // Hash password
                 if (!string.IsNullOrEmpty(doctor.LoginPassword))
                 {
                     doctor.LoginPassword = BCrypt.Net.BCrypt.HashPassword(doctor.LoginPassword);
                 }
 
-                // Set default values
                 doctor.CanLogin = true;
                 doctor.Active = false; // Requires admin approval
                 doctor.RegDate = DateTime.Now;
@@ -120,17 +117,17 @@ namespace ClinicManagementSystem.Controllers
                 _context.Add(doctor);
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Registration successful! Please wait for admin approval before logging in.";
+                TempData["Success"] = "Registration successful! Please wait for admin approval.";
                 return RedirectToAction(nameof(Login));
             }
 
+            PopulateDropdowns(doctor.SpecialistId, DepartmentId);
             return View(doctor);
         }
 
         [HttpGet]
         public IActionResult Login()
         {
-            // If already logged in, redirect to home
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 return RedirectToAction("Index", "Home");
@@ -148,7 +145,6 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            // Validate userType
             if (userType != "Admin" && userType != "Doctor" && userType != "Assistant")
             {
                 ViewBag.Error = "Invalid user type selected";
@@ -159,14 +155,12 @@ namespace ClinicManagementSystem.Controllers
 
             if (result.Success)
             {
-                // Check if selected userType matches actual userType
                 if (result.UserType != userType)
                 {
-                    ViewBag.Error = $"Invalid credentials for {userType}. Please check your user type selection.";
+                    ViewBag.Error = $"Invalid credentials for {userType}.";
                     return View();
                 }
 
-                // Set session
                 SessionHelper.SetUserSession(
                     HttpContext.Session,
                     result.UserId,
@@ -190,6 +184,19 @@ namespace ClinicManagementSystem.Controllers
             SessionHelper.ClearSession(HttpContext.Session);
             TempData["Success"] = "You have been logged out successfully";
             return RedirectToAction("Login");
+        }
+
+        private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedDepartment = null)
+        {
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d=>d.DepartmentName ), "Id", "DepartmentName", selectedDepartment);
+            ViewBag.Specialists = new SelectList(_context.Specialists.OrderBy(d=>d.SpecialistName), "Id", "SpecialistName", selectedSpecialist);
+
+            var specialistsData = _context.Specialists.OrderBy(d => d.SpecialistName).Select(s => new {
+                id = s.Id,
+                name = s.SpecialistName,
+                departmentId = s.DepartmentId
+            }).ToList();
+            ViewBag.SpecialistsJson = System.Text.Json.JsonSerializer.Serialize(specialistsData);
         }
     }
 }

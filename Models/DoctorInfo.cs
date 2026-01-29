@@ -28,7 +28,7 @@ namespace ClinicManagementSystem.Models
         public bool Active { get; set; } = true;
 
         [StringLength(50)]
-        [Display(Name = "Civil ID")]
+        [Display(Name = "National ID number")] 
         public string? DoctorCivilId { get; set; }
 
         [StringLength(20)]

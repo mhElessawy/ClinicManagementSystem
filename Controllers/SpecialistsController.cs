@@ -15,16 +15,33 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? departmentId, string searchName)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            var specialists = await _context.Specialists
+            var specialistsQuery = _context.Specialists
                 .Include(s => s.Department)
-                .OrderBy(d=>d.Department.DepartmentName)
-                 .ThenBy(d => d.SpecialistName)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Filter by Department
+            if (departmentId.HasValue && departmentId.Value > 0)
+            {
+                specialistsQuery = specialistsQuery.Where(s => s.DepartmentId == departmentId.Value);
+            }
+
+            // Search by Name
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                specialistsQuery = specialistsQuery.Where(s => s.SpecialistName.Contains(searchName));
+            }
+
+            var specialists = await specialistsQuery.ToListAsync();
+
+            // Populate departments dropdown for filter
+            ViewBag.Departments = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", departmentId);
+            ViewBag.SearchName = searchName;
+            ViewBag.SelectedDepartment = departmentId;
 
             return View(specialists);
         }
@@ -51,7 +68,7 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy (d=>d.DepartmentName), "Id", "DepartmentName");
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName");
             return View();
         }
 
@@ -90,7 +107,7 @@ namespace ClinicManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DepartmentId,SpecialistName,Description")] Specialist specialist)
+        public async Task<IActionResult> Edit(int id,  Specialist specialist)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -152,6 +169,7 @@ namespace ClinicManagementSystem.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
         private bool SpecialistExists(int id)
         {
             return _context.Specialists.Any(e => e.Id == id);

@@ -68,13 +68,6 @@
                 <p class="mb-0 mt-2">Create your account</p>
             </div>
             <div class="card-body p-4">
-                @if (TempData["Error"] != null)
-                {
-                    <div class="alert alert-danger">
-                        <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
-                    </div>
-                }
-
                 <form asp-action="Register" method="post" enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
 
@@ -86,20 +79,22 @@
                             <span asp-validation-for="DoctorName" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorTitle" class="form-label">Title</label>
-                            <input asp-for="DoctorTitle" class="form-control" placeholder="e.g., Consultant, Specialist" />
+                            <label asp-for="DoctorCivilId" class="form-label">Civil ID <span class="text-danger">*</span></label>
+                            <input asp-for="DoctorCivilId" class="form-control" />
+                            <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorCivilId" class="form-label">Civil ID</label>
-                            <input asp-for="DoctorCivilId" class="form-control" placeholder="Civil ID Number" />
+                            <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="Gender" class="form-label">Gender</label>
                             <select asp-for="Gender" class="form-select">
-                                <option value="">-- Select Gender --</option>
+                                <option value="">-- Select --</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                             </select>
@@ -107,7 +102,7 @@
                     </div>
 
                     <hr class="my-4" />
-                    <h5 class="mb-3 text-primary"><i class="fas fa-stethoscope"></i> Specialty Information</h5>
+                    <h5 class="mb-3 text-primary"><i class="fas fa-stethoscope"></i> Specialty</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Department <span class="text-danger">*</span></label>
@@ -115,88 +110,51 @@
                                 <option value="">-- Select Department --</option>
                                 @foreach (var dept in (SelectList)ViewBag.DepartmentId)
                                 {
-                                    if (dept.Selected)
-                                    {
-                                        <option value="@dept.Value" selected>@dept.Text</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@dept.Value">@dept.Text</option>
-                                    }
+                                    <option value="@dept.Value">@dept.Text</option>
                                 }
                             </select>
-                            <small class="text-muted">Select department first to filter specialists</small>
+                            <small class="text-muted">Select department first</small>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label asp-for="SpecialistId" class="form-label">Specialist <span class="text-danger">*</span></label>
                             <select asp-for="SpecialistId" id="SpecialistId" class="form-select">
                                 <option value="">-- Select Department First --</option>
                             </select>
-                            <span asp-validation-for="SpecialistId" class="text-danger"></span>
                         </div>
-                    </div>
-
-                    <hr class="my-4" />
-                    <h5 class="mb-3 text-primary"><i class="fas fa-phone"></i> Contact Information</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorTel1" class="form-label">Phone 1</label>
-                            <input asp-for="DoctorTel1" class="form-control" placeholder="Primary phone number" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorTel2" class="form-label">Phone 2</label>
-                            <input asp-for="DoctorTel2" class="form-control" placeholder="Secondary phone number" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="DoctorAddress" class="form-label">Address</label>
-                        <textarea asp-for="DoctorAddress" class="form-control" rows="2" placeholder="Your address"></textarea>
                     </div>
 
                     <hr class="my-4" />
                     <h5 class="mb-3 text-primary"><i class="fas fa-lock"></i> Login Credentials</h5>
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="LoginUsername" class="form-label">Username <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                <input asp-for="LoginUsername" class="form-control" placeholder="e.g., dr.smith" />
-                            </div>
+                            <input asp-for="LoginUsername" class="form-control" />
                             <span asp-validation-for="LoginUsername" class="text-danger"></span>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label asp-for="LoginPassword" class="form-label">Password <span class="text-danger">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                <input asp-for="LoginPassword" type="password" class="form-control" placeholder="Minimum 6 characters" />
-                            </div>
+                            <input asp-for="LoginPassword" type="password" class="form-control" />
                             <span asp-validation-for="LoginPassword" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                            <input type="password" name="ConfirmPassword" class="form-control" />
                         </div>
                     </div>
 
-                    <hr class="my-4" />
-                    <h5 class="mb-3 text-primary"><i class="fas fa-image"></i> Profile Picture</h5>
                     <div class="mb-3">
-                        <label class="form-label">Doctor Picture</label>
+                        <label class="form-label">Profile Picture</label>
                         <input type="file" class="form-control" name="DoctorPictureFile" accept="image/*" />
-                        <small class="text-muted">JPG, PNG, GIF - Max 2MB (will be resized automatically)</small>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="DoctorDetails" class="form-label">About You</label>
-                        <textarea asp-for="DoctorDetails" class="form-control" rows="3" placeholder="Brief description about yourself and your experience"></textarea>
-                    </div>
-
-                    <div class="d-grid gap-2 mt-4">
+                    <div class="d-grid mt-4">
                         <button type="submit" class="btn btn-primary btn-register">
                             <i class="fas fa-user-plus"></i> Register
                         </button>
                     </div>
 
                     <div class="text-center mt-3">
-                        <span>Already have an account?</span>
-                        <a asp-action="Login" class="text-decoration-none">Login here</a>
+                        <a asp-action="Login">Already have an account? Login</a>
                     </div>
                 </form>
             </div>
@@ -205,18 +163,14 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // All specialists data for client-side filtering
         var allSpecialists = @Html.Raw(ViewBag.SpecialistsJson);
 
         document.addEventListener('DOMContentLoaded', function() {
             var departmentSelect = document.getElementById('DepartmentId');
             var specialistSelect = document.getElementById('SpecialistId');
 
-            // Filter specialists when department changes
             departmentSelect.addEventListener('change', function() {
                 var selectedDeptId = parseInt(this.value);
-
-                // Clear current options
                 specialistSelect.innerHTML = '';
 
                 if (!selectedDeptId) {
@@ -224,18 +178,16 @@
                     return;
                 }
 
-                // Add default option
                 specialistSelect.innerHTML = '<option value="">-- Select Specialist --</option>';
 
-                // Filter and add specialists for selected department
-                var filteredSpecialists = allSpecialists.filter(function(s) {
+                var filtered = allSpecialists.filter(function(s) {
                     return s.departmentId === selectedDeptId;
                 });
 
-                filteredSpecialists.forEach(function(specialist) {
+                filtered.forEach(function(s) {
                     var option = document.createElement('option');
-                    option.value = specialist.id;
-                    option.textContent = specialist.name;
+                    option.value = s.id;
+                    option.textContent = s.name;
                     specialistSelect.appendChild(option);
                 });
             });

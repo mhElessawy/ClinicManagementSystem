@@ -231,12 +231,12 @@ namespace ClinicManagementSystem.Controllers
 
         private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedUser = null, int? selectedDepartment = null)
         {
-            ViewBag.DepartmentId = new SelectList(_context.Departments, "Id", "DepartmentName", selectedDepartment);
-            ViewBag.SpecialistId = new SelectList(_context.Specialists, "Id", "SpecialistName", selectedSpecialist);
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d=>d.DepartmentName ), "Id", "DepartmentName", selectedDepartment);
+            ViewBag.SpecialistId = new SelectList(_context.Specialists.OrderBy(d=>d.SpecialistName), "Id", "SpecialistName", selectedSpecialist);
             ViewBag.UserId = new SelectList(_context.UserInfos.Where(u => u.Active), "Id", "UserFullName", selectedUser);
 
             // Pass specialists data as JSON for JavaScript filtering
-            var specialistsData = _context.Specialists.Select(s => new {
+            var specialistsData = _context.Specialists.OrderBy(d => d.SpecialistName).Select(s => new {
                 id = s.Id,
                 name = s.SpecialistName,
                 departmentId = s.DepartmentId
