@@ -15,14 +15,33 @@ namespace ClinicManagementSystem.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? departmentId, string searchName)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            var specialists = await _context.Specialists
+            var specialistsQuery = _context.Specialists
                 .Include(s => s.Department)
-                .ToListAsync();
+                .AsQueryable();
+
+            // Filter by Department
+            if (departmentId.HasValue && departmentId.Value > 0)
+            {
+                specialistsQuery = specialistsQuery.Where(s => s.DepartmentId == departmentId.Value);
+            }
+
+            // Search by Name
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                specialistsQuery = specialistsQuery.Where(s => s.SpecialistName.Contains(searchName));
+            }
+
+            var specialists = await specialistsQuery.ToListAsync();
+
+            // Populate departments dropdown for filter
+            ViewBag.Departments = new SelectList(_context.Departments, "Id", "DepartmentName", departmentId);
+            ViewBag.SearchName = searchName;
+            ViewBag.SelectedDepartment = departmentId;
 
             return View(specialists);
         }
