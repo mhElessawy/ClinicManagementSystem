@@ -71,6 +71,9 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
+            var userType = SessionHelper.GetUserType(HttpContext.Session);
+            var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
+
             // Check if diagnosis already exists for this appointment
             if (appointmentId.HasValue)
             {
@@ -81,6 +84,22 @@ namespace ClinicManagementSystem.Controllers
                 {
                     TempData["Info"] = "A diagnosis already exists for this appointment. Redirecting to edit.";
                     return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
+
+            // Check if diagnosis already exists for this patient today by the same doctor
+            if (patientId.HasValue && doctorId.HasValue)
+            {
+                var today = DateTime.Today;
+                var existingTodayDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.PatientId == patientId.Value
+                        && d.DoctorId == doctorId.Value
+                        && d.DiagnosisDate.Date == today);
+
+                if (existingTodayDiagnosis != null)
+                {
+                    TempData["Info"] = "A diagnosis already exists for this patient today. Redirecting to edit.";
+                    return RedirectToAction(nameof(Edit), new { id = existingTodayDiagnosis.Id });
                 }
             }
 
@@ -205,6 +224,22 @@ namespace ClinicManagementSystem.Controllers
                 {
                     TempData["Error"] = "A diagnosis already exists for this appointment.";
                     return RedirectToAction(nameof(Edit), new { id = existingDiagnosis.Id });
+                }
+            }
+
+            // Check if diagnosis already exists for this patient today by the same doctor
+            if (diagnosis.PatientId > 0 && doctorId.HasValue)
+            {
+                var today = DateTime.Today;
+                var existingTodayDiagnosis = await _context.PatientDiagnoses
+                    .FirstOrDefaultAsync(d => d.PatientId == diagnosis.PatientId
+                        && d.DoctorId == doctorId.Value
+                        && d.DiagnosisDate.Date == today);
+
+                if (existingTodayDiagnosis != null)
+                {
+                    TempData["Info"] = "A diagnosis already exists for this patient today. Redirecting to edit.";
+                    return RedirectToAction(nameof(Edit), new { id = existingTodayDiagnosis.Id });
                 }
             }
 
