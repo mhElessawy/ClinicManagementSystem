@@ -23,8 +23,8 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorName" class="form-label"></label>
-                            <input asp-for="DoctorName" class="form-control" />
+                            <label asp-for="DoctorName" class="form-label"><span class="text-danger">*</span></label>
+                            <input asp-for="DoctorName" class="form-control" required />
                             <span asp-validation-for="DoctorName" class="text-danger"></span>
                         </div>
 
@@ -37,8 +37,8 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorCivilId" class="form-label"></label>
-                            <input asp-for="DoctorCivilId" class="form-control" />
+                            <label asp-for="DoctorCivilId" class="form-label"><span class="text-danger">*</span></label>
+                            <input asp-for="DoctorCivilId" class="form-control" required />
                             <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
                         </div>
 
@@ -54,22 +54,24 @@
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Department</label>
-                            <select id="DepartmentId" name="DepartmentId" class="form-select">
+                            <label class="form-label">Department <span class="text-danger">*</span></label>
+                            <select id="DepartmentId" name="DepartmentId" class="form-select" required>
                                 <option value="">-- Select Department --</option>
                                 @foreach (var dept in (SelectList)ViewBag.DepartmentId)
                                 {
                                     <option value="@dept.Value">@dept.Text</option>
                                 }
                             </select>
+                            <span id="DepartmentId-error" class="text-danger"></span>
                             <small class="text-muted">Select department first to filter specialists</small>
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label asp-for="SpecialistId" class="form-label"></label>
-                            <select asp-for="SpecialistId" id="SpecialistId" class="form-select">
+                            <label asp-for="SpecialistId" class="form-label"><span class="text-danger">*</span></label>
+                            <select asp-for="SpecialistId" id="SpecialistId" class="form-select" required>
                                 <option value="">-- Select Department First --</option>
                             </select>
+                            <span asp-validation-for="SpecialistId" class="text-danger"></span>
                         </div>
                     </div>
 
@@ -91,8 +93,9 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label asp-for="DoctorTel1" class="form-label"></label>
-                            <input asp-for="DoctorTel1" class="form-control" />
+                            <label asp-for="DoctorTel1" class="form-label"><span class="text-danger">*</span></label>
+                            <input asp-for="DoctorTel1" class="form-control" required />
+                            <span asp-validation-for="DoctorTel1" class="text-danger"></span>
                         </div>
 
                         <div class="col-md-6 mb-3">
@@ -108,10 +111,10 @@
                         </div>
 
                         <div class="col-md-6 mb-3">
-                            <label asp-for="Email" class="form-label"></label>
+                            <label asp-for="Email" class="form-label"><span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fas fa-envelope"></i></span>
-                                <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" />
+                                <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" required />
                             </div>
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
