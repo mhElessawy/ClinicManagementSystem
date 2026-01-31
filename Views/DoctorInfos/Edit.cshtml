@@ -75,10 +75,25 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="DoctorAddress" class="form-label"></label>
-                        <textarea asp-for="DoctorAddress" class="form-control" rows="2"></textarea>
-                        <span asp-validation-for="DoctorAddress" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DoctorAddress" class="form-label"></label>
+                                <textarea asp-for="DoctorAddress" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="DoctorAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
