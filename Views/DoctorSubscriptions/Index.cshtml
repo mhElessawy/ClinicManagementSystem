@@ -38,6 +38,8 @@
                                     <th>Start Date</th>
                                     <th>End Date</th>
                                     <th>Duration</th>
+                                    <th>Cost Money</th>
+                                    <th>Sales Man</th>
                                     <th>Status</th>
                                     <th>Remaining Days</th>
                                     <th>Notes</th>
@@ -76,6 +78,26 @@
                                             else
                                             {
                                                 <span>@duration day(s)</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.CostMoney.HasValue)
+                                            {
+                                                <span class="text-success fw-bold">@item.CostMoney.Value.ToString("N2") EGP</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (!string.IsNullOrEmpty(item.SalesMan))
+                                            {
+                                                <span>@item.SalesMan</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted">-</span>
                                             }
                                         </td>
                                         <td>

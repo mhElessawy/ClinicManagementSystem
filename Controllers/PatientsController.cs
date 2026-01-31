@@ -78,7 +78,7 @@ namespace ClinicManagementSystem.Controllers
         // POST: Patients/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create( Patient patient)
+        public async Task<IActionResult> Create(Patient patient)
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
@@ -237,7 +237,9 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            var patient = await _context.Patients.FindAsync(id);
+            var patient = await _context.Patients
+                .Include(p => p.PatientDiagnoses)
+                .FirstOrDefaultAsync(p => p.Id == id);
 
             if (patient == null) return NotFound();
 
@@ -246,6 +248,19 @@ namespace ClinicManagementSystem.Controllers
             {
                 TempData["Error"] = "You don't have permission to delete this patient";
                 return RedirectToAction(nameof(Index));
+            }
+
+            // Delete all diagnosis files associated with this patient
+            foreach (var diagnosis in patient.PatientDiagnoses)
+            {
+                if (!string.IsNullOrEmpty(diagnosis.DiagnosisFilePath))
+                {
+                    var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", diagnosis.DiagnosisFilePath.TrimStart('/'));
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
             }
 
             _context.Patients.Remove(patient);
