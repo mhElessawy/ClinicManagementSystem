@@ -21,7 +21,6 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Title")]
         public string? DoctorTitle { get; set; }
        
-        [Required(ErrorMessage = "Specialist is required")]
         [Display(Name = "Specialist")]
         public int? SpecialistId { get; set; }
 
