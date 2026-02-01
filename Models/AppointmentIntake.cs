@@ -84,7 +84,7 @@ namespace ClinicManagementSystem.Models
 
         // Tracking Info
         [Display(Name = "Performed By")]
-        public int PerformedBy { get; set; } // DoctorAssist.Id
+        public int? PerformedBy { get; set; } // DoctorAssist.Id
 
         [Display(Name = "Performed By Name")]
         [StringLength(100)]
