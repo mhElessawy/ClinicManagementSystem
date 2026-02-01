@@ -11,6 +11,7 @@ namespace ClinicManagementSystem.Helpers
         private const string DOCTOR_ID = "DoctorId";
         private const string ROLE_ID = "RoleId";
         private const string FULL_NAME = "FullName";
+        private const string SESSION_START_TIME = "SessionStartTime";
 
         // User Types
         public const string TYPE_ADMIN = "Admin";
@@ -24,10 +25,11 @@ namespace ClinicManagementSystem.Helpers
             session.SetString(USER_NAME, userName);
             session.SetString(USER_TYPE, userType);
             session.SetString(FULL_NAME, fullName);
-            
+            session.SetString(SESSION_START_TIME, DateTime.Now.ToString("o")); // ISO 8601 format
+
             if (doctorId.HasValue)
                 session.SetInt32(DOCTOR_ID, doctorId.Value);
-            
+
             if (roleId.HasValue)
                 session.SetInt32(ROLE_ID, roleId.Value);
         }
@@ -79,10 +81,32 @@ namespace ClinicManagementSystem.Helpers
             return GetUserType(session) == TYPE_ASSISTANT;
         }
 
-        // Check if logged in
+        // Check if logged in (with session expiry check)
         public static bool IsLoggedIn(ISession session)
         {
-            return GetUserId(session).HasValue;
+            if (!GetUserId(session).HasValue)
+                return false;
+
+            // Check if session was created today
+            var sessionStartStr = session.GetString(SESSION_START_TIME);
+            if (string.IsNullOrEmpty(sessionStartStr))
+            {
+                // Old session without timestamp - clear it
+                ClearSession(session);
+                return false;
+            }
+
+            if (DateTime.TryParse(sessionStartStr, out DateTime sessionStart))
+            {
+                // If session is from a previous day, clear it
+                if (sessionStart.Date < DateTime.Today)
+                {
+                    ClearSession(session);
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         // Clear Session
