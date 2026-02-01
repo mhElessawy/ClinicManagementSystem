@@ -20,8 +20,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label asp-for="DoctorName" class="form-label"></label>
-                                <input asp-for="DoctorName" class="form-control" />
+                                <label asp-for="DoctorName" class="form-label">Doctor Name <span class="text-danger">*</span></label>
+                                <input asp-for="DoctorName" class="form-control" required />
                                 <span asp-validation-for="DoctorName" class="text-danger"></span>
                             </div>
                         </div>
@@ -38,8 +38,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label asp-for="DoctorCivilId" class="form-label"></label>
-                                <input asp-for="DoctorCivilId" class="form-control" />
+                                <label asp-for="DoctorCivilId" class="form-label">National Id Number <span class="text-danger">*</span></label>
+                                <input asp-for="DoctorCivilId" class="form-control" required />
                                 <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
                             </div>
                         </div>
@@ -60,8 +60,8 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label asp-for="DoctorTel1" class="form-label"></label>
-                                <input asp-for="DoctorTel1" class="form-control" />
+                                <label asp-for="DoctorTel1" class="form-label">Phone 1 <span class="text-danger">*</span></label>
+                                <input asp-for="DoctorTel1" class="form-control" required />
                                 <span asp-validation-for="DoctorTel1" class="text-danger"></span>
                             </div>
                         </div>
@@ -75,17 +75,32 @@
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label asp-for="DoctorAddress" class="form-label"></label>
-                        <textarea asp-for="DoctorAddress" class="form-control" rows="2"></textarea>
-                        <span asp-validation-for="DoctorAddress" class="text-danger"></span>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="DoctorAddress" class="form-label"></label>
+                                <textarea asp-for="DoctorAddress" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="DoctorAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" required />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label">Department</label>
-                                <select id="DepartmentId" name="DepartmentId" class="form-control">
+                                <label class="form-label">Department <span class="text-danger">*</span></label>
+                                <select id="DepartmentId" name="DepartmentId" class="form-control" required>
                                     <option value="">-- Select Department --</option>
                                     @foreach (var dept in (SelectList)ViewBag.DepartmentId)
                                     {
@@ -105,8 +120,8 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label asp-for="SpecialistId" class="form-label"></label>
-                                <select asp-for="SpecialistId" id="SpecialistId" class="form-control">
+                                <label asp-for="SpecialistId" class="form-label">Specialist <span class="text-danger">*</span></label>
+                                <select asp-for="SpecialistId" id="SpecialistId" class="form-control" required>
                                     <option value="">-- Select Department First --</option>
                                 </select>
                                 <span asp-validation-for="SpecialistId" class="text-danger"></span>
@@ -210,17 +225,14 @@
     }
 
     <script>
-        // All specialists data for client-side filtering
         var allSpecialists = @Html.Raw(ViewBag.SpecialistsJson);
-        var selectedSpecialistId = @(Model.SpecialistId.HasValue ? Model.SpecialistId.Value.ToString() : "null");
+        var selectedSpecialistId = @(Model.SpecialistId.HasValue? Model.SpecialistId.Value.ToString() : "null");
 
         document.addEventListener('DOMContentLoaded', function() {
             var departmentSelect = document.getElementById('DepartmentId');
             var specialistSelect = document.getElementById('SpecialistId');
 
-            // Function to populate specialists based on department
             function populateSpecialists(departmentId, selectedId) {
-                // Clear current options
                 specialistSelect.innerHTML = '';
 
                 if (!departmentId) {
@@ -228,10 +240,8 @@
                     return;
                 }
 
-                // Add default option
                 specialistSelect.innerHTML = '<option value="">-- Select Specialist --</option>';
 
-                // Filter and add specialists for selected department
                 var filteredSpecialists = allSpecialists.filter(function(s) {
                     return s.departmentId === parseInt(departmentId);
                 });
@@ -247,12 +257,10 @@
                 });
             }
 
-            // Filter specialists when department changes
             departmentSelect.addEventListener('change', function() {
                 populateSpecialists(this.value, null);
             });
 
-            // On page load, populate specialists for the selected department
             var selectedDeptId = departmentSelect.value;
             if (selectedDeptId) {
                 populateSpecialists(selectedDeptId, selectedSpecialistId);

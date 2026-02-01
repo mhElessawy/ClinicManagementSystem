@@ -20,16 +20,19 @@ namespace ClinicManagementSystem.Models
         [StringLength(50)]
         [Display(Name = "Title")]
         public string? DoctorTitle { get; set; }
-
+       
+        [Required(ErrorMessage = "Specialist is required")]
         [Display(Name = "Specialist")]
         public int? SpecialistId { get; set; }
 
         [Display(Name = "Active")]
         public bool Active { get; set; } = true;
 
+        [Required(ErrorMessage = "National ID number is required")]
         [StringLength(50)]
         [Display(Name = "National ID number")] 
         public string? DoctorCivilId { get; set; }
+        [Required(ErrorMessage = "Phone number is required")]
 
         [StringLength(20)]
         [Display(Name = "Phone 1")]
@@ -39,6 +42,7 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Phone 2")]
         public string? DoctorTel2 { get; set; }
 
+        [Required(ErrorMessage = "Email is required")]
         [StringLength(100)]
         [Display(Name = "Email")]
         [EmailAddress(ErrorMessage = "Invalid email address")]
