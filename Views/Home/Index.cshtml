@@ -306,8 +306,9 @@
             </div>
             <div class="card-body">
                 <p><strong>User Type:</strong> @ViewBag.UserType</p>
-                <p><strong>Date:</strong> @DateTime.Now.ToString("dddd, MMMM dd, yyyy")</p>
-                <p><strong>Time:</strong> @DateTime.Now.ToString("hh:mm tt")</p>
+                <p><strong>Date:</strong> <span class="current-date"></span></p>
+                <p><strong>Time:</strong> <span class="current-time"></span></p>
+                <p><strong>Timezone:</strong> <span class="user-timezone text-muted"></span></p>
             </div>
         </div>
     </div>

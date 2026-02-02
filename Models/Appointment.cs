@@ -52,7 +52,7 @@ namespace ClinicManagementSystem.Models
         public string Status { get; set; } = "Scheduled"; // Scheduled, Completed, Cancelled, NoShow
 
         [Display(Name = "Created By")]
-        public int CreatedBy { get; set; } // UserInfo.Id or DoctorInfo.Id or DoctorAssist.Id
+        public int? CreatedBy { get; set; } // UserInfo.Id or DoctorInfo.Id or DoctorAssist.Id
 
         [Display(Name = "Created By Type")]
         [StringLength(20)]
