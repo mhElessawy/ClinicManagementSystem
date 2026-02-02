@@ -41,7 +41,7 @@ namespace ClinicManagementSystem.Services
 
                 message.Body = bodyBuilder.ToMessageBody();
 
-                using var client = new SmtpClient();
+                using var client = new MailKit.Net.Smtp.SmtpClient();
                 await client.ConnectAsync(_emailSettings.SmtpServer, _emailSettings.SmtpPort, SecureSocketOptions.StartTls);
                 await client.AuthenticateAsync(_emailSettings.SenderEmail, _emailSettings.SenderPassword);
                 await client.SendAsync(message);
