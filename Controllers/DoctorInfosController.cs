@@ -224,6 +224,20 @@ namespace ClinicManagementSystem.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // GET: DoctorInfos/GetDoctorImage/5
+        public async Task<IActionResult> GetDoctorImage(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var doctor = await _context.DoctorInfos.FindAsync(id);
+            if (doctor == null || doctor.DoctorPicture == null || doctor.DoctorPicture.Length == 0)
+            {
+                return NotFound();
+            }
+
+            return File(doctor.DoctorPicture, "image/jpeg");
+        }
+
         private bool DoctorExists(int id)
         {
             return _context.DoctorInfos.Any(e => e.Id == id);
