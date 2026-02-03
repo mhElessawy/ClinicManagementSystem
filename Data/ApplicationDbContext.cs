@@ -231,15 +231,54 @@ namespace ClinicManagementSystem.Models
             // TEMPORARY: Plain text password for testing
             // Login: admin / Admin@123
             modelBuilder.Entity<UserInfo>().HasData(
-                new UserInfo 
-                { 
-                    Id = 1, 
-                    UserName = "admin", 
+                new UserInfo
+                {
+                    Id = 1,
+                    UserName = "admin",
                     UserPassword = "Admin@123", // Plain text - CHANGE THIS IN PRODUCTION!
                     UserFullName = "System Administrator",
                     JobTitle = "Administrator",
                     RoleId = 1, // Super Admin
                     Active = true
+                }
+            );
+
+            // Demo Doctor
+            // Login: dr.ahmed / Doctor@123
+            modelBuilder.Entity<DoctorInfo>().HasData(
+                new DoctorInfo
+                {
+                    Id = 1,
+                    DoctorName = "د. أحمد محمد",
+                    DoctorCivilId = "123456789012",
+                    DoctorTel1 = "0501234567",
+                    DoctorTel2 = "0507654321",
+                    Email = "dr.ahmed@clinic.com",
+                    DoctorAddress = "الرياض - حي النخيل",
+                    DoctorTitle = "استشاري",
+                    Gender = "ذكر",
+                    SpecialistId = 1, // Cardiology
+                    LoginUsername = "dr.ahmed",
+                    LoginPassword = "Doctor@123", // Plain text - CHANGE THIS IN PRODUCTION!
+                    CanLogin = true,
+                    Active = true,
+                    RegDate = new DateTime(2024, 1, 1)
+                }
+            );
+
+            // Demo Doctor Subscription (Active)
+            modelBuilder.Entity<DoctorSubscription>().HasData(
+                new DoctorSubscription
+                {
+                    Id = 1,
+                    DoctorId = 1,
+                    StartDate = new DateTime(2024, 1, 1),
+                    EndDate = new DateTime(2026, 12, 31),
+                    IsActive = true,
+                    SubscriptionType = "سنوي",
+                    Amount = 1000,
+                    Notes = "اشتراك تجريبي",
+                    CreatedDate = new DateTime(2024, 1, 1)
                 }
             );
         }
