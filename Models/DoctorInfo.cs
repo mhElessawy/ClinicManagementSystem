@@ -62,8 +62,9 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Registration Date")]
         public DateTime? RegDate { get; set; }
 
+        [StringLength(500)]
         [Display(Name = "Picture")]
-        public byte[]? DoctorPicture { get; set; }
+        public string? DoctorPicture { get; set; }
 
         // Login Fields
         [StringLength(50)]

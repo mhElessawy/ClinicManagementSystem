@@ -13,13 +13,15 @@ namespace ClinicManagementSystem.Controllers
         private readonly LoginService _loginService;
         private readonly IFileProcessingService _fileProcessingService;
         private readonly IEmailService _emailService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public AccountController(ApplicationDbContext context, IFileProcessingService fileProcessingService, IEmailService emailService)
+        public AccountController(ApplicationDbContext context, IFileProcessingService fileProcessingService, IEmailService emailService, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _loginService = new LoginService(context);
             _fileProcessingService = fileProcessingService;
             _emailService = emailService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Account/Welcome
@@ -99,11 +101,11 @@ namespace ClinicManagementSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                // Handle image upload with resizing
+                // Handle image upload - save to folder with resizing
                 if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                 {
-                    doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
-                        DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
+                    doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
+                        DoctorPictureFile, _webHostEnvironment.WebRootPath);
                 }
 
                 // Hash password

@@ -2,16 +2,21 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ClinicManagementSystem.Models;
 using ClinicManagementSystem.Helpers;
+using ClinicManagementSystem.Services;
 
 namespace ClinicManagementSystem.Controllers
 {
     public class ProfileController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IFileProcessingService _fileProcessingService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProfileController(ApplicationDbContext context)
+        public ProfileController(ApplicationDbContext context, IFileProcessingService fileProcessingService, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
+            _fileProcessingService = fileProcessingService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         // GET: Profile
@@ -151,14 +156,15 @@ namespace ClinicManagementSystem.Controllers
                 {
                     var existingDoctor = await _context.DoctorInfos.AsNoTracking().FirstOrDefaultAsync(d => d.Id == doctorId);
 
-                    // Handle image
+                    // Handle image - save to folder with resizing
                     if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                     {
-                        using (var ms = new MemoryStream())
-                        {
-                            await DoctorPictureFile.CopyToAsync(ms);
-                            doctor.DoctorPicture = ms.ToArray();
-                        }
+                        // Delete old picture if exists
+                        _fileProcessingService.DeleteDoctorPicture(existingDoctor?.DoctorPicture, _webHostEnvironment.WebRootPath);
+
+                        // Save new picture
+                        doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
+                            DoctorPictureFile, _webHostEnvironment.WebRootPath);
                     }
                     else
                     {

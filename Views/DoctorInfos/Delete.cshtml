@@ -18,11 +18,11 @@
 
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        @if (Model.DoctorPicture != null)
+                        @if (!string.IsNullOrEmpty(Model.DoctorPicture))
                         {
-                            <img src="@Url.Action("GetDoctorImage", new { id = Model.Id })" 
-                                 alt="@Model.DoctorName" 
-                                 class="img-fluid rounded" 
+                            <img src="@Model.DoctorPicture"
+                                 alt="@Model.DoctorName"
+                                 class="img-fluid rounded"
                                  style="max-width: 150px;" />
                         }
                     </div>
