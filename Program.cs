@@ -10,6 +10,12 @@ builder.Services.AddControllersWithViews();
 // Add File Processing Service for image resizing
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
+// Configure Email Settings
+builder.Services.Configure<ClinicManagementSystem.Models.EmailSettings>(
+    builder.Configuration.GetSection("EmailSettings"));
+builder.Services.AddScoped<IEmailService, EmailService>();
+
+
 // Configure DbContext with SQL Server
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

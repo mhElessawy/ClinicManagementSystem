@@ -9,13 +9,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Doctor Management System</title>
-    
+
     <!-- Bootstrap 5 CSS from CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    
+
     <style>
         body {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -24,6 +24,7 @@
             align-items: center;
             justify-content: center;
         }
+
         .login-container {
             background: white;
             border-radius: 15px;
@@ -31,6 +32,7 @@
             max-width: 500px;
             width: 100%;
         }
+
         .login-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -38,13 +40,16 @@
             text-align: center;
             border-radius: 15px 15px 0 0;
         }
+
         .login-body {
             padding: 40px;
         }
+
         .form-control:focus, .form-select:focus {
             border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
         }
+
         .btn-login {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -53,24 +58,28 @@
             font-weight: bold;
             transition: all 0.3s;
         }
-        .btn-login:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
+
+            .btn-login:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }
+
         .user-type-icons {
             display: flex;
             justify-content: space-around;
             margin: 20px 0;
         }
+
         .user-type-icon {
             text-align: center;
             opacity: 0.6;
             transition: all 0.3s;
         }
-        .user-type-icon.active {
-            opacity: 1;
-            transform: scale(1.1);
-        }
+
+            .user-type-icon.active {
+                opacity: 1;
+                transform: scale(1.1);
+            }
     </style>
 </head>
 <body>
@@ -88,6 +97,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["Error"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
             @if (TempData["Success"] != null)
             {
                 <div class="alert alert-success alert-dismissible fade show">
@@ -98,7 +114,7 @@
 
             <form method="post" asp-action="Login">
                 @Html.AntiForgeryToken()
-                
+
                 <div class="mb-4">
                     <label for="userType" class="form-label">
                         <i class="fas fa-user-tag"></i> User Type
@@ -136,7 +152,7 @@
                     <label for="username" class="form-label">
                         <i class="fas fa-user"></i> Username
                     </label>
-                    <input type="text" class="form-control" id="username" name="username" 
+                    <input type="text" class="form-control" id="username" name="username"
                            placeholder="Enter your username" required />
                 </div>
 
@@ -144,13 +160,19 @@
                     <label for="password" class="form-label">
                         <i class="fas fa-lock"></i> Password
                     </label>
-                    <input type="password" class="form-control" id="password" name="password" 
+                    <input type="password" class="form-control" id="password" name="password"
                            placeholder="Enter your password" required />
                 </div>
 
                 <button type="submit" class="btn btn-login w-100">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
+
+                <div class="text-center mt-3">
+                    <a href="@Url.Action("ForgotPassword", "Account")" class="text-decoration-none" style="color: #667eea;">
+                        <i class="fas fa-key"></i> Forgot Password?
+                    </a>
+                </div>
             </form>
             <div class="text-center mt-4">
                 <p class="text-muted mb-2">Don't have an account?</p>
@@ -164,16 +186,16 @@
                     <i class="fas fa-arrow-left"></i> Back to Welcome
                 </a>
             </div>
-            
+
         </div>
     </div>
 
     <!-- jQuery from CDN -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    
+
     <!-- Bootstrap 5 JS from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         // Highlight selected user type icon
         $('#userType').on('change', function() {

@@ -80,6 +80,12 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Last Login Date")]
         public DateTime? LastLoginDate { get; set; }
 
+        // Password Reset Fields
+        [StringLength(255)]
+        public string? PasswordResetToken { get; set; }
+
+        public DateTime? PasswordResetTokenExpiry { get; set; }
+
         // Navigation Properties
         [ForeignKey("UserId")]
         public virtual UserInfo? User { get; set; }
