@@ -32,14 +32,16 @@ namespace ClinicManagementSystem.Controllers
                 ViewBag.TodayDiagnoses = await _context.PatientDiagnoses
                     .CountAsync(d => d.DiagnosisDate.Date == DateTime.Today);
             }
-            else if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+            else if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+
                 ViewBag.TotalPatients = await _context.Patients
-                    .CountAsync(p => p.DoctorId == doctorId.Value);
+                    .CountAsync(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
                 ViewBag.TotalDiagnoses = await _context.PatientDiagnoses
-                    .CountAsync(d => d.DoctorId == doctorId.Value);
+                    .CountAsync(d => d.DoctorId.HasValue && groupDoctorIds.Contains(d.DoctorId.Value));
                 ViewBag.TodayDiagnoses = await _context.PatientDiagnoses
-                    .CountAsync(d => d.DoctorId == doctorId.Value && d.DiagnosisDate.Date == DateTime.Today);
+                    .CountAsync(d => d.DoctorId.HasValue && groupDoctorIds.Contains(d.DoctorId.Value) && d.DiagnosisDate.Date == DateTime.Today);
 
                 // Get today's and tomorrow's appointments
                 var today = DateTime.Today;
@@ -47,7 +49,8 @@ namespace ClinicManagementSystem.Controllers
 
                 ViewBag.TodayAppointments = await _context.Appointments
                     .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value
+                    .Include(a => a.Doctor)
+                    .Where(a => groupDoctorIds.Contains(a.DoctorId)
                              && a.AppointmentDate.Date == today
                              && !a.IsDeleted
                              && a.Status == "Scheduled")
@@ -56,58 +59,31 @@ namespace ClinicManagementSystem.Controllers
 
                 ViewBag.TomorrowAppointments = await _context.Appointments
                     .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value
+                    .Include(a => a.Doctor)
+                    .Where(a => groupDoctorIds.Contains(a.DoctorId)
                              && a.AppointmentDate.Date == tomorrow
                              && !a.IsDeleted
                              && a.Status == "Scheduled")
                     .OrderBy(a => a.AppointmentTime)
                     .ToListAsync();
 
-                // Get doctor's subscription information
-                var doctor = await _context.DoctorInfos
-                    .Include(d => d.Subscriptions)
-                    .FirstOrDefaultAsync(d => d.Id == doctorId.Value);
-
-                if (doctor != null)
+                // Get doctor's subscription information (own subscription only)
+                if (userType == SessionHelper.TYPE_DOCTOR)
                 {
-                    var currentSubscription = doctor.Subscriptions?
-                        .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
-                        .OrderByDescending(s => s.EndDate)
-                        .FirstOrDefault();
+                    var doctor = await _context.DoctorInfos
+                        .Include(d => d.Subscriptions)
+                        .FirstOrDefaultAsync(d => d.Id == doctorId.Value);
 
-                    ViewBag.CurrentSubscription = currentSubscription;
+                    if (doctor != null)
+                    {
+                        var currentSubscription = doctor.Subscriptions?
+                            .Where(s => s.IsActive && s.StartDate <= today && s.EndDate >= today)
+                            .OrderByDescending(s => s.EndDate)
+                            .FirstOrDefault();
+
+                        ViewBag.CurrentSubscription = currentSubscription;
+                    }
                 }
-            }
-            else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
-            {
-                ViewBag.TotalPatients = await _context.Patients
-                    .CountAsync(p => p.DoctorId == doctorId.Value);
-                ViewBag.TotalDiagnoses = await _context.PatientDiagnoses
-                    .CountAsync(d => d.DoctorId == doctorId.Value);
-                ViewBag.TodayDiagnoses = await _context.PatientDiagnoses
-                    .CountAsync(d => d.DoctorId == doctorId.Value && d.DiagnosisDate.Date == DateTime.Today);
-
-                // Get today's and tomorrow's appointments
-                var today = DateTime.Today;
-                var tomorrow = today.AddDays(1);
-
-                ViewBag.TodayAppointments = await _context.Appointments
-                    .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value
-                             && a.AppointmentDate.Date == today
-                             && !a.IsDeleted
-                             && a.Status == "Scheduled")
-                    .OrderBy(a => a.AppointmentTime)
-                    .ToListAsync();
-
-                ViewBag.TomorrowAppointments = await _context.Appointments
-                    .Include(a => a.Patient)
-                    .Where(a => a.DoctorId == doctorId.Value
-                             && a.AppointmentDate.Date == tomorrow
-                             && !a.IsDeleted
-                             && a.Status == "Scheduled")
-                    .OrderBy(a => a.AppointmentTime)
-                    .ToListAsync();
             }
 
             ViewBag.UserName = SessionHelper.GetFullName(HttpContext.Session);
