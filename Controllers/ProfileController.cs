@@ -163,7 +163,8 @@ namespace ClinicManagementSystem.Controllers
                         _fileProcessingService.DeleteDoctorPicture(existingDoctor?.DoctorPicture, _webHostEnvironment.WebRootPath);
 
                         // Save new picture
-                        doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(DoctorPictureFile, 400, 400, 75);
+                        doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
+                            DoctorPictureFile, _webHostEnvironment.WebRootPath);
                     }
                     else
                     {
