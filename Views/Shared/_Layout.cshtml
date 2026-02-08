@@ -80,6 +80,11 @@
                         @if (userType == "Doctor")
                         {
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="AppointmentIntake" asp-action="Index">
+                                    <i class="fas fa-clipboard-check"></i> Patient Intake
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="MyAssistants" asp-action="Index">
                                     <i class="fas fa-user-nurse"></i> My Assistants
                                 </a>

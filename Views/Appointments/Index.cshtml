@@ -180,7 +180,7 @@
                                         <span class="badge bg-secondary">
                                             <i class="fas fa-clock"></i> Waiting
                                         </span>
-                                        @if (ViewBag.IsAssistant == true)
+                                        @if (ViewBag.IsAssistant == true || ViewBag.IsDoctor == true)
                                         {
                                             <a asp-controller="AppointmentIntake" asp-action="Perform" asp-route-id="@appointment.Id" class="btn btn-sm btn-link p-0" title="Start Intake">
                                                 <i class="fas fa-clipboard-check"></i>

@@ -79,9 +79,9 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction("Login", "Account");
 
             var userType = SessionHelper.GetUserType(HttpContext.Session);
-            if (userType != SessionHelper.TYPE_ASSISTANT)
+            if (userType != SessionHelper.TYPE_ASSISTANT && userType != SessionHelper.TYPE_DOCTOR)
             {
-                TempData["Error"] = "Only assistants can perform patient intake";
+                TempData["Error"] = "Only doctors and assistants can perform patient intake";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -90,7 +90,9 @@ namespace ClinicManagementSystem.Controllers
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
             if (!doctorId.HasValue)
             {
-                TempData["Error"] = "No doctor assigned to this assistant";
+                TempData["Error"] = userType == SessionHelper.TYPE_DOCTOR
+                    ? "Doctor ID not found"
+                    : "No doctor assigned to this assistant";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -143,16 +145,18 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction("Login", "Account");
 
             var userType = SessionHelper.GetUserType(HttpContext.Session);
-            if (userType != SessionHelper.TYPE_ASSISTANT)
+            if (userType != SessionHelper.TYPE_ASSISTANT && userType != SessionHelper.TYPE_DOCTOR)
             {
-                TempData["Error"] = "Only assistants can perform patient intake";
+                TempData["Error"] = "Only doctors and assistants can perform patient intake";
                 return RedirectToAction("Index", "Home");
             }
 
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
             if (!doctorId.HasValue)
             {
-                TempData["Error"] = "No doctor assigned to this assistant";
+                TempData["Error"] = userType == SessionHelper.TYPE_DOCTOR
+                    ? "Doctor ID not found"
+                    : "No doctor assigned to this assistant";
                 return RedirectToAction("Index", "Home");
             }
 
@@ -315,9 +319,9 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction("Login", "Account");
 
             var userType = SessionHelper.GetUserType(HttpContext.Session);
-            if (userType != SessionHelper.TYPE_ASSISTANT)
+            if (userType != SessionHelper.TYPE_ASSISTANT && userType != SessionHelper.TYPE_DOCTOR)
             {
-                TempData["Error"] = "Only assistants can mark patients as ready";
+                TempData["Error"] = "Only doctors and assistants can mark patients as ready";
                 return RedirectToAction(nameof(Index));
             }
 
