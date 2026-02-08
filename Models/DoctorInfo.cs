@@ -62,6 +62,7 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Registration Date")]
         public DateTime? RegDate { get; set; }
 
+        [MaxLength(500)]
         [Display(Name = "Picture")]
         public string? DoctorPicture { get; set; }
 
