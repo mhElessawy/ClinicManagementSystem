@@ -114,6 +114,9 @@
                         <a asp-controller="MyAssistants" asp-action="Index" class="btn btn-outline-warning">
                             <i class="fas fa-user-nurse"></i> My Assistants
                         </a>
+                        <a asp-controller="MyReception" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-concierge-bell"></i> My Receptionists
+                        </a>
                     </div>
                 </div>
             </div>
@@ -172,7 +175,7 @@
     </div>
 </div>
 
-@if (ViewBag.UserType == "Doctor" || ViewBag.UserType == "Assistant")
+@if (ViewBag.UserType == "Doctor" || ViewBag.UserType == "Assistant" || ViewBag.UserType == "Reception")
 {
     var todayAppointments = ViewBag.TodayAppointments as List<ClinicManagementSystem.Models.Appointment>;
     var tomorrowAppointments = ViewBag.TomorrowAppointments as List<ClinicManagementSystem.Models.Appointment>;

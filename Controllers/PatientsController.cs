@@ -27,7 +27,7 @@ namespace ClinicManagementSystem.Controllers
             IQueryable<Patient> patientsQuery = _context.Patients.Include(p => p.Doctor);
 
             // Filter patients based on user type
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
                 {
@@ -86,7 +86,7 @@ namespace ClinicManagementSystem.Controllers
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
                     patient.DoctorId = doctorId.Value;
@@ -111,7 +111,7 @@ namespace ClinicManagementSystem.Controllers
 
             IQueryable<DoctorInfo> doctorsQuery = _context.DoctorInfos.Where(d => d.Active);
 
-            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
                 doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);
             }
@@ -283,7 +283,7 @@ namespace ClinicManagementSystem.Controllers
             if (userType == SessionHelper.TYPE_ADMIN)
                 return true;
 
-            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
                 return patient.DoctorId == doctorId.Value;
             }

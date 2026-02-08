@@ -16,6 +16,7 @@ namespace ClinicManagementSystem.Helpers
         public const string TYPE_ADMIN = "Admin";
         public const string TYPE_DOCTOR = "Doctor";
         public const string TYPE_ASSISTANT = "Assistant";
+        public const string TYPE_RECEPTION = "Reception";
 
         // Set Session
         public static void SetUserSession(ISession session, int userId, string userName, string userType, string fullName, int? doctorId = null, int? roleId = null)
@@ -77,6 +78,11 @@ namespace ClinicManagementSystem.Helpers
         public static bool IsAssistant(ISession session)
         {
             return GetUserType(session) == TYPE_ASSISTANT;
+        }
+
+        public static bool IsReception(ISession session)
+        {
+            return GetUserType(session) == TYPE_RECEPTION;
         }
 
         // Check if logged in

@@ -89,6 +89,11 @@
                                     <i class="fas fa-user-nurse"></i> My Assistants
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="MyReception" asp-action="Index">
+                                    <i class="fas fa-concierge-bell"></i> My Receptionists
+                                </a>
+                            </li>
 
                             <li class="nav-item">
                                 <a class="nav-link" asp-controller="DoctorReports" asp-action="Index">
@@ -109,6 +114,11 @@
                                     <i class="fas fa-chart-bar"></i> My Reports
                                 </a>
                             </li>
+                        }
+
+                        @if (userType == "Reception")
+                        {
+                            @* Reception sees Patients and Appointments from the common nav items above *@
                         }
 
                         @if (userType == "Admin" || userType == "Doctor")

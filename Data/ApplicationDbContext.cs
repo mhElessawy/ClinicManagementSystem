@@ -17,6 +17,7 @@ namespace ClinicManagementSystem.Models
         public DbSet<Specialist> Specialists { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<DoctorAssist> DoctorAssists { get; set; }
+        public DbSet<DoctorReception> DoctorReceptions { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
 
         public DbSet<DoctorSubscription> DoctorSubscriptions { get; set; }
@@ -63,6 +64,13 @@ namespace ClinicManagementSystem.Models
                 .HasOne(da => da.Doctor)
                 .WithMany(d => d.DoctorAssists)
                 .HasForeignKey(da => da.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DoctorInfo -> DoctorReception (One-to-Many)
+            modelBuilder.Entity<DoctorReception>()
+                .HasOne(dr => dr.Doctor)
+                .WithMany(d => d.DoctorReceptions)
+                .HasForeignKey(dr => dr.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // DoctorInfo -> Patient (One-to-Many)
@@ -115,6 +123,11 @@ namespace ClinicManagementSystem.Models
 
             modelBuilder.Entity<DoctorAssist>()
                 .HasIndex(a => a.LoginUsername)
+                .IsUnique()
+                .HasFilter("[LoginUsername] IS NOT NULL");
+
+            modelBuilder.Entity<DoctorReception>()
+                .HasIndex(r => r.LoginUsername)
                 .IsUnique()
                 .HasFilter("[LoginUsername] IS NOT NULL");
 
