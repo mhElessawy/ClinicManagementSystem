@@ -78,7 +78,7 @@ namespace ClinicManagementSystem.Controllers
                     ViewBag.CurrentSubscription = currentSubscription;
                 }
             }
-            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
+            else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
                 ViewBag.TotalPatients = await _context.Patients
                     .CountAsync(p => p.DoctorId == doctorId.Value);

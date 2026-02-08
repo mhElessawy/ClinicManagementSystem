@@ -11,11 +11,13 @@ namespace ClinicManagementSystem.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IFileProcessingService _fileProcessingService;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public DoctorInfosController(ApplicationDbContext context, IFileProcessingService fileProcessingService)
+        public DoctorInfosController(ApplicationDbContext context, IFileProcessingService fileProcessingService, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _fileProcessingService = fileProcessingService;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<IActionResult> Index()
@@ -71,12 +73,14 @@ namespace ClinicManagementSystem.Controllers
 
             if (ModelState.IsValid)
             {
-                // Handle image upload with resizing
+                // Handle image upload with resizing and save to folder
                 if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                 {
-                    // Resize image to max 400x400 pixels with 75% quality for doctor pictures
-                    doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
-                        DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
+                    using (var memoryStream = new MemoryStream())
+                    {
+                        await DoctorPictureFile.CopyToAsync(memoryStream);
+                        doctor.DoctorPicture = memoryStream.ToArray();
+                    }
                 }
 
                 // Hash password if provided
@@ -140,12 +144,18 @@ namespace ClinicManagementSystem.Controllers
                 {
                     var existingDoctor = await _context.DoctorInfos.AsNoTracking().FirstOrDefaultAsync(d => d.Id == id);
 
-                    // Handle image with resizing
+                    // Handle image - save to folder
                     if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                     {
-                        // Resize image to max 400x400 pixels with 75% quality for doctor pictures
-                        doctor.DoctorPicture = await _fileProcessingService.ResizeImageAsync(
-                            DoctorPictureFile, maxWidth: 400, maxHeight: 400, quality: 75);
+                        // Delete old picture if exists
+                        _fileProcessingService.DeleteDoctorPicture(existingDoctor?.DoctorPicture, _webHostEnvironment.WebRootPath);
+
+                        // Save new picture
+                        using (var memoryStream = new MemoryStream())
+                        {
+                            await DoctorPictureFile.CopyToAsync(memoryStream);
+                            doctor.DoctorPicture = memoryStream.ToArray();
+                        }
                     }
                     else
                     {
@@ -216,6 +226,9 @@ namespace ClinicManagementSystem.Controllers
             var doctor = await _context.DoctorInfos.FindAsync(id);
             if (doctor != null)
             {
+                // Delete the doctor's picture file if exists
+                _fileProcessingService.DeleteDoctorPicture(doctor.DoctorPicture, _webHostEnvironment.WebRootPath);
+
                 _context.DoctorInfos.Remove(doctor);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Doctor deleted successfully";
@@ -231,8 +244,8 @@ namespace ClinicManagementSystem.Controllers
 
         private void PopulateDropdowns(int? selectedSpecialist = null, int? selectedUser = null, int? selectedDepartment = null)
         {
-            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d=>d.DepartmentName ), "Id", "DepartmentName", selectedDepartment);
-            ViewBag.SpecialistId = new SelectList(_context.Specialists.OrderBy(d=>d.SpecialistName), "Id", "SpecialistName", selectedSpecialist);
+            ViewBag.DepartmentId = new SelectList(_context.Departments.OrderBy(d => d.DepartmentName), "Id", "DepartmentName", selectedDepartment);
+            ViewBag.SpecialistId = new SelectList(_context.Specialists.OrderBy(d => d.SpecialistName), "Id", "SpecialistName", selectedSpecialist);
             ViewBag.UserId = new SelectList(_context.UserInfos.Where(u => u.Active), "Id", "UserFullName", selectedUser);
 
             // Pass specialists data as JSON for JavaScript filtering

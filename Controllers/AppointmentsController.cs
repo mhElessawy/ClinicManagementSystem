@@ -25,7 +25,7 @@ namespace ClinicManagementSystem.Controllers
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
             // Default to today's date for doctors and assistants
-            if (!showAll && !filterDate.HasValue && (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT))
+            if (!showAll && !filterDate.HasValue && (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION))
             {
                 filterDate = DateTime.Today;
             }
@@ -36,7 +36,7 @@ namespace ClinicManagementSystem.Controllers
                 .Include(a => a.Intake);
 
             // Filter by doctor/assistant - MUST have doctorId to see appointments
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (!doctorId.HasValue)
                 {
@@ -47,6 +47,7 @@ namespace ClinicManagementSystem.Controllers
                     ViewBag.IsDoctorOrAssistant = true;
                     ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
                     ViewBag.IsDoctor = (userType == SessionHelper.TYPE_DOCTOR);
+                    ViewBag.IsReception = (userType == SessionHelper.TYPE_RECEPTION);
                     return View(new List<Appointment>());
                 }
                 appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
@@ -72,9 +73,10 @@ namespace ClinicManagementSystem.Controllers
             ViewBag.ShowDeleted = showDeleted;
             ViewBag.FilterDate = filterDate ?? DateTime.Today;
             ViewBag.ShowAll = showAll;
-            ViewBag.IsDoctorOrAssistant = (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT);
+            ViewBag.IsDoctorOrAssistant = (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION);
             ViewBag.IsAssistant = (userType == SessionHelper.TYPE_ASSISTANT);
             ViewBag.IsDoctor = (userType == SessionHelper.TYPE_DOCTOR);
+            ViewBag.IsReception = (userType == SessionHelper.TYPE_RECEPTION);
             return View(appointments);
         }
 
@@ -145,7 +147,7 @@ namespace ClinicManagementSystem.Controllers
             {
                 appointment.DoctorId = doctorId.Value;
             }
-            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
+            else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
                 appointment.DoctorId = doctorId.Value;
             }
@@ -408,7 +410,7 @@ namespace ClinicManagementSystem.Controllers
                 .Include(a => a.Intake);
 
             // Filter by doctor/assistant - MUST have doctorId to see appointments
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (!doctorId.HasValue)
                 {
@@ -439,7 +441,7 @@ namespace ClinicManagementSystem.Controllers
             if (userType == SessionHelper.TYPE_ADMIN)
                 return true;
 
-            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
                 return appointment.DoctorId == doctorId.Value;
 
             return false;
@@ -452,7 +454,7 @@ namespace ClinicManagementSystem.Controllers
 
             // Patients dropdown
             IQueryable<Patient> patientsQuery = _context.Patients;
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
                     patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
@@ -462,7 +464,7 @@ namespace ClinicManagementSystem.Controllers
 
             // Doctors dropdown
             IQueryable<DoctorInfo> doctorsQuery = _context.DoctorInfos.Where(d => d.Active);
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT)
+            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
                     doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);

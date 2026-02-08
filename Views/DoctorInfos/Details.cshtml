@@ -1,3 +1,4 @@
+@using Microsoft.IdentityModel.Tokens
 @model ClinicManagementSystem.Models.DoctorInfo
 
 @{
@@ -13,11 +14,11 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 text-center">
-                        @if (Model.DoctorPicture != null)
+                        @if (!string.IsNullOrEmpty(Model.DoctorPicture))
                         {
-                            <img src="@Url.Action("GetDoctorImage", new { id = Model.Id })" 
-                                 alt="@Model.DoctorName" 
-                                 class="img-fluid rounded" 
+                            <img src="@Model.DoctorPicture"
+                                 alt="@Model.DoctorName"
+                                 class="img-fluid rounded"
                                  style="max-width: 200px;" />
                         }
                         else

@@ -10,8 +10,12 @@ namespace ClinicManagementSystem.Services
         Task<byte[]> ResizeImageAsync(IFormFile file, int maxWidth = 800, int maxHeight = 800, int quality = 75);
         Task<byte[]> ResizeImageAsync(byte[] imageData, int maxWidth = 800, int maxHeight = 800, int quality = 75);
         Task<string> SaveResizedFileAsync(IFormFile file, string uploadsFolder, int maxWidth = 1200, int maxHeight = 1200, int quality = 80);
+        Task<string> SaveDoctorPictureAsync(IFormFile file, string webRootPath, int maxWidth = 400, int maxHeight = 400, int quality = 75);
+        void DeleteDoctorPicture(string? picturePath, string webRootPath);
+
         bool IsImageFile(string fileName);
         bool IsPdfFile(string fileName);
+        void DeleteDoctorPicture(byte[]? doctorPicture, string webRootPath);
     }
 
     public class FileProcessingService : IFileProcessingService
@@ -93,6 +97,56 @@ namespace ClinicManagementSystem.Services
             return _pdfExtensions.Contains(extension);
         }
 
+        public async Task<string> SaveDoctorPictureAsync(IFormFile file, string webRootPath, int maxWidth = 400, int maxHeight = 400, int quality = 75)
+        {
+            if (file == null || file.Length == 0)
+                return string.Empty;
+
+            if (!IsImageFile(file.FileName))
+                return string.Empty;
+
+            // Create the uploads/doctors directory if it doesn't exist
+            var uploadsFolder = Path.Combine(webRootPath, "uploads", "doctors");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            // Generate unique filename
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            // Always save as jpg for consistency
+            var fileName = $"{Guid.NewGuid()}.jpg";
+            var filePath = Path.Combine(uploadsFolder, fileName);
+
+            // Resize and save the image
+            var resizedBytes = await ResizeImageAsync(file, maxWidth, maxHeight, quality);
+            await File.WriteAllBytesAsync(filePath, resizedBytes);
+
+            // Return relative path for storage in database
+            return $"/uploads/doctors/{fileName}";
+        }
+
+        public void DeleteDoctorPicture(string? picturePath, string webRootPath)
+        {
+            if (string.IsNullOrEmpty(picturePath))
+                return;
+
+            try
+            {
+                // Convert relative URL path to physical path
+                var relativePath = picturePath.TrimStart('/').Replace('/', Path.DirectorySeparatorChar);
+                var fullPath = Path.Combine(webRootPath, relativePath);
+
+                if (File.Exists(fullPath))
+                {
+                    File.Delete(fullPath);
+                }
+            }
+            catch
+            {
+                // Silently ignore delete errors
+            }
+        }
         private async Task<byte[]> ProcessImageAsync(Stream inputStream, int maxWidth, int maxHeight, int quality, string extension)
         {
             using var image = await Image.LoadAsync(inputStream);

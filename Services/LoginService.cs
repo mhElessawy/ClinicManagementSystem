@@ -181,6 +181,42 @@ namespace ClinicManagementSystem.Services
                 }
             }
 
+            // Try DoctorReception
+            var reception = await _context.DoctorReceptions
+                .Include(r => r.Doctor)
+                .FirstOrDefaultAsync(r => r.LoginUsername == username && r.CanLogin && r.Active);
+
+            if (reception != null && !string.IsNullOrEmpty(reception.LoginPassword))
+            {
+                bool isValid = false;
+
+                try
+                {
+                    isValid = BCrypt.Net.BCrypt.Verify(password, reception.LoginPassword);
+                }
+                catch
+                {
+                    isValid = reception.LoginPassword == password;
+                }
+
+                if (isValid)
+                {
+                    // Update last login
+                    reception.LastLoginDate = DateTime.Now;
+                    await _context.SaveChangesAsync();
+
+                    return new LoginResult
+                    {
+                        Success = true,
+                        UserId = reception.Id,
+                        UserName = reception.LoginUsername!,
+                        FullName = reception.ReceptionName,
+                        UserType = Helpers.SessionHelper.TYPE_RECEPTION,
+                        DoctorId = reception.DoctorId
+                    };
+                }
+            }
+
             // Authentication failed
             return new LoginResult
             {

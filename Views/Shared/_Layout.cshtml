@@ -72,7 +72,7 @@
                                 <i class="fas fa-calendar-alt"></i> Appointments
                             </a>
                         </li>
-                       @*  <li class="nav-item">
+                        @*  <li class="nav-item">
                             <a class="nav-link" asp-controller="WhatsApp" asp-action="SendMessage">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
                             </a>
@@ -80,8 +80,18 @@
                         @if (userType == "Doctor")
                         {
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="AppointmentIntake" asp-action="Index">
+                                    <i class="fas fa-clipboard-check"></i> Patient Intake
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="MyAssistants" asp-action="Index">
                                     <i class="fas fa-user-nurse"></i> My Assistants
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="MyReception" asp-action="Index">
+                                    <i class="fas fa-concierge-bell"></i> My Receptionists
                                 </a>
                             </li>
 
@@ -94,7 +104,7 @@
 
                         @if (userType == "Assistant")
                         {
-                             <li class="nav-item">
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="AppointmentIntake" asp-action="Index">
                                     <i class="fas fa-clipboard-check"></i> Patient Intake
                                 </a>
@@ -104,6 +114,11 @@
                                     <i class="fas fa-chart-bar"></i> My Reports
                                 </a>
                             </li>
+                        }
+
+                        @if (userType == "Reception")
+                        {
+                            @* Reception sees Patients and Appointments from the common nav items above *@
                         }
 
                         @if (userType == "Admin" || userType == "Doctor")

@@ -1,6 +1,6 @@
 @model ClinicManagementSystem.Models.PatientDiagnosis
 @{
-    ViewData["Title"] = "إضافة تشخيص جديد";
+    ViewData["Title"] = "New Diagnosis";
 }
 
 <!-- Select2 CSS -->
@@ -23,7 +23,7 @@
                     {
                         var selectedPatient = (ViewBag.PatientId as SelectList)?.FirstOrDefault(p => p.Value == Model.PatientId.ToString());
                         <div class="alert alert-info">
-                            <i class="fas fa-user"></i> <strong>المريض المحدد:</strong> @selectedPatient?.Text
+                            <i class="fas fa-user"></i> <strong>Selected Patient:</strong> @selectedPatient?.Text
                         </div>
                     }
 
@@ -32,7 +32,7 @@
                             <div class="mb-3">
                                 <label asp-for="PatientId" class="form-label"></label>
                                 <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-control" id="patientSelect">
-                                    <option value="">-- اختر المريض --</option>
+                                    <option value="">-- Select Patient --</option>
                                 </select>
                                 <span asp-validation-for="PatientId" class="text-danger"></span>
                             </div>
@@ -41,7 +41,7 @@
                             <div class="mb-3">
                                 <label asp-for="DoctorId" class="form-label"></label>
                                 <select asp-for="DoctorId" asp-items="ViewBag.DoctorId" class="form-control">
-                                    <option value="">-- اختر الطبيب --</option>
+                                    <option value="">-- Select Doctor --</option>
                                 </select>
                                 <span asp-validation-for="DoctorId" class="text-danger"></span>
                             </div>
@@ -50,13 +50,13 @@
 
                     <!-- Patient Info Display -->
                     <div id="patientInfoCard" class="alert alert-info" style="display:none;">
-                        <h6><i class="fas fa-user-circle"></i> معلومات المريض:</h6>
+                        <h6><i class="fas fa-user-circle"></i> Patient Information:</h6>
                         <div class="row">
                             <div class="col-md-6">
-                                <strong>الرقم المدني:</strong> <span id="patientCivilId">-</span>
+                                <strong>Civil ID:</strong> <span id="patientCivilId">-</span>
                             </div>
                             <div class="col-md-6">
-                                <strong>هاتف 1:</strong> <span id="patientTel1">-</span>
+                                <strong>Phone 1:</strong> <span id="patientTel1">-</span>
                             </div>
                         </div>
                     </div>
@@ -72,7 +72,7 @@
                             <div class="card-header bg-warning text-dark">
                                 <h5 class="mb-0">
                                     <i class="fas fa-clipboard-list"></i>
-                                    ملاحظات المساعد (Intake Notes)
+                                    Intake Notes
                                     <small class="float-end">
                                         Performed by: @intake.PerformedByName at @intake.IntakeDate.ToString("HH:mm")
                                     </small>
@@ -193,14 +193,14 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">ملف التشخيص (PDF أو صورة)</label>
+                        <label class="form-label">Diagnosis File (PDF or Image)</label>
                         <input type="file" name="DiagnosisFileUpload" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.gif,.bmp" />
-                        <small class="form-text text-muted">الملفات المدعومة: PDF, JPG, PNG, GIF, BMP</small>
+                        <small class="form-text text-muted">Supported file types: PDF, JPG, PNG, GIF, BMP</small>
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ</button>
-                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                     </div>
                 </form>
             </div>
@@ -223,18 +223,18 @@
             // Initialize Select2 on patient dropdown
             $('#patientSelect').select2({
                 theme: 'bootstrap-5',
-                placeholder: '-- ابحث عن مريض أو اختر من القائمة --',
+                placeholder: '-- Search for a patient or select from the list --',
                 allowClear: true,
                 dir: 'rtl',
                 language: {
                     noResults: function() {
-                        return "لا توجد نتائج";
+                        return "No results found";
                     },
                     searching: function() {
-                        return "جاري البحث...";
+                        return "Searching...";
                     },
                     inputTooShort: function() {
-                        return "الرجاء إدخال حرف أو أكثر";
+                        return "Please enter 2 or more characters";
                     }
                 },
                 width: '100%'
@@ -253,8 +253,8 @@
                         $('#patientInfoCard').show();
 
                         // Update patient info
-                        $('#patientCivilId').text(patient.civilId || 'غير محدد');
-                        $('#patientTel1').text(patient.tel1 || 'غير محدد');
+                        $('#patientCivilId').text(patient.civilId || 'Unknown');
+                        $('#patientTel1').text(patient.tel1 || 'Unknown');
                     }
                 } else {
                     // Hide patient info card

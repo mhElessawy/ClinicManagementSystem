@@ -1,6 +1,6 @@
 @model ClinicManagementSystem.Models.PatientDiagnosis
 @{
-    ViewData["Title"] = "تفاصيل التشخيص";
+    ViewData["Title"] = "Patient Details";
     var isImage = ViewBag.IsImage ?? false;
     var isPdf = ViewBag.IsPdf ?? false;
 }
@@ -9,7 +9,7 @@
         <!-- Patient Information Card -->
         <div class="card mb-3">
             <div class="card-header bg-primary text-white">
-                <h5 class="mb-0"><i class="fas fa-user"></i> معلومات المريض</h5>
+                <h5 class="mb-0"><i class="fas fa-user"></i> Patient Information</h5>
             </div>
             <div class="card-body">
                 <div class="row">
@@ -18,20 +18,20 @@
                         <p>@Model.Patient.PatientName</p>
                     </div>
                     <div class="col-md-3">
-                        <strong>الرقم المدني:</strong>
-                        <p>@(Model.Patient.PatientCivilID ?? "غير محدد")</p>
+                        <strong>National ID Number:</strong>
+                        <p>@(Model.Patient.PatientCivilID ?? "unknown")</p>
                     </div>
                     <div class="col-md-3">
-                        <strong>هاتف 1:</strong>
-                        <p>@(Model.Patient.PatientTel1 ?? "غير محدد")</p>
+                        <strong>Phone 1:</strong>
+                        <p>@(Model.Patient.PatientTel1 ?? "unknown")</p>
                     </div>
                     <div class="col-md-3">
-                        <strong>هاتف 2:</strong>
-                        <p>@(Model.Patient.PatientTel2 ?? "غير محدد")</p>
+                        <strong>Phone 2:</strong>
+                        <p>@(Model.Patient.PatientTel2 ?? "unknown")</p>
                     </div>
                     <div class="col-md-12">
-                        <strong>العنوان:</strong>
-                        <p>@(Model.Patient.PatientAddress ?? "غير محدد")</p>
+                        <strong>Address:</strong>
+                        <p>@(Model.Patient.PatientAddress ?? "unknown")</p>
                     </div>
                 </div>
             </div>
@@ -63,11 +63,11 @@
                     <dd class="col-sm-9">
                         @if (Model.Active)
                         {
-                            <span class="badge bg-success">نشط</span>
+                            <span class="badge bg-success">Active</span>
                         }
                         else
                         {
-                            <span class="badge bg-secondary">غير نشط</span>
+                            <span class="badge bg-secondary">Inactive</span>
                         }
                     </dd>
 
@@ -80,8 +80,8 @@
                 </dl>
 
                 <div class="mt-4">
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="fas fa-edit"></i> تعديل</a>
-                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع للقائمة</a>
+                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning"><i class="fas fa-edit"></i> Edit</a>
+                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back to List</a>
                 </div>
             </div>
         </div>
@@ -91,12 +91,12 @@
         {
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0"><i class="fas fa-file"></i> ملف التشخيص</h5>
+                    <h5 class="mb-0"><i class="fas fa-file"></i> Diagnosis File</h5>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id" class="btn btn-sm btn-primary" download>
-                            <i class="fas fa-download"></i> تحميل الملف
+                            <i class="fas fa-download"></i> Download File
                         </a>
                     </div>
 
@@ -110,14 +110,14 @@
                     {
                         <div class="embed-responsive" style="height: 800px;">
                             <iframe src="@Model.DiagnosisFilePath" width="100%" height="100%" style="border: 1px solid #ddd;">
-                                <p>متصفحك لا يدعم عرض ملفات PDF. يمكنك <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id">تحميل الملف</a> بدلاً من ذلك.</p>
+                                <p>Your browser does not support viewing PDF files. You can <a asp-action="GetDiagnosisFile" asp-route-id="@Model.Id">download the file</a> instead.</p>
                             </iframe>
                         </div>
                     }
                     else
                     {
                         <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> نوع الملف غير مدعوم للعرض المباشر. يمكنك تحميل الملف لعرضه.
+                            <i class="fas fa-exclamation-triangle"></i> The file type is not supported for direct viewing. You can download the file to view it.
                         </div>
                     }
                 </div>

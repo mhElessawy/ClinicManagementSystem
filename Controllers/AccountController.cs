@@ -158,7 +158,7 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            if (userType != "Admin" && userType != "Doctor" && userType != "Assistant")
+            if (userType != "Admin" && userType != "Doctor" && userType != "Assistant" && userType != "Reception")
             {
                 ViewBag.Error = "Invalid user type selected";
                 return View();

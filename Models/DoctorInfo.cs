@@ -20,7 +20,7 @@ namespace ClinicManagementSystem.Models
         [StringLength(50)]
         [Display(Name = "Title")]
         public string? DoctorTitle { get; set; }
-       
+
         [Required(ErrorMessage = "Specialist is required")]
         [Display(Name = "Specialist")]
         public int? SpecialistId { get; set; }
@@ -30,7 +30,7 @@ namespace ClinicManagementSystem.Models
 
         [Required(ErrorMessage = "National ID number is required")]
         [StringLength(50)]
-        [Display(Name = "National ID number")] 
+        [Display(Name = "National ID number")]
         public string? DoctorCivilId { get; set; }
         [Required(ErrorMessage = "Phone number is required")]
 
@@ -63,7 +63,7 @@ namespace ClinicManagementSystem.Models
         public DateTime? RegDate { get; set; }
 
         [Display(Name = "Picture")]
-        public byte[]? DoctorPicture { get; set; }
+        public string? DoctorPicture { get; set; }
 
         // Login Fields
         [StringLength(50)]
@@ -94,6 +94,7 @@ namespace ClinicManagementSystem.Models
         public virtual Specialist? Specialist { get; set; }
 
         public virtual ICollection<DoctorAssist> DoctorAssists { get; set; } = new List<DoctorAssist>();
+        public virtual ICollection<DoctorReception> DoctorReceptions { get; set; } = new List<DoctorReception>();
         public virtual ICollection<Patient> Patients { get; set; } = new List<Patient>();
         public virtual ICollection<PatientDiagnosis> PatientDiagnoses { get; set; } = new List<PatientDiagnosis>();
         public virtual ICollection<DoctorSubscription> Subscriptions { get; set; } = new List<DoctorSubscription>();

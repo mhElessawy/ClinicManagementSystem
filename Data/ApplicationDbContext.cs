@@ -17,6 +17,7 @@ namespace ClinicManagementSystem.Models
         public DbSet<Specialist> Specialists { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<DoctorAssist> DoctorAssists { get; set; }
+        public DbSet<DoctorReception> DoctorReceptions { get; set; }
         public DbSet<Appointment> Appointments { get; set; }
 
         public DbSet<DoctorSubscription> DoctorSubscriptions { get; set; }
@@ -29,7 +30,7 @@ namespace ClinicManagementSystem.Models
             base.OnModelCreating(modelBuilder);
 
             // Configure relationships and constraints
-            
+
             // Role -> UserInfo (One-to-Many)
             modelBuilder.Entity<UserInfo>()
                 .HasOne(u => u.Role)
@@ -65,6 +66,13 @@ namespace ClinicManagementSystem.Models
                 .HasForeignKey(da => da.DoctorId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // DoctorInfo -> DoctorReception (One-to-Many)
+            modelBuilder.Entity<DoctorReception>()
+                .HasOne(dr => dr.Doctor)
+                .WithMany(d => d.DoctorReceptions)
+                .HasForeignKey(dr => dr.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             // DoctorInfo -> Patient (One-to-Many)
             modelBuilder.Entity<Patient>()
                 .HasOne(p => p.Doctor)
@@ -85,7 +93,7 @@ namespace ClinicManagementSystem.Models
                 .WithMany(d => d.PatientDiagnoses)
                 .HasForeignKey(pd => pd.DoctorId)
                 .OnDelete(DeleteBehavior.SetNull);
-           
+
             // DoctorInfo -> DoctorSubscription (One-to-Many)
             modelBuilder.Entity<DoctorSubscription>()
                 .HasOne(ds => ds.Doctor)
@@ -118,14 +126,19 @@ namespace ClinicManagementSystem.Models
                 .IsUnique()
                 .HasFilter("[LoginUsername] IS NOT NULL");
 
+            modelBuilder.Entity<DoctorReception>()
+                .HasIndex(r => r.LoginUsername)
+                .IsUnique()
+                .HasFilter("[LoginUsername] IS NOT NULL");
+
             // Seed initial data
-            
+
             // Roles
             modelBuilder.Entity<Role>().HasData(
-                new Role 
-                { 
-                    Id = 1, 
-                    RoleName = "Super Admin", 
+                new Role
+                {
+                    Id = 1,
+                    RoleName = "Super Admin",
                     Description = "Full system access",
                     CanManageDepartments = true,
                     CanManageSpecialists = true,
@@ -139,10 +152,10 @@ namespace ClinicManagementSystem.Models
                     ViewOwnPatientsOnly = false,
                     Active = true
                 },
-                new Role 
-                { 
-                    Id = 2, 
-                    RoleName = "Admin", 
+                new Role
+                {
+                    Id = 2,
+                    RoleName = "Admin",
                     Description = "Administrative access",
                     CanManageDepartments = true,
                     CanManageSpecialists = true,
@@ -156,10 +169,10 @@ namespace ClinicManagementSystem.Models
                     ViewOwnPatientsOnly = false,
                     Active = true
                 },
-                new Role 
-                { 
-                    Id = 3, 
-                    RoleName = "Doctor", 
+                new Role
+                {
+                    Id = 3,
+                    RoleName = "Doctor",
                     Description = "Doctor access - own patients only",
                     CanManageDepartments = false,
                     CanManageSpecialists = false,
@@ -173,10 +186,10 @@ namespace ClinicManagementSystem.Models
                     ViewOwnPatientsOnly = true,
                     Active = true
                 },
-                new Role 
-                { 
-                    Id = 4, 
-                    RoleName = "Assistant", 
+                new Role
+                {
+                    Id = 4,
+                    RoleName = "Assistant",
                     Description = "Doctor assistant - limited access",
                     CanManageDepartments = false,
                     CanManageSpecialists = false,
@@ -190,10 +203,10 @@ namespace ClinicManagementSystem.Models
                     ViewOwnPatientsOnly = true,
                     Active = true
                 },
-                new Role 
-                { 
-                    Id = 5, 
-                    RoleName = "Receptionist", 
+                new Role
+                {
+                    Id = 5,
+                    RoleName = "Receptionist",
                     Description = "Front desk - patient management only",
                     CanManageDepartments = false,
                     CanManageSpecialists = false,
@@ -231,10 +244,10 @@ namespace ClinicManagementSystem.Models
             // TEMPORARY: Plain text password for testing
             // Login: admin / Admin@123
             modelBuilder.Entity<UserInfo>().HasData(
-                new UserInfo 
-                { 
-                    Id = 1, 
-                    UserName = "admin", 
+                new UserInfo
+                {
+                    Id = 1,
+                    UserName = "admin",
                     UserPassword = "Admin@123", // Plain text - CHANGE THIS IN PRODUCTION!
                     UserFullName = "System Administrator",
                     JobTitle = "Administrator",

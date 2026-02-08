@@ -91,6 +91,14 @@
                             <input asp-for="Email" type="email" class="form-control" placeholder="doctor@example.com" />
                             <span asp-validation-for="Email" class="text-danger"></span>
                         </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DoctorTel1" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input asp-for="DoctorTel1" class="form-control" placeholder="+1234567890" />
+                            <span asp-validation-for="DoctorTel1" class="text-danger"></span>
+                        </div>
+
+
                         <div class="col-md-6 mb-3">
                             <label asp-for="Gender" class="form-label">Gender</label>
                             <select asp-for="Gender" class="form-select">
