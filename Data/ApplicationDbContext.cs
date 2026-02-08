@@ -25,6 +25,29 @@ namespace ClinicManagementSystem.Models
         public DbSet<Location> Locations { get; set; }
         public DbSet<AppointmentIntake> AppointmentIntakes { get; set; }
         public DbSet<IntakeQuestion> IntakeQuestions { get; set; }
+        public DbSet<DoctorGroup> DoctorGroups { get; set; }
+        public DbSet<DoctorGroupMember> DoctorGroupMembers { get; set; }
+        /// <summary>
+        /// Gets all doctor IDs that share a group with the given doctor (including the doctor themselves).
+        /// If the doctor is not in any group, returns a list with only their own ID.
+        /// </summary>
+        public async Task<List<int>> GetGroupDoctorIdsAsync(int doctorId)
+        {
+            var groupIds = await DoctorGroupMembers
+                .Where(m => m.DoctorId == doctorId && m.DoctorGroup!.Active)
+                .Select(m => m.DoctorGroupId)
+                .ToListAsync();
+
+            if (!groupIds.Any())
+                return new List<int> { doctorId };
+
+            return await DoctorGroupMembers
+                .Where(m => groupIds.Contains(m.DoctorGroupId))
+                .Select(m => m.DoctorId)
+                .Distinct()
+                .ToListAsync();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -114,6 +137,25 @@ namespace ClinicManagementSystem.Models
                 .WithMany()
                 .HasForeignKey(iq => iq.SpecialistId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // DoctorGroup -> DoctorGroupMember (One-to-Many)
+            modelBuilder.Entity<DoctorGroupMember>()
+                .HasOne(m => m.DoctorGroup)
+                .WithMany(g => g.Members)
+                .HasForeignKey(m => m.DoctorGroupId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DoctorInfo -> DoctorGroupMember (One-to-Many)
+            modelBuilder.Entity<DoctorGroupMember>()
+                .HasOne(m => m.Doctor)
+                .WithMany(d => d.GroupMemberships)
+                .HasForeignKey(m => m.DoctorId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Prevent duplicate doctor in same group
+            modelBuilder.Entity<DoctorGroupMember>()
+                .HasIndex(m => new { m.DoctorGroupId, m.DoctorId })
+                .IsUnique();
 
             // Unique constraints
             modelBuilder.Entity<DoctorInfo>()

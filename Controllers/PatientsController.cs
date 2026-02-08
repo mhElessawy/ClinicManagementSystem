@@ -26,12 +26,13 @@ namespace ClinicManagementSystem.Controllers
 
             IQueryable<Patient> patientsQuery = _context.Patients.Include(p => p.Doctor);
 
-            // Filter patients based on user type
+            // Filter patients based on user type (includes doctor group members)
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
                 {
-                    patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
+                    var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                    patientsQuery = patientsQuery.Where(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
                 }
                 else
                 {
@@ -66,12 +67,12 @@ namespace ClinicManagementSystem.Controllers
         }
 
         // GET: Patients/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            PopulateDoctorDropdown();
+            await PopulateDoctorDropdownAsync();
             return View();
         }
 
@@ -100,11 +101,11 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDoctorDropdown(patient.DoctorId);
+            await PopulateDoctorDropdownAsync(patient.DoctorId);
             return View(patient);
         }
 
-        private void PopulateDoctorDropdown(int? selectedValue = null)
+        private async Task PopulateDoctorDropdownAsync(int? selectedValue = null)
         {
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -113,7 +114,8 @@ namespace ClinicManagementSystem.Controllers
 
             if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
-                doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                doctorsQuery = doctorsQuery.Where(d => groupDoctorIds.Contains(d.Id));
             }
 
             ViewBag.DoctorId = new SelectList(doctorsQuery, "Id", "DoctorName", selectedValue);
@@ -134,7 +136,7 @@ namespace ClinicManagementSystem.Controllers
             if (patient == null) return NotFound();
 
             // Check access
-            if (!CanAccessPatient(patient))
+            if (!await CanAccessPatientAsync(patient))
             {
                 TempData["Error"] = "You don't have permission to view this patient";
                 return RedirectToAction(nameof(Index));
@@ -155,13 +157,13 @@ namespace ClinicManagementSystem.Controllers
             if (patient == null) return NotFound();
 
             // Check access
-            if (!CanAccessPatient(patient))
+            if (!await CanAccessPatientAsync(patient))
             {
                 TempData["Error"] = "You don't have permission to edit this patient";
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDoctorDropdown(patient.DoctorId);
+            await PopulateDoctorDropdownAsync(patient.DoctorId);
             return View(patient);
         }
 
@@ -177,7 +179,7 @@ namespace ClinicManagementSystem.Controllers
 
             // Check access for existing patient
             var existingPatient = await _context.Patients.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id);
-            if (existingPatient == null || !CanAccessPatient(existingPatient))
+            if (existingPatient == null || !await CanAccessPatientAsync(existingPatient))
             {
                 TempData["Error"] = "You don't have permission to edit this patient";
                 return RedirectToAction(nameof(Index));
@@ -201,7 +203,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDoctorDropdown(patient.DoctorId);
+            await PopulateDoctorDropdownAsync(patient.DoctorId);
             return View(patient);
         }
 
@@ -220,7 +222,7 @@ namespace ClinicManagementSystem.Controllers
             if (patient == null) return NotFound();
 
             // Check access
-            if (!CanAccessPatient(patient))
+            if (!await CanAccessPatientAsync(patient))
             {
                 TempData["Error"] = "You don't have permission to delete this patient";
                 return RedirectToAction(nameof(Index));
@@ -244,7 +246,7 @@ namespace ClinicManagementSystem.Controllers
             if (patient == null) return NotFound();
 
             // Check access
-            if (!CanAccessPatient(patient))
+            if (!await CanAccessPatientAsync(patient))
             {
                 TempData["Error"] = "You don't have permission to delete this patient";
                 return RedirectToAction(nameof(Index));
@@ -275,7 +277,7 @@ namespace ClinicManagementSystem.Controllers
             return _context.Patients.Any(e => e.Id == id);
         }
 
-        private bool CanAccessPatient(Patient patient)
+        private async Task<bool> CanAccessPatientAsync(Patient patient)
         {
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -285,7 +287,8 @@ namespace ClinicManagementSystem.Controllers
 
             if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
-                return patient.DoctorId == doctorId.Value;
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                return patient.DoctorId.HasValue && groupDoctorIds.Contains(patient.DoctorId.Value);
             }
 
             return false;

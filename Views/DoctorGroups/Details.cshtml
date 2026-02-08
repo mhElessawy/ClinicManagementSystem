@@ -1,0 +1,86 @@
+@model ClinicManagementSystem.Models.DoctorGroup
+@{
+    ViewData["Title"] = "Doctor Group Details";
+}
+
+<h2><i class="fas fa-info-circle"></i> Doctor Group Details</h2>
+
+<div class="card shadow-sm mt-3">
+    <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">@Model.GroupName</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <strong>Description:</strong>
+                <p>@(Model.Description ?? "No description")</p>
+            </div>
+            <div class="col-md-3">
+                <strong>Status:</strong>
+                <p>
+                    @if (Model.Active)
+                    {
+                        <span class="badge bg-success">Active</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-danger">Inactive</span>
+                    }
+                </p>
+            </div>
+            <div class="col-md-3">
+                <strong>Created:</strong>
+                <p>@Model.CreatedDate.ToString("dd/MM/yyyy")</p>
+            </div>
+        </div>
+
+        <h5><i class="fas fa-user-md"></i> Group Members (@Model.Members.Count)</h5>
+        <hr />
+
+        @if (Model.Members.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Doctor Name</th>
+                            <th>Title</th>
+                            <th>Specialist</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Added Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in Model.Members)
+                        {
+                            <tr>
+                                <td><strong>@member.Doctor?.DoctorName</strong></td>
+                                <td>@(member.Doctor?.DoctorTitle ?? "-")</td>
+                                <td>@(member.Doctor?.Specialist?.SpecialistName ?? "-")</td>
+                                <td>@(member.Doctor?.DoctorTel1 ?? "-")</td>
+                                <td>@(member.Doctor?.Email ?? "-")</td>
+                                <td>@member.AddedDate.ToString("dd/MM/yyyy")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="text-center text-muted py-3">
+                <p>No doctors in this group yet.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+        <i class="fas fa-edit"></i> Edit
+    </a>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to List
+    </a>
+</div>

@@ -27,14 +27,11 @@ namespace ClinicManagementSystem.Controllers
                 .Include(p => p.Patient)
                 .Include(p => p.Doctor);
 
-            // Filter by doctor
-            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+            // Filter by doctor (includes doctor group members)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
             {
-                diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
-            }
-            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
-            {
-                diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                diagnosesQuery = diagnosesQuery.Where(d => d.DoctorId.HasValue && groupDoctorIds.Contains(d.DoctorId.Value));
             }
 
             // Apply search filters
@@ -135,18 +132,15 @@ namespace ClinicManagementSystem.Controllers
             ViewBag.Intake = intake;
             ViewBag.AppointmentId = appointmentId;
 
-            PopulateDropdowns(patientId ?? diagnosis.PatientId);
+            await PopulateDropdownsAsync(patientId ?? diagnosis.PatientId);
 
             // Send patients data as JSON for JavaScript use
             IQueryable<Patient> patientsQuery = _context.Patients;
 
-            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
             {
-                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
-            }
-            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
-            {
-                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                patientsQuery = patientsQuery.Where(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
             }
 
             var patientsData = patientsQuery.Select(p => new {
@@ -257,7 +251,7 @@ namespace ClinicManagementSystem.Controllers
                 }
             }
 
-            PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
+            await PopulateDropdownsAsync(diagnosis.PatientId, diagnosis.DoctorId);
             return View(diagnosis);
         }
 
@@ -305,7 +299,7 @@ namespace ClinicManagementSystem.Controllers
             if (diagnosis == null)
                 return NotFound();
 
-            PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
+            await PopulateDropdownsAsync(diagnosis.PatientId, diagnosis.DoctorId);
             return View(diagnosis);
         }
 
@@ -399,7 +393,7 @@ namespace ClinicManagementSystem.Controllers
                 }
             }
 
-            PopulateDropdowns(diagnosis.PatientId, diagnosis.DoctorId);
+            await PopulateDropdownsAsync(diagnosis.PatientId, diagnosis.DoctorId);
             return View(diagnosis);
         }
 
@@ -493,7 +487,7 @@ namespace ClinicManagementSystem.Controllers
             return _context.PatientDiagnoses.Any(e => e.Id == id);
         }
 
-        private void PopulateDropdowns(int? selectedPatient = null, int? selectedDoctor = null)
+        private async Task PopulateDropdownsAsync(int? selectedPatient = null, int? selectedDoctor = null)
         {
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -501,15 +495,11 @@ namespace ClinicManagementSystem.Controllers
             IQueryable<Patient> patientsQuery = _context.Patients;
             IQueryable<DoctorInfo> doctorsQuery = _context.DoctorInfos.Where(d => d.Active);
 
-            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
+            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT) && doctorId.HasValue)
             {
-                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
-                doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);
-            }
-            else if (userType == SessionHelper.TYPE_ASSISTANT && doctorId.HasValue)
-            {
-                patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
-                doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                patientsQuery = patientsQuery.Where(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
+                doctorsQuery = doctorsQuery.Where(d => groupDoctorIds.Contains(d.Id));
             }
 
             ViewBag.PatientId = new SelectList(patientsQuery, "Id", "PatientName", selectedPatient);
