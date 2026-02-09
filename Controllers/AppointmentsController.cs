@@ -149,7 +149,12 @@ namespace ClinicManagementSystem.Controllers
             }
             else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
-                appointment.DoctorId = doctorId.Value;
+                // Assistant/Reception can select any doctor from their group
+                // Only default to their own doctor if none was selected
+                if (appointment.DoctorId == 0)
+                {
+                    appointment.DoctorId = doctorId.Value;
+                }
             }
 
             // Validate appointment date/time

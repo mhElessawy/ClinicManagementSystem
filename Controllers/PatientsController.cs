@@ -87,10 +87,18 @@ namespace ClinicManagementSystem.Controllers
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
+            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
             {
-                if (doctorId.HasValue)
+                patient.DoctorId = doctorId.Value;
+            }
+            else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
+            {
+                // Assistant/Reception can select any doctor from their group
+                // Only default to their own doctor if none was selected
+                if (!patient.DoctorId.HasValue || patient.DoctorId == 0)
+                {
                     patient.DoctorId = doctorId.Value;
+                }
             }
 
             if (ModelState.IsValid)
