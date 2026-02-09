@@ -35,12 +35,11 @@ namespace ClinicManagementSystem.Controllers
                 .Include(a => a.Doctor)
                 .Include(a => a.Intake);
 
-            // Filter by doctor/assistant - MUST have doctorId to see appointments
+            // Filter by doctor/assistant (includes doctor group members)
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (!doctorId.HasValue)
                 {
-                    // Doctor/Assistant without valid DoctorId - return empty list with ViewBag set
                     ViewBag.ShowDeleted = showDeleted;
                     ViewBag.FilterDate = filterDate ?? DateTime.Today;
                     ViewBag.ShowAll = showAll;
@@ -50,7 +49,8 @@ namespace ClinicManagementSystem.Controllers
                     ViewBag.IsReception = (userType == SessionHelper.TYPE_RECEPTION);
                     return View(new List<Appointment>());
                 }
-                appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                appointmentsQuery = appointmentsQuery.Where(a => groupDoctorIds.Contains(a.DoctorId));
             }
 
             // Filter by date if specified
@@ -102,7 +102,7 @@ namespace ClinicManagementSystem.Controllers
             ViewBag.ExistingDiagnosisId = existingDiagnosis?.Id;
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to view this appointment";
                 return RedirectToAction(nameof(Index));
@@ -112,12 +112,12 @@ namespace ClinicManagementSystem.Controllers
         }
 
         // GET: Appointments/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
-            PopulateDropdowns();
+            await PopulateDropdownsAsync();
 
             // Set default date to today
             ViewBag.DefaultDate = DateTime.Today.ToString("yyyy-MM-dd");
@@ -180,7 +180,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDropdowns(appointment.PatientId, appointment.DoctorId);
+            await PopulateDropdownsAsync(appointment.PatientId, appointment.DoctorId);
             ViewBag.DefaultDate = appointment.AppointmentDate.ToString("yyyy-MM-dd");
             return View(appointment);
         }
@@ -197,13 +197,13 @@ namespace ClinicManagementSystem.Controllers
             if (appointment == null) return NotFound();
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to edit this appointment";
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDropdowns(appointment.PatientId, appointment.DoctorId);
+            await PopulateDropdownsAsync(appointment.PatientId, appointment.DoctorId);
             return View(appointment);
         }
 
@@ -219,7 +219,7 @@ namespace ClinicManagementSystem.Controllers
 
             // Check access
             var existingAppointment = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync(a => a.Id == id);
-            if (existingAppointment == null || !CanAccessAppointment(existingAppointment))
+            if (existingAppointment == null || !await CanAccessAppointmentAsync(existingAppointment))
             {
                 TempData["Error"] = "You don't have permission to edit this appointment";
                 return RedirectToAction(nameof(Index));
@@ -269,7 +269,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            PopulateDropdowns(appointment.PatientId, appointment.DoctorId);
+            await PopulateDropdownsAsync(appointment.PatientId, appointment.DoctorId);
             return View(appointment);
         }
 
@@ -285,7 +285,7 @@ namespace ClinicManagementSystem.Controllers
             if (appointment == null) return NotFound();
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to cancel this appointment";
                 return RedirectToAction(nameof(Index));
@@ -314,7 +314,7 @@ namespace ClinicManagementSystem.Controllers
             if (appointment == null) return NotFound();
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to delete this appointment";
                 return RedirectToAction(nameof(Index));
@@ -341,7 +341,7 @@ namespace ClinicManagementSystem.Controllers
             if (appointment == null) return NotFound();
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to delete this appointment";
                 return RedirectToAction(nameof(Index));
@@ -382,7 +382,7 @@ namespace ClinicManagementSystem.Controllers
             if (appointment == null) return NotFound();
 
             // Check access
-            if (!CanAccessAppointment(appointment))
+            if (!await CanAccessAppointmentAsync(appointment))
             {
                 TempData["Error"] = "You don't have permission to complete this appointment";
                 return RedirectToAction(nameof(Index));
@@ -409,14 +409,15 @@ namespace ClinicManagementSystem.Controllers
                 .Include(a => a.Doctor)
                 .Include(a => a.Intake);
 
-            // Filter by doctor/assistant - MUST have doctorId to see appointments
+            // Filter by doctor/assistant (includes doctor group members)
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (!doctorId.HasValue)
                 {
                     return View(new List<Appointment>());
                 }
-                appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == doctorId.Value);
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                appointmentsQuery = appointmentsQuery.Where(a => groupDoctorIds.Contains(a.DoctorId));
             }
 
             var appointments = await appointmentsQuery
@@ -433,7 +434,7 @@ namespace ClinicManagementSystem.Controllers
             return _context.Appointments.Any(e => e.Id == id);
         }
 
-        private bool CanAccessAppointment(Appointment appointment)
+        private async Task<bool> CanAccessAppointmentAsync(Appointment appointment)
         {
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -442,12 +443,15 @@ namespace ClinicManagementSystem.Controllers
                 return true;
 
             if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
-                return appointment.DoctorId == doctorId.Value;
+            {
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                return groupDoctorIds.Contains(appointment.DoctorId);
+            }
 
             return false;
         }
 
-        private void PopulateDropdowns(int? selectedPatient = null, int? selectedDoctor = null)
+        private async Task PopulateDropdownsAsync(int? selectedPatient = null, int? selectedDoctor = null)
         {
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
@@ -457,7 +461,10 @@ namespace ClinicManagementSystem.Controllers
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
-                    patientsQuery = patientsQuery.Where(p => p.DoctorId == doctorId.Value);
+                {
+                    var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                    patientsQuery = patientsQuery.Where(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
+                }
             }
 
             ViewBag.PatientId = new SelectList(patientsQuery.OrderBy(p => p.PatientName), "Id", "PatientName", selectedPatient);
@@ -467,7 +474,10 @@ namespace ClinicManagementSystem.Controllers
             if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
             {
                 if (doctorId.HasValue)
-                    doctorsQuery = doctorsQuery.Where(d => d.Id == doctorId.Value);
+                {
+                    var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                    doctorsQuery = doctorsQuery.Where(d => groupDoctorIds.Contains(d.Id));
+                }
             }
 
             ViewBag.DoctorId = new SelectList(doctorsQuery.OrderBy(d => d.DoctorName), "Id", "DoctorName", selectedDoctor);

@@ -15,7 +15,6 @@ namespace ClinicManagementSystem.Services
 
         bool IsImageFile(string fileName);
         bool IsPdfFile(string fileName);
-        void DeleteDoctorPicture(byte[]? doctorPicture, string webRootPath);
     }
 
     public class FileProcessingService : IFileProcessingService

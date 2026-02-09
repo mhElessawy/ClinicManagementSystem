@@ -76,11 +76,8 @@ namespace ClinicManagementSystem.Controllers
                 // Handle image upload with resizing and save to folder
                 if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
                 {
-                    using (var memoryStream = new MemoryStream())
-                    {
-                        await DoctorPictureFile.CopyToAsync(memoryStream);
-                        doctor.DoctorPicture = memoryStream.ToArray();
-                    }
+                    doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
+                        DoctorPictureFile, _webHostEnvironment.WebRootPath);
                 }
 
                 // Hash password if provided
@@ -151,11 +148,8 @@ namespace ClinicManagementSystem.Controllers
                         _fileProcessingService.DeleteDoctorPicture(existingDoctor?.DoctorPicture, _webHostEnvironment.WebRootPath);
 
                         // Save new picture
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await DoctorPictureFile.CopyToAsync(memoryStream);
-                            doctor.DoctorPicture = memoryStream.ToArray();
-                        }
+                        doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
+                            DoctorPictureFile, _webHostEnvironment.WebRootPath);
                     }
                     else
                     {

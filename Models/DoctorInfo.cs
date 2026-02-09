@@ -62,6 +62,7 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Registration Date")]
         public DateTime? RegDate { get; set; }
 
+        [MaxLength(500)]
         [Display(Name = "Picture")]
         public string? DoctorPicture { get; set; }
 
@@ -98,6 +99,7 @@ namespace ClinicManagementSystem.Models
         public virtual ICollection<Patient> Patients { get; set; } = new List<Patient>();
         public virtual ICollection<PatientDiagnosis> PatientDiagnoses { get; set; } = new List<PatientDiagnosis>();
         public virtual ICollection<DoctorSubscription> Subscriptions { get; set; } = new List<DoctorSubscription>();
+        public virtual ICollection<DoctorGroupMember> GroupMemberships { get; set; } = new List<DoctorGroupMember>();
 
         // Computed property to check if doctor has valid subscription
         [NotMapped]
