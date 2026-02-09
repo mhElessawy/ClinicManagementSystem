@@ -87,10 +87,19 @@ namespace ClinicManagementSystem.Controllers
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
+            // Auto-assign doctor only for doctors; assistants/receptionists can choose from their group
+            if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
             {
-                if (doctorId.HasValue)
-                    patient.DoctorId = doctorId.Value;
+                patient.DoctorId = doctorId.Value;
+            }
+            else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
+            {
+                // Validate selected doctor is in the user's group
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                if (!patient.DoctorId.HasValue || !groupDoctorIds.Contains(patient.DoctorId.Value))
+                {
+                    ModelState.AddModelError("DoctorId", "يجب اختيار طبيب من المجموعة");
+                }
             }
 
             if (ModelState.IsValid)

@@ -142,14 +142,19 @@ namespace ClinicManagementSystem.Controllers
             appointment.CreatedByType = userType;
             appointment.CreatedDate = DateTime.Now;
 
-            // Auto-assign doctor if logged in as doctor
+            // Auto-assign doctor only for doctors; assistants/receptionists can choose from their group
             if (userType == SessionHelper.TYPE_DOCTOR && doctorId.HasValue)
             {
                 appointment.DoctorId = doctorId.Value;
             }
             else if ((userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
             {
-                appointment.DoctorId = doctorId.Value;
+                // Validate selected doctor is in the user's group
+                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
+                if (!groupDoctorIds.Contains(appointment.DoctorId))
+                {
+                    ModelState.AddModelError("DoctorId", "يجب اختيار طبيب من المجموعة");
+                }
             }
 
             // Validate appointment date/time
