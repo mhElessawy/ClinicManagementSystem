@@ -158,12 +158,71 @@
                         <td>Paid:</td>
                         <td class="text-end fw-bold">@Model.PaidAmount.ToString("N3")</td>
                     </tr>
-                    <tr class="@(Model.RemainingAmount > 0 ? "text-danger" : "text-success")">
+                    <tr class="@(Model.RemainingAmount > 0 ? "text-danger fw-bold" : "text-success fw-bold")">
                         <td class="fw-bold">Remaining:</td>
                         <td class="text-end fw-bold">@Model.RemainingAmount.ToString("N3")</td>
                     </tr>
                 </table>
+
+                @if (Model.RemainingAmount > 0)
+                {
+                    <div class="mt-3">
+                        <button type="button" class="btn btn-success w-100"
+                                data-bs-toggle="modal" data-bs-target="#addPaymentModal">
+                            <i class="fas fa-money-bill-wave"></i> Add Payment
+                        </button>
+                    </div>
+                }
             </div>
         </div>
     </div>
 </div>
+
+@if (Model.RemainingAmount > 0)
+{
+    <!-- Add Payment Modal -->
+    <div class="modal fade" id="addPaymentModal" tabindex="-1">
+        <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-money-bill-wave"></i> Add Payment
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form asp-action="AddPayment" asp-route-id="@Model.Id" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 mb-3">
+                            <small>Remaining Balance:</small><br />
+                            <strong class="fs-5">@Model.RemainingAmount.ToString("N3")</strong>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Amount *</label>
+                            <input type="number" name="amount" class="form-control form-control-lg"
+                                   min="0.001" max="@Model.RemainingAmount" step="0.001"
+                                   value="@Model.RemainingAmount.ToString("F3")" required autofocus />
+                            <div class="form-text">Max: @Model.RemainingAmount.ToString("N3")</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Payment Method</label>
+                            <select name="paymentMethod" class="form-select">
+                                <option value="">-- Same as before --</option>
+                                <option value="Cash" selected="@(Model.PaymentMethod == "Cash" ? "selected" : null)">Cash</option>
+                                <option value="Card" selected="@(Model.PaymentMethod == "Card" ? "selected" : null)">Card</option>
+                                <option value="Insurance" selected="@(Model.PaymentMethod == "Insurance" ? "selected" : null)">Insurance</option>
+                                <option value="Transfer" selected="@(Model.PaymentMethod == "Transfer" ? "selected" : null)">Bank Transfer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-check"></i> Confirm Payment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}

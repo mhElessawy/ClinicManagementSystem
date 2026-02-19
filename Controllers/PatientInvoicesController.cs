@@ -223,6 +223,57 @@ namespace ClinicManagementSystem.Controllers
             return View(invoice);
         }
 
+        // POST: PatientInvoices/AddPayment
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddPayment(int id, decimal amount, string? paymentMethod)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session))
+                return RedirectToAction("Login", "Account");
+
+            var invoice = await _context.PatientInvoices
+                .Include(i => i.Items)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (invoice == null) return NotFound();
+
+            if (!await CanAccessInvoiceAsync(invoice))
+            {
+                TempData["Error"] = "You don't have permission to update this invoice.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (amount <= 0)
+            {
+                TempData["Error"] = "Payment amount must be greater than zero.";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            var remaining = invoice.NetAmount - invoice.PaidAmount;
+            if (amount > remaining)
+            {
+                TempData["Error"] = $"Payment amount ({amount:N3}) exceeds remaining balance ({remaining:N3}).";
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            invoice.PaidAmount += amount;
+
+            if (!string.IsNullOrEmpty(paymentMethod))
+                invoice.PaymentMethod = paymentMethod;
+
+            var net = invoice.NetAmount;
+            if (invoice.PaidAmount <= 0)
+                invoice.PaymentStatus = "Unpaid";
+            else if (invoice.PaidAmount >= net)
+                invoice.PaymentStatus = "Paid";
+            else
+                invoice.PaymentStatus = "Partial";
+
+            await _context.SaveChangesAsync();
+            TempData["Success"] = $"Payment of {amount:N3} recorded successfully.";
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
         // GET: PatientInvoices/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {

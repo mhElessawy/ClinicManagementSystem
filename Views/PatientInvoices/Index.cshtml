@@ -139,6 +139,12 @@ else
                                     <a asp-action="Print" asp-route-id="@invoice.Id" class="btn btn-sm btn-outline-secondary" title="Print" target="_blank">
                                         <i class="fas fa-print"></i>
                                     </a>
+                                    @if (invoice.RemainingAmount > 0)
+                                    {
+                                        <a asp-action="Details" asp-route-id="@invoice.Id" class="btn btn-sm btn-success" title="Add Payment - Remaining: @invoice.RemainingAmount.ToString("N3")">
+                                            <i class="fas fa-money-bill-wave"></i>
+                                        </a>
+                                    }
                                     <a asp-action="Edit" asp-route-id="@invoice.Id" class="btn btn-sm btn-outline-warning" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
