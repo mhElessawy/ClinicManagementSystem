@@ -101,6 +101,16 @@
                             </li>
 
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="PatientInvoices" asp-action="Index">
+                                    <i class="fas fa-file-invoice-dollar"></i> Invoices
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PatientInvoices" asp-action="DoctorIncome">
+                                    <i class="fas fa-chart-bar"></i> Doctor Income
+                                </a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="DoctorReports" asp-action="Index">
                                     <i class="fas fa-chart-line"></i> My Reports
                                 </a>
@@ -123,7 +133,16 @@
 
                         @if (userType == "Reception")
                         {
-                            @* Reception sees Patients and Appointments from the common nav items above *@
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PatientInvoices" asp-action="Index">
+                                    <i class="fas fa-file-invoice-dollar"></i> Invoices
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="PatientInvoices" asp-action="DoctorIncome">
+                                    <i class="fas fa-chart-bar"></i> Doctor Income
+                                </a>
+                            </li>
                         }
 
                         @if (userType == "Admin" || userType == "Doctor")
