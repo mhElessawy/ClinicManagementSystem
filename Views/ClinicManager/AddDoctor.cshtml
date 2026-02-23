@@ -1,0 +1,126 @@
+@model ClinicManagementSystem.Models.DoctorInfo
+@{
+    ViewData["Title"] = "Add Doctor";
+}
+
+<div class="d-flex align-items-center mb-4">
+    <a asp-action="Doctors" class="btn btn-outline-secondary me-3">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <h2 class="mb-0"><i class="fas fa-user-plus text-primary"></i> Add Doctor</h2>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form asp-action="AddDoctor" method="post" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label asp-for="DoctorTitle" class="form-label">Title</label>
+                    <select asp-for="DoctorTitle" class="form-select">
+                        <option value="">-- Select --</option>
+                        <option value="Dr.">Dr.</option>
+                        <option value="Prof.">Prof.</option>
+                        <option value="Assist. Prof.">Assist. Prof.</option>
+                    </select>
+                </div>
+                <div class="col-md-9">
+                    <label asp-for="DoctorName" class="form-label">Doctor Name <span class="text-danger">*</span></label>
+                    <input asp-for="DoctorName" class="form-control" />
+                    <span asp-validation-for="DoctorName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DoctorCivilId" class="form-label">Civil ID <span class="text-danger">*</span></label>
+                    <input asp-for="DoctorCivilId" class="form-control" />
+                    <span asp-validation-for="DoctorCivilId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Email" class="form-label">Email <span class="text-danger">*</span></label>
+                    <input asp-for="Email" class="form-control" type="email" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DoctorTel1" class="form-label">Phone 1</label>
+                    <input asp-for="DoctorTel1" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="DoctorTel2" class="form-label">Phone 2</label>
+                    <input asp-for="DoctorTel2" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label for="DepartmentId" class="form-label">Department</label>
+                    <select id="DepartmentId" name="DepartmentId" class="form-select" onchange="filterSpecialists(this.value)">
+                        <option value="">-- All Departments --</option>
+                        @foreach (var item in (IEnumerable<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)ViewBag.DepartmentId)
+                        {
+                            <option value="@item.Value">@item.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SpecialistId" class="form-label">Specialty</label>
+                    <select asp-for="SpecialistId" asp-items="ViewBag.SpecialistId" class="form-select" id="SpecialistSelect">
+                        <option value="">-- Select Specialty --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LoginUsername" class="form-label">Login Username</label>
+                    <input asp-for="LoginUsername" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="LoginPassword" class="form-label">Login Password</label>
+                    <input asp-for="LoginPassword" class="form-control" type="password" autocomplete="new-password" />
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Profile Picture</label>
+                    <input type="file" name="DoctorPictureFile" class="form-control" accept="image/*" />
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        <input asp-for="CanLogin" class="form-check-input" type="checkbox" />
+                        <label asp-for="CanLogin" class="form-check-label">Can Login</label>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-check mt-4">
+                        <input asp-for="Active" class="form-check-input" type="checkbox" checked />
+                        <label asp-for="Active" class="form-check-label">Active</label>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label asp-for="DoctorDetails" class="form-label">Details / Bio</label>
+                    <textarea asp-for="DoctorDetails" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Doctor
+                </button>
+                <a asp-action="Doctors" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        var specialistsData = @Html.Raw(ViewBag.SpecialistsJson ?? "[]");
+
+        function filterSpecialists(departmentId) {
+            var select = document.getElementById('SpecialistSelect');
+            var current = select.value;
+            select.innerHTML = '<option value="">-- Select Specialty --</option>';
+            specialistsData.forEach(function (s) {
+                if (!departmentId || s.departmentId == departmentId) {
+                    var opt = document.createElement('option');
+                    opt.value = s.id;
+                    opt.textContent = s.name;
+                    if (s.id == current) opt.selected = true;
+                    select.appendChild(opt);
+                }
+            });
+        }
+    </script>
+}

@@ -857,6 +857,23 @@ namespace ClinicManagementSystem.Migrations
                             RoleName = "Receptionist",
                             ViewAllPatients = true,
                             ViewOwnPatientsOnly = false
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Active = true,
+                            CanManageAssistants = true,
+                            CanManageDepartments = false,
+                            CanManageDiagnoses = false,
+                            CanManageDoctors = true,
+                            CanManagePatients = false,
+                            CanManageSpecialists = false,
+                            CanManageUsers = false,
+                            CanViewReports = true,
+                            Description = "Manages a group of doctors - can add doctors, view income, manage assistants and receptionists",
+                            RoleName = "Clinic Manager",
+                            ViewAllPatients = false,
+                            ViewOwnPatientsOnly = false
                         });
                 });
 
@@ -939,6 +956,9 @@ namespace ClinicManagementSystem.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
+                    b.Property<int?>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("RoleId")
                         .HasColumnType("int");
 
@@ -961,6 +981,8 @@ namespace ClinicManagementSystem.Migrations
                         .HasColumnType("nvarchar(20)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GroupId");
 
                     b.HasIndex("RoleId");
 
@@ -1154,10 +1176,17 @@ namespace ClinicManagementSystem.Migrations
 
             modelBuilder.Entity("ClinicManagementSystem.Models.UserInfo", b =>
                 {
+                    b.HasOne("ClinicManagementSystem.Models.DoctorGroup", "Group")
+                        .WithMany()
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("ClinicManagementSystem.Models.Role", "Role")
                         .WithMany("Users")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Group");
 
                     b.Navigation("Role");
                 });

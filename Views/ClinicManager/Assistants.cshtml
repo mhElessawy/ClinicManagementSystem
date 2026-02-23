@@ -1,0 +1,82 @@
+@model IEnumerable<ClinicManagementSystem.Models.DoctorAssist>
+@{
+    ViewData["Title"] = "Clinic Assistants";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-user-nurse text-success"></i> Clinic Assistants</h2>
+    <a asp-action="AddAssistant" class="btn btn-success">
+        <i class="fas fa-plus"></i> Add Assistant
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No assistants found. <a asp-action="AddAssistant">Add the first assistant</a>.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Assistant Name</th>
+                            <th>Doctor</th>
+                            <th>Phone</th>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var assistant in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@assistant.AssistName</td>
+                                <td>
+                                    @if (assistant.Doctor != null)
+                                    {
+                                        <span class="badge bg-primary">@assistant.Doctor.DoctorName</span>
+                                    }
+                                </td>
+                                <td>@(assistant.AssistTel1 ?? "-")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(assistant.LoginUsername))
+                                    {
+                                        <code>@assistant.LoginUsername</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No login</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (assistant.Active)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="EditAssistant" asp-route-id="@assistant.Id" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a asp-action="DeleteAssistant" asp-route-id="@assistant.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
