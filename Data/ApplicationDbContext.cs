@@ -27,6 +27,7 @@ namespace ClinicManagementSystem.Models
         public DbSet<IntakeQuestion> IntakeQuestions { get; set; }
         public DbSet<DoctorGroup> DoctorGroups { get; set; }
         public DbSet<DoctorGroupMember> DoctorGroupMembers { get; set; }
+        public DbSet<PatientInvoice> PatientInvoices { get; set; }
         /// <summary>
         /// Gets all doctor IDs that share a group with the given doctor (including the doctor themselves).
         /// If the doctor is not in any group, returns a list with only their own ID.
@@ -109,6 +110,20 @@ namespace ClinicManagementSystem.Models
                 .WithMany(p => p.PatientDiagnoses)
                 .HasForeignKey(pd => pd.PatientId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Patient -> PatientInvoice (One-to-Many)
+            modelBuilder.Entity<PatientInvoice>()
+                .HasOne(pi => pi.Patient)
+                .WithMany(p => p.PatientInvoices)
+                .HasForeignKey(pi => pi.PatientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DoctorInfo -> PatientInvoice (One-to-Many)
+            modelBuilder.Entity<PatientInvoice>()
+                .HasOne(pi => pi.Doctor)
+                .WithMany()
+                .HasForeignKey(pi => pi.DoctorId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // DoctorInfo -> PatientDiagnosis (One-to-Many)
             modelBuilder.Entity<PatientDiagnosis>()
