@@ -160,7 +160,7 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            if (userType != "Admin" && userType != "Doctor" && userType != "Assistant" && userType != "Reception")
+            if (userType != "Admin" && userType != "Doctor" && userType != "Assistant" && userType != "Reception" && userType != "ClinicManager")
             {
                 ViewBag.Error = "Invalid user type selected";
                 return View();
@@ -183,7 +183,8 @@ namespace ClinicManagementSystem.Controllers
                     result.UserType!,
                     result.FullName!,
                     result.DoctorId,
-                    result.RoleId
+                    result.RoleId,
+                    result.GroupId
                 );
 
                 TempData["Success"] = $"Welcome back, {result.FullName}!";

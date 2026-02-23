@@ -22,6 +22,10 @@ namespace ClinicManagementSystem.Controllers
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 
+            // Redirect Clinic Manager to their own dashboard
+            if (userType == SessionHelper.TYPE_CLINIC_MANAGER)
+                return RedirectToAction("Index", "ClinicManager");
+
             // Calculate stats based on user type
             ViewBag.TotalDoctors = await _context.DoctorInfos.CountAsync(d => d.Active);
 
