@@ -40,6 +40,7 @@ namespace ClinicManagementSystem.Models
         public virtual DoctorInfo? Doctor { get; set; }
 
         public virtual ICollection<PatientDiagnosis> PatientDiagnoses { get; set; } = new List<PatientDiagnosis>();
+        public virtual ICollection<PatientInvoice> PatientInvoices { get; set; } = new List<PatientInvoice>();
 
         // Computed property for Age
         [NotMapped]
@@ -62,4 +63,3 @@ namespace ClinicManagementSystem.Models
         }
     }
 }
-
