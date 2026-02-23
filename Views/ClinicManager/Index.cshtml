@@ -1,0 +1,100 @@
+﻿@{
+    ViewData["Title"] = "Clinic Manager Dashboard";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2><i class="fas fa-clinic-medical text-primary"></i> Clinic Manager Dashboard</h2>
+        <p class="text-muted mb-0"><i class="fas fa-users"></i> Group: <strong>@ViewBag.GroupName</strong></p>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i class="fas fa-stethoscope fa-2x text-primary"></i>
+                </div>
+                <h3 class="fw-bold text-primary">@ViewBag.TotalDoctors</h3>
+                <p class="text-muted mb-2">Doctors</p>
+                <a asp-action="Doctors" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i class="fas fa-user-nurse fa-2x text-success"></i>
+                </div>
+                <h3 class="fw-bold text-success">@ViewBag.TotalAssistants</h3>
+                <p class="text-muted mb-2">Assistants</p>
+                <a asp-action="Assistants" class="btn btn-sm btn-outline-success">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i class="fas fa-concierge-bell fa-2x text-info"></i>
+                </div>
+                <h3 class="fw-bold text-info">@ViewBag.TotalReceptionists</h3>
+                <p class="text-muted mb-2">Receptionists</p>
+                <a asp-action="Receptionists" class="btn btn-sm btn-outline-info">View All</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-6 col-lg-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body text-center">
+                <div class="mb-2">
+                    <i class="fas fa-dollar-sign fa-2x text-warning"></i>
+                </div>
+                <h3 class="fw-bold text-warning">@ViewBag.TotalIncome.ToString("N2")</h3>
+                <p class="text-muted mb-2">Total Income</p>
+                <a asp-action="Income" class="btn btn-sm btn-outline-warning">View Details</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                <h5>Add Doctor</h5>
+                <p class="text-muted small">Add a new doctor and assign them to your group</p>
+                <a asp-action="AddDoctor" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Doctor
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-user-nurse fa-3x text-success mb-3"></i>
+                <h5>Add Assistant</h5>
+                <p class="text-muted small">Add an assistant for a doctor in your group</p>
+                <a asp-action="AddAssistant" class="btn btn-success">
+                    <i class="fas fa-plus"></i> Add Assistant
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <i class="fas fa-concierge-bell fa-3x text-info mb-3"></i>
+                <h5>Add Receptionist</h5>
+                <p class="text-muted small">Add a receptionist for a doctor in your group</p>
+                <a asp-action="AddReceptionist" class="btn btn-info text-white">
+                    <i class="fas fa-plus"></i> Add Receptionist
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

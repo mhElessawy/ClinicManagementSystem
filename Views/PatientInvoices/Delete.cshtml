@@ -1,0 +1,59 @@
+﻿@model ClinicManagementSystem.Models.PatientInvoice
+@{
+    ViewData["Title"] = "Delete Invoice";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="text-danger"><i class="fas fa-trash"></i> Delete Invoice</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back
+    </a>
+</div>
+
+<div class="card border-danger">
+    <div class="card-header bg-danger text-white">
+        <i class="fas fa-exclamation-triangle"></i> Confirm Delete
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Are you sure you want to delete this invoice? This action cannot be undone.</p>
+        <table class="table table-borderless table-sm" style="max-width:400px;">
+            <tr>
+                <td class="fw-bold">Invoice #:</td>
+                <td>@Model.InvoiceNumber</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Date:</td>
+                <td>@Model.InvoiceDate.ToString("dd/MM/yyyy")</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Patient:</td>
+                <td>@Model.Patient?.PatientName</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Doctor:</td>
+                <td>@Model.Doctor?.DoctorName</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Net Amount:</td>
+                <td>@Model.NetAmount.ToString("N3")</td>
+            </tr>
+            <tr>
+                <td class="fw-bold">Items:</td>
+                <td>@Model.Items.Count service(s)</td>
+            </tr>
+        </table>
+
+        <form asp-action="Delete" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Yes, Delete
+                </button>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>

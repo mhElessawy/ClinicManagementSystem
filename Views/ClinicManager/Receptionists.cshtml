@@ -1,0 +1,82 @@
+﻿@model IEnumerable<ClinicManagementSystem.Models.DoctorReception>
+@{
+    ViewData["Title"] = "Clinic Receptionists";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-concierge-bell text-info"></i> Clinic Receptionists</h2>
+    <a asp-action="AddReceptionist" class="btn btn-info text-white">
+        <i class="fas fa-plus"></i> Add Receptionist
+    </a>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No receptionists found. <a asp-action="AddReceptionist">Add the first receptionist</a>.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Receptionist Name</th>
+                            <th>Doctor</th>
+                            <th>Phone</th>
+                            <th>Username</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var reception in Model)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@reception.ReceptionName</td>
+                                <td>
+                                    @if (reception.Doctor != null)
+                                    {
+                                        <span class="badge bg-primary">@reception.Doctor.DoctorName</span>
+                                    }
+                                </td>
+                                <td>@(reception.ReceptionTel1 ?? "-")</td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(reception.LoginUsername))
+                                    {
+                                        <code>@reception.LoginUsername</code>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">No login</span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (reception.Active)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                </td>
+                                <td class="text-end">
+                                    <a asp-action="EditReceptionist" asp-route-id="@reception.Id" class="btn btn-sm btn-outline-primary me-1">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a asp-action="DeleteReceptionist" asp-route-id="@reception.Id" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}

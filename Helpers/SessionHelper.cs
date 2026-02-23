@@ -11,15 +11,17 @@ namespace ClinicManagementSystem.Helpers
         private const string DOCTOR_ID = "DoctorId";
         private const string ROLE_ID = "RoleId";
         private const string FULL_NAME = "FullName";
+        private const string GROUP_ID = "GroupId";
 
         // User Types
         public const string TYPE_ADMIN = "Admin";
         public const string TYPE_DOCTOR = "Doctor";
         public const string TYPE_ASSISTANT = "Assistant";
         public const string TYPE_RECEPTION = "Reception";
+        public const string TYPE_CLINIC_MANAGER = "ClinicManager";
 
         // Set Session
-        public static void SetUserSession(ISession session, int userId, string userName, string userType, string fullName, int? doctorId = null, int? roleId = null)
+        public static void SetUserSession(ISession session, int userId, string userName, string userType, string fullName, int? doctorId = null, int? roleId = null, int? groupId = null)
         {
             session.SetInt32(USER_ID, userId);
             session.SetString(USER_NAME, userName);
@@ -31,6 +33,9 @@ namespace ClinicManagementSystem.Helpers
 
             if (roleId.HasValue)
                 session.SetInt32(ROLE_ID, roleId.Value);
+
+            if (groupId.HasValue)
+                session.SetInt32(GROUP_ID, groupId.Value);
         }
 
         // Get Session Values
@@ -64,6 +69,11 @@ namespace ClinicManagementSystem.Helpers
             return session.GetInt32(ROLE_ID);
         }
 
+        public static int? GetGroupId(ISession session)
+        {
+            return session.GetInt32(GROUP_ID);
+        }
+
         // Check User Type
         public static bool IsAdmin(ISession session)
         {
@@ -83,6 +93,11 @@ namespace ClinicManagementSystem.Helpers
         public static bool IsReception(ISession session)
         {
             return GetUserType(session) == TYPE_RECEPTION;
+        }
+
+        public static bool IsClinicManager(ISession session)
+        {
+            return GetUserType(session) == TYPE_CLINIC_MANAGER;
         }
 
         // Check if logged in

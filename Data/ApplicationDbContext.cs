@@ -138,6 +138,13 @@ namespace ClinicManagementSystem.Models
                 .HasForeignKey(iq => iq.SpecialistId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            // UserInfo -> DoctorGroup (Many-to-One, optional)
+            modelBuilder.Entity<UserInfo>()
+                .HasOne(u => u.Group)
+                .WithMany()
+                .HasForeignKey(u => u.GroupId)
+                .OnDelete(DeleteBehavior.SetNull);
+
             // DoctorGroup -> DoctorGroupMember (One-to-Many)
             modelBuilder.Entity<DoctorGroupMember>()
                 .HasOne(m => m.DoctorGroup)
@@ -259,6 +266,23 @@ namespace ClinicManagementSystem.Models
                     CanViewReports = false,
                     CanManageAssistants = false,
                     ViewAllPatients = true,
+                    ViewOwnPatientsOnly = false,
+                    Active = true
+                },
+                new Role
+                {
+                    Id = 6,
+                    RoleName = "Clinic Manager",
+                    Description = "Manages a group of doctors - can add doctors, view income, manage assistants and receptionists",
+                    CanManageDepartments = false,
+                    CanManageSpecialists = false,
+                    CanManageDoctors = true,
+                    CanManagePatients = false,
+                    CanManageDiagnoses = false,
+                    CanManageUsers = false,
+                    CanViewReports = true,
+                    CanManageAssistants = true,
+                    ViewAllPatients = false,
                     ViewOwnPatientsOnly = false,
                     Active = true
                 }

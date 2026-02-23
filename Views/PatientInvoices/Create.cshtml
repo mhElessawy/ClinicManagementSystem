@@ -1,0 +1,212 @@
+﻿@model ClinicManagementSystem.Models.PatientInvoice
+@{
+    ViewData["Title"] = "New Invoice";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="fas fa-file-invoice-dollar"></i> New Invoice</h2>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Invoices
+    </a>
+</div>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <!-- Invoice Header -->
+        <div class="col-md-8">
+            <div class="card mb-3">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-info-circle"></i> Invoice Details
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label asp-for="InvoiceNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="InvoiceNumber" class="form-control" readonly />
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="InvoiceDate" class="form-label fw-semibold"></label>
+                            <input asp-for="InvoiceDate" class="form-control" type="date" />
+                            <span asp-validation-for="InvoiceDate" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-4">
+                            <label asp-for="AppointmentId" class="form-label fw-semibold">Appointment (Optional)</label>
+                            <select asp-for="AppointmentId" asp-items="ViewBag.AppointmentId" class="form-select">
+                                <option value="">-- Select Appointment --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="PatientId" class="form-label fw-semibold"></label>
+                            <select asp-for="PatientId" asp-items="ViewBag.PatientId" class="form-select">
+                                <option value="">-- Select Patient --</option>
+                            </select>
+                            <span asp-validation-for="PatientId" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <label asp-for="DoctorId" class="form-label fw-semibold"></label>
+                            <select asp-for="DoctorId" asp-items="ViewBag.DoctorId" class="form-select">
+                                <option value="">-- Select Doctor --</option>
+                            </select>
+                            <span asp-validation-for="DoctorId" class="text-danger small"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Items -->
+            <div class="card mb-3">
+                <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                    <span><i class="fas fa-list"></i> Services</span>
+                    <button type="button" class="btn btn-sm btn-light" id="addItemBtn">
+                        <i class="fas fa-plus"></i> Add Service
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table mb-0" id="itemsTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th style="width:35%">Service Name *</th>
+                                    <th style="width:25%">Description</th>
+                                    <th style="width:10%">Qty</th>
+                                    <th style="width:15%">Unit Price</th>
+                                    <th style="width:10%">Total</th>
+                                    <th style="width:5%"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="itemsBody">
+                                <tr class="item-row">
+                                    <td><input type="text" name="serviceNames" class="form-control form-control-sm" placeholder="e.g. Consultation" required /></td>
+                                    <td><input type="text" name="descriptions" class="form-control form-control-sm" placeholder="Optional" /></td>
+                                    <td><input type="number" name="quantities" class="form-control form-control-sm qty-input" value="1" min="1" required /></td>
+                                    <td><input type="number" name="unitPrices" class="form-control form-control-sm price-input" value="0" min="0" step="0.001" required /></td>
+                                    <td><span class="row-total fw-bold">0.000</span></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger remove-row"><i class="fas fa-times"></i></button></td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-light">
+                                    <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                                    <td colspan="2"><span id="subtotalDisplay" class="fw-bold">0.000</span></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Summary -->
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-money-bill-wave"></i> Payment
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label asp-for="Discount" class="form-label fw-semibold">Discount</label>
+                        <input asp-for="Discount" class="form-control" id="discountInput" min="0" step="0.001" />
+                        <span asp-validation-for="Discount" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Net Amount</label>
+                        <div class="form-control bg-light fw-bold text-primary" id="netAmountDisplay">0.000</div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PaidAmount" class="form-label fw-semibold">Paid Amount</label>
+                        <input asp-for="PaidAmount" class="form-control" id="paidInput" min="0" step="0.001" />
+                        <span asp-validation-for="PaidAmount" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Remaining</label>
+                        <div class="form-control bg-light fw-bold text-danger" id="remainingDisplay">0.000</div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="PaymentMethod" class="form-label fw-semibold">Payment Method</label>
+                        <select asp-for="PaymentMethod" class="form-select">
+                            <option value="">-- Select --</option>
+                            <option value="Cash">Cash</option>
+                            <option value="Card">Card</option>
+                            <option value="Insurance">Insurance</option>
+                            <option value="Transfer">Bank Transfer</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label fw-semibold">Notes</label>
+                        <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Save Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        function calcRow(row) {
+            var qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+            var price = parseFloat(row.querySelector('.price-input').value) || 0;
+            var total = qty * price;
+            row.querySelector('.row-total').textContent = total.toFixed(3);
+            updateTotals();
+        }
+
+        function updateTotals() {
+            var subtotal = 0;
+            document.querySelectorAll('.item-row').forEach(function (row) {
+                var qty = parseFloat(row.querySelector('.qty-input').value) || 0;
+                var price = parseFloat(row.querySelector('.price-input').value) || 0;
+                subtotal += qty * price;
+            });
+            var discount = parseFloat(document.getElementById('discountInput').value) || 0;
+            var paid = parseFloat(document.getElementById('paidInput').value) || 0;
+            var net = subtotal - discount;
+            if (net < 0) net = 0;
+            var remaining = net - paid;
+            if (remaining < 0) remaining = 0;
+
+            document.getElementById('subtotalDisplay').textContent = subtotal.toFixed(3);
+            document.getElementById('netAmountDisplay').textContent = net.toFixed(3);
+            document.getElementById('remainingDisplay').textContent = remaining.toFixed(3);
+        }
+
+        document.getElementById('itemsBody').addEventListener('input', function (e) {
+            var row = e.target.closest('.item-row');
+            if (row) calcRow(row);
+        });
+
+        document.getElementById('discountInput').addEventListener('input', updateTotals);
+        document.getElementById('paidInput').addEventListener('input', updateTotals);
+
+        document.getElementById('addItemBtn').addEventListener('click', function () {
+            var tbody = document.getElementById('itemsBody');
+            var firstRow = tbody.querySelector('.item-row');
+            var newRow = firstRow.cloneNode(true);
+            newRow.querySelectorAll('input').forEach(function (input) {
+                if (input.classList.contains('qty-input')) input.value = '1';
+                else if (input.classList.contains('price-input')) input.value = '0';
+                else input.value = '';
+            });
+            newRow.querySelector('.row-total').textContent = '0.000';
+            tbody.appendChild(newRow);
+        });
+
+        document.getElementById('itemsBody').addEventListener('click', function (e) {
+            if (e.target.closest('.remove-row')) {
+                var rows = document.querySelectorAll('.item-row');
+                if (rows.length > 1) {
+                    e.target.closest('.item-row').remove();
+                    updateTotals();
+                }
+            }
+        });
+    </script>
+}

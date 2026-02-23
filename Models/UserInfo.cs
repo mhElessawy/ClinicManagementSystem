@@ -37,9 +37,15 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Active")]
         public bool Active { get; set; } = true;
 
+        [Display(Name = "Assigned Group")]
+        public int? GroupId { get; set; }
+
         // Navigation Properties
         [ForeignKey("RoleId")]
         public virtual Role? Role { get; set; }
+
+        [ForeignKey("GroupId")]
+        public virtual DoctorGroup? Group { get; set; }
 
         public virtual ICollection<DoctorInfo> Doctors { get; set; } = new List<DoctorInfo>();
     }

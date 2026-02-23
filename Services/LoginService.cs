@@ -14,7 +14,7 @@ namespace ClinicManagementSystem.Services
 
         public async Task<LoginResult> AuthenticateAsync(string username, string password)
         {
-            // Try UserInfo (Admin/Staff)
+            // Try UserInfo (Admin/Staff/ClinicManager)
             var user = await _context.UserInfos
                 .Include(u => u.Role)
                 .FirstOrDefaultAsync(u => u.UserName == username && u.Active);
@@ -37,14 +37,20 @@ namespace ClinicManagementSystem.Services
 
                 if (isValid)
                 {
+                    // Clinic Manager gets its own session type
+                    var userType = (user.RoleId == 6)
+                        ? Helpers.SessionHelper.TYPE_CLINIC_MANAGER
+                        : Helpers.SessionHelper.TYPE_ADMIN;
+
                     return new LoginResult
                     {
                         Success = true,
                         UserId = user.Id,
                         UserName = user.UserName,
                         FullName = user.UserFullName ?? user.UserName,
-                        UserType = Helpers.SessionHelper.TYPE_ADMIN,
-                        RoleId = user.RoleId
+                        UserType = userType,
+                        RoleId = user.RoleId,
+                        GroupId = user.GroupId
                     };
                 }
             }
@@ -235,6 +241,7 @@ namespace ClinicManagementSystem.Services
         public string? UserType { get; set; }
         public int? DoctorId { get; set; }
         public int? RoleId { get; set; }
+        public int? GroupId { get; set; }
         public string? ErrorMessage { get; set; }
     }
 }

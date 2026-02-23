@@ -33,6 +33,7 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction("Login", "Account");
 
             ViewBag.RoleId = new SelectList(_context.Roles.Where(r => r.Active), "Id", "RoleName");
+            ViewBag.GroupId = new SelectList(_context.DoctorGroups.Where(g => g.Active).OrderBy(g => g.GroupName), "Id", "GroupName");
             return View();
         }
 
@@ -47,6 +48,7 @@ namespace ClinicManagementSystem.Controllers
             {
                 ModelState.AddModelError("UserName", "Username already exists");
                 ViewBag.RoleId = new SelectList(_context.Roles.Where(r => r.Active), "Id", "RoleName", user.RoleId);
+                ViewBag.GroupId = new SelectList(_context.DoctorGroups.Where(g => g.Active).OrderBy(g => g.GroupName), "Id", "GroupName", user.GroupId);
                 return View(user);
             }
 
@@ -65,6 +67,7 @@ namespace ClinicManagementSystem.Controllers
             }
 
             ViewBag.RoleId = new SelectList(_context.Roles.Where(r => r.Active), "Id", "RoleName", user.RoleId);
+            ViewBag.GroupId = new SelectList(_context.DoctorGroups.Where(g => g.Active).OrderBy(g => g.GroupName), "Id", "GroupName", user.GroupId);
             return View(user);
         }
 
@@ -80,6 +83,7 @@ namespace ClinicManagementSystem.Controllers
 
             user.UserPassword = ""; // Clear for security
             ViewBag.RoleId = new SelectList(_context.Roles.Where(r => r.Active), "Id", "RoleName", user.RoleId);
+            ViewBag.GroupId = new SelectList(_context.DoctorGroups.Where(g => g.Active).OrderBy(g => g.GroupName), "Id", "GroupName", user.GroupId);
             return View(user);
         }
 
@@ -121,6 +125,7 @@ namespace ClinicManagementSystem.Controllers
             }
 
             ViewBag.RoleId = new SelectList(_context.Roles.Where(r => r.Active), "Id", "RoleName", user.RoleId);
+            ViewBag.GroupId = new SelectList(_context.DoctorGroups.Where(g => g.Active).OrderBy(g => g.GroupName), "Id", "GroupName", user.GroupId);
             return View(user);
         }
 
