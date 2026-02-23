@@ -1,0 +1,126 @@
+@model IEnumerable<ClinicManagementSystem.Models.DoctorSubscription>
+@{
+    ViewData["Title"] = "Group Income";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="fas fa-chart-line text-warning"></i> Group Income</h2>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-warning bg-opacity-10">
+            <div class="card-body text-center">
+                <i class="fas fa-dollar-sign fa-2x text-warning mb-2"></i>
+                <h4 class="fw-bold text-warning">@ViewBag.TotalIncome.ToString("N2")</h4>
+                <p class="text-muted mb-0">Total Income</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-success bg-opacity-10">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h4 class="fw-bold text-success">@ViewBag.ActiveSubscriptions</h4>
+                <p class="text-muted mb-0">Active Subscriptions</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10">
+            <div class="card-body text-center">
+                <i class="fas fa-list fa-2x text-primary mb-2"></i>
+                <h4 class="fw-bold text-primary">@Model.Count()</h4>
+                <p class="text-muted mb-0">Total Records</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> No income records found for your group.
+    </div>
+}
+else
+{
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Type</th>
+                            <th>Start Date</th>
+                            <th>End Date</th>
+                            <th>Amount</th>
+                            <th>Sales Rep</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var sub in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="fw-semibold">@sub.Doctor?.DoctorName</div>
+                                </td>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(sub.SubscriptionType))
+                                    {
+                                        <span class="badge bg-secondary">@sub.SubscriptionType</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@sub.StartDate.ToString("dd/MM/yyyy")</td>
+                                <td>@sub.EndDate.ToString("dd/MM/yyyy")</td>
+                                <td>
+                                    @if (sub.CostMoney.HasValue)
+                                    {
+                                        <span class="fw-semibold text-success">@sub.CostMoney.Value.ToString("N2")</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted">-</span>
+                                    }
+                                </td>
+                                <td>@(sub.SalesMan ?? "-")</td>
+                                <td>
+                                    @if (sub.IsCurrentlyValid)
+                                    {
+                                        <span class="badge bg-success">Active</span>
+                                        <small class="text-muted d-block">@sub.RemainingDays days left</small>
+                                    }
+                                    else if (sub.IsExpired)
+                                    {
+                                        <span class="badge bg-danger">Expired</span>
+                                    }
+                                    else if (!sub.IsActive)
+                                    {
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-warning text-dark">Pending</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Total:</td>
+                            <td class="fw-bold text-success">@Model.Sum(s => s.CostMoney ?? 0).ToString("N2")</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+}

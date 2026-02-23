@@ -66,17 +66,20 @@
                             </li>
                         }
 
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Patients" asp-action="Index">
-                                <i class="fas fa-procedures"></i> Patients
-                            </a>
-                        </li>
+                        @if (userType != "ClinicManager")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Patients" asp-action="Index">
+                                    <i class="fas fa-procedures"></i> Patients
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Appointments" asp-action="Index">
-                                <i class="fas fa-calendar-alt"></i> Appointments
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="Appointments" asp-action="Index">
+                                    <i class="fas fa-calendar-alt"></i> Appointments
+                                </a>
+                            </li>
+                        }
                         @*  <li class="nav-item">
                             <a class="nav-link" asp-controller="WhatsApp" asp-action="SendMessage">
                                 <i class="fab fa-whatsapp"></i> WhatsApp
@@ -124,6 +127,30 @@
                         @if (userType == "Reception")
                         {
                             @* Reception sees Patients and Appointments from the common nav items above *@
+                        }
+
+                        @if (userType == "ClinicManager")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClinicManager" asp-action="Doctors">
+                                    <i class="fas fa-stethoscope"></i> Doctors
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClinicManager" asp-action="Income">
+                                    <i class="fas fa-chart-line"></i> Income
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClinicManager" asp-action="Assistants">
+                                    <i class="fas fa-user-nurse"></i> Assistants
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-controller="ClinicManager" asp-action="Receptionists">
+                                    <i class="fas fa-concierge-bell"></i> Receptionists
+                                </a>
+                            </li>
                         }
 
                         @if (userType == "Admin" || userType == "Doctor")
