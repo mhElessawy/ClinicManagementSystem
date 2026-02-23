@@ -27,6 +27,8 @@ namespace ClinicManagementSystem.Models
         public DbSet<IntakeQuestion> IntakeQuestions { get; set; }
         public DbSet<DoctorGroup> DoctorGroups { get; set; }
         public DbSet<DoctorGroupMember> DoctorGroupMembers { get; set; }
+        public DbSet<PatientInvoice> PatientInvoices { get; set; }
+        public DbSet<PatientInvoiceItem> PatientInvoiceItems { get; set; }
         /// <summary>
         /// Gets all doctor IDs that share a group with the given doctor (including the doctor themselves).
         /// If the doctor is not in any group, returns a list with only their own ID.
@@ -163,6 +165,34 @@ namespace ClinicManagementSystem.Models
             modelBuilder.Entity<DoctorGroupMember>()
                 .HasIndex(m => new { m.DoctorGroupId, m.DoctorId })
                 .IsUnique();
+
+            // Patient -> PatientInvoice (One-to-Many)
+            modelBuilder.Entity<PatientInvoice>()
+                .HasOne(i => i.Patient)
+                .WithMany()
+                .HasForeignKey(i => i.PatientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // DoctorInfo -> PatientInvoice (One-to-Many)
+            modelBuilder.Entity<PatientInvoice>()
+                .HasOne(i => i.Doctor)
+                .WithMany()
+                .HasForeignKey(i => i.DoctorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Appointment -> PatientInvoice (One-to-Many, optional)
+            modelBuilder.Entity<PatientInvoice>()
+                .HasOne(i => i.Appointment)
+                .WithMany()
+                .HasForeignKey(i => i.AppointmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // PatientInvoice -> PatientInvoiceItem (One-to-Many)
+            modelBuilder.Entity<PatientInvoiceItem>()
+                .HasOne(ii => ii.Invoice)
+                .WithMany(i => i.Items)
+                .HasForeignKey(ii => ii.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // Unique constraints
             modelBuilder.Entity<DoctorInfo>()
