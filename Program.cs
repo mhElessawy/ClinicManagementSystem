@@ -43,24 +43,11 @@ using (var scope = app.Services.CreateScope())
     // Ensure Clinic Manager role exists (seed if missing)
     if (!db.Roles.Any(r => r.Id == 6))
     {
-        db.Roles.Add(new Role
-        {
-            Id = 6,
-            RoleName = "Clinic Manager",
-            Description = "Manages a group of doctors - can add doctors, view income, manage assistants and receptionists",
-            Active = true,
-            CanManageAssistants = true,
-            CanManageDepartments = false,
-            CanManageDiagnoses = false,
-            CanManageDoctors = true,
-            CanManagePatients = false,
-            CanManageSpecialists = false,
-            CanManageUsers = false,
-            CanViewReports = true,
-            ViewAllPatients = false,
-            ViewOwnPatientsOnly = false
-        });
-        db.SaveChanges();
+        db.Database.ExecuteSqlRaw(@"
+            SET IDENTITY_INSERT [Roles] ON;
+            INSERT INTO [Roles] ([Id],[Active],[CanManageAssistants],[CanManageDepartments],[CanManageDiagnoses],[CanManageDoctors],[CanManagePatients],[CanManageSpecialists],[CanManageUsers],[CanViewReports],[Description],[RoleName],[ViewAllPatients],[ViewOwnPatientsOnly])
+            VALUES (6,1,1,0,0,1,0,0,0,1,N'Manages a group of doctors - can add doctors, view income, manage assistants and receptionists',N'Clinic Manager',0,0);
+            SET IDENTITY_INSERT [Roles] OFF;");
     }
 }
 
