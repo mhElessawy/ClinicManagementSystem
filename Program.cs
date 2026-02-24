@@ -39,6 +39,29 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     db.Database.Migrate();
+
+    // Ensure Clinic Manager role exists (seed if missing)
+    if (!db.Roles.Any(r => r.Id == 6))
+    {
+        db.Roles.Add(new Role
+        {
+            Id = 6,
+            RoleName = "Clinic Manager",
+            Description = "Manages a group of doctors - can add doctors, view income, manage assistants and receptionists",
+            Active = true,
+            CanManageAssistants = true,
+            CanManageDepartments = false,
+            CanManageDiagnoses = false,
+            CanManageDoctors = true,
+            CanManagePatients = false,
+            CanManageSpecialists = false,
+            CanManageUsers = false,
+            CanViewReports = true,
+            ViewAllPatients = false,
+            ViewOwnPatientsOnly = false
+        });
+        db.SaveChanges();
+    }
 }
 
 // Configure the HTTP request pipeline.
