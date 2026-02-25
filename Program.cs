@@ -34,6 +34,23 @@ builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 
+// Apply pending database migrations automatically on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+
+    // Ensure Clinic Manager role exists (seed if missing)
+    if (!db.Roles.Any(r => r.Id == 6))
+    {
+        db.Database.ExecuteSqlRaw(@"
+            SET IDENTITY_INSERT [Roles] ON;
+            INSERT INTO [Roles] ([Id],[Active],[CanManageAssistants],[CanManageDepartments],[CanManageDiagnoses],[CanManageDoctors],[CanManagePatients],[CanManageSpecialists],[CanManageUsers],[CanViewReports],[Description],[RoleName],[ViewAllPatients],[ViewOwnPatientsOnly])
+            VALUES (6,1,1,0,0,1,0,0,0,1,N'Manages a group of doctors - can add doctors, view income, manage assistants and receptionists',N'Clinic Manager',0,0);
+            SET IDENTITY_INSERT [Roles] OFF;");
+    }
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
