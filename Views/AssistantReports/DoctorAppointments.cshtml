@@ -1,0 +1,114 @@
+@model IEnumerable<ClinicManagementSystem.Models.Appointment>
+
+@{
+    ViewData["Title"] = "Doctor's Appointments";
+}
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <h2><i class="fas fa-calendar-alt"></i> Doctor's Appointments</h2>
+        <p class="text-muted">Dr. @ViewBag.DoctorName</p>
+        <hr />
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-12">
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-3">
+    <div class="card-header bg-primary text-white">
+        <i class="fas fa-filter"></i> Filter
+    </div>
+    <div class="card-body">
+        <form asp-action="DoctorAppointments" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">From Date</label>
+                <input type="date" name="fromDate" class="form-control" value="@ViewBag.FromDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">To Date</label>
+                <input type="date" name="toDate" class="form-control" value="@ViewBag.ToDate" />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Status</label>
+                <select name="status" class="form-select">
+                    <option value="All" selected="@(ViewBag.SelectedStatus == "All")">All</option>
+                    <option value="Scheduled" selected="@(ViewBag.SelectedStatus == "Scheduled")">Scheduled</option>
+                    <option value="Completed" selected="@(ViewBag.SelectedStatus == "Completed")">Completed</option>
+                    <option value="Cancelled" selected="@(ViewBag.SelectedStatus == "Cancelled")">Cancelled</option>
+                    <option value="NoShow" selected="@(ViewBag.SelectedStatus == "NoShow")">No Show</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> Search
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results -->
+<div class="card">
+    <div class="card-body">
+        @if (!Model.Any())
+        {
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No appointments found.
+            </div>
+        }
+        else
+        {
+            <table class="table table-striped table-hover">
+                <thead class="table-primary">
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Phone</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var appt in Model)
+                    {
+                        <tr>
+                            <td>@appt.AppointmentDate.ToString("yyyy-MM-dd")</td>
+                            <td>@appt.AppointmentTime.ToString(@"hh\:mm")</td>
+                            <td>@appt.Patient?.PatientName</td>
+                            <td>@appt.Patient?.PatientTel1</td>
+                            <td>@(appt.Reason.Length > 40 ? appt.Reason.Substring(0, 40) + "..." : appt.Reason)</td>
+                            <td>
+                                @switch (appt.Status)
+                                {
+                                    case "Scheduled":
+                                        <span class="badge bg-primary">Scheduled</span>
+                                        break;
+                                    case "Completed":
+                                        <span class="badge bg-success">Completed</span>
+                                        break;
+                                    case "Cancelled":
+                                        <span class="badge bg-danger">Cancelled</span>
+                                        break;
+                                    case "NoShow":
+                                        <span class="badge bg-warning text-dark">No Show</span>
+                                        break;
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="alert alert-success">
+                <strong>Total:</strong> @Model.Count() appointment(s)
+            </div>
+        }
+    </div>
+</div>
