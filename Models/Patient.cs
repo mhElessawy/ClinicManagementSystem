@@ -20,9 +20,10 @@ namespace ClinicManagementSystem.Models
         [Display(Name = "Birth Date")]
         public DateTime? BirthDate { get; set; }
 
+        [Required(ErrorMessage = "Phone number is required")]
         [StringLength(20)]
         [Display(Name = "Phone 1")]
-        public string? PatientTel1 { get; set; }
+        public string PatientTel1 { get; set; } = string.Empty;
 
         [StringLength(20)]
         [Display(Name = "Phone 2")]

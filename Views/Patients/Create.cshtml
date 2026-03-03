@@ -37,7 +37,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="PatientTel1" class="form-label"></label>
-                                <input asp-for="PatientTel1" class="form-control" />
+                                <input asp-for="PatientTel1" class="form-control" required />
+                                <span asp-validation-for="PatientTel1" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-md-6">
