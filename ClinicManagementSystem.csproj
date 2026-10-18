@@ -22,6 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="Tests\**\*.cs" />
+    <Content Remove="Tests\**" />
+    <None Remove="Tests\**" />
     <Folder Include="Migrations\" />
     <Folder Include="wwwroot\PatientFIle\" />
   </ItemGroup>

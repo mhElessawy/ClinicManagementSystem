@@ -46,6 +46,8 @@ namespace ClinicManagementSystem.Controllers
                     .ToListAsync();
             }
 
+            ViewBag.Clinic = await _context.Clinics.FirstOrDefaultAsync(c => c.Id == _context.CurrentClinicId);
+            ViewBag.TotalPatients = await _context.Patients.CountAsync();
             ViewBag.TotalDoctors = doctorIds.Count;
             ViewBag.TotalAssistants = await _context.DoctorAssists
                 .CountAsync(a => doctorIds.Contains(a.DoctorId));

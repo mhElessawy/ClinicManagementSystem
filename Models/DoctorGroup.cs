@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace ClinicManagementSystem.Models
 {
-    public class DoctorGroup
+    public class DoctorGroup : IClinicOwned
     {
         [Key]
         public int Id { get; set; }
+
+        public int? ClinicId { get; set; }
+        public virtual Clinic? Clinic { get; set; }
 
         [Required(ErrorMessage = "Group name is required")]
         [StringLength(100)]

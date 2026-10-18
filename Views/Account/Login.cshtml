@@ -8,7 +8,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Doctor Management System</title>
+    <title>@ViewData["Title"] - Clinic Management System</title>
 
     <!-- Bootstrap 5 CSS from CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -86,7 +86,7 @@
     <div class="login-container">
         <div class="login-header">
             <i class="fas fa-hospital-user fa-3x mb-3"></i>
-            <h2 class="mb-0">Doctor Management System</h2>
+            <h2 class="mb-0">Clinic Management System</h2>
             <p class="mb-0 mt-2">Login to your account</p>
         </div>
         <div class="login-body">
@@ -112,7 +112,13 @@
                 </div>
             }
 
-            <form method="post" asp-action="Login">
+            <div class="mb-3 text-center"><a asp-action="RegisterClinic">تسجيل عيادة جديدة</a></div>
+<form method="post" asp-action="Login">
+    <div class="mb-3">
+        <label for="clinicCode" class="form-label">كود العيادة</label>
+        <input name="clinicCode" id="clinicCode" class="form-control" maxlength="32" autocomplete="organization" />
+        <div class="form-text">مطلوب لكل فريق العيادة. أدمن الموقع يتركه فارغًا.</div>
+    </div>
                 @Html.AntiForgeryToken()
 
                 <div class="mb-4">
@@ -122,7 +128,7 @@
                     <select class="form-select form-select-lg" id="userType" name="userType" required>
                         <option value="">-- Select User Type --</option>
                         <option value="Admin">
-                            <i class="fas fa-user-shield"></i> Administrator
+                            <i class="fas fa-user-shield"></i> Site Administrator
                         </option>
                         <option value="Doctor">
                             <i class="fas fa-user-md"></i> Doctor

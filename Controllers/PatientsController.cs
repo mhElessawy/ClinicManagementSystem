@@ -26,20 +26,6 @@ namespace ClinicManagementSystem.Controllers
 
             IQueryable<Patient> patientsQuery = _context.Patients.Include(p => p.Doctor);
 
-            // Filter patients based on user type (includes doctor group members)
-            if (userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION)
-            {
-                if (doctorId.HasValue)
-                {
-                    var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
-                    patientsQuery = patientsQuery.Where(p => p.DoctorId.HasValue && groupDoctorIds.Contains(p.DoctorId.Value));
-                }
-                else
-                {
-                    return View(new List<Patient>());
-                }
-            }
-
             // Apply search filters
             if (!string.IsNullOrEmpty(searchName))
             {
@@ -98,7 +84,7 @@ namespace ClinicManagementSystem.Controllers
                 var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
                 if (!patient.DoctorId.HasValue || !groupDoctorIds.Contains(patient.DoctorId.Value))
                 {
-                    ModelState.AddModelError("DoctorId", "íÌÈ ÇÎÊíÇÑ ØÈíÈ ãä ÇáãÌãæÚÉ");
+                    ModelState.AddModelError("DoctorId", "ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
                 }
             }
 
@@ -288,19 +274,7 @@ namespace ClinicManagementSystem.Controllers
 
         private async Task<bool> CanAccessPatientAsync(Patient patient)
         {
-            var userType = SessionHelper.GetUserType(HttpContext.Session);
-            var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
-
-            if (userType == SessionHelper.TYPE_ADMIN)
-                return true;
-
-            if ((userType == SessionHelper.TYPE_DOCTOR || userType == SessionHelper.TYPE_ASSISTANT || userType == SessionHelper.TYPE_RECEPTION) && doctorId.HasValue)
-            {
-                var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
-                return patient.DoctorId.HasValue && groupDoctorIds.Contains(patient.DoctorId.Value);
-            }
-
-            return false;
+            return await _context.Patients.AnyAsync(p => p.Id == patient.Id);
         }
     }
 }

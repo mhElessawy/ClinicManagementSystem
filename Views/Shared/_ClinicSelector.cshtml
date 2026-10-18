@@ -1,0 +1,16 @@
+@using Microsoft.EntityFrameworkCore
+@inject ClinicManagementSystem.Models.ApplicationDbContext ClinicDb
+@if (ClinicManagementSystem.Helpers.SessionHelper.IsSuperAdmin(Context.Session))
+{
+    <div class="mb-3">
+        <label for="ClinicId" class="form-label">العيادة التابعة لها البيانات</label>
+        <select name="ClinicId" id="ClinicId" class="form-select">
+            <option value="">-- اختر العيادة --</option>
+            @foreach (var clinic in await ClinicDb.Clinics.OrderBy(c => c.Name).ToListAsync())
+            {
+                <option value="@clinic.Id">@clinic.Name (@clinic.Code)</option>
+            }
+        </select>
+        <span class="form-text">مطلوب للبيانات التابعة لعيادة. حساب أدمن الموقع وحده يُترك بدون عيادة.</span>
+    </div>
+}

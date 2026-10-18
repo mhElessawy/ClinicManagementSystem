@@ -5,7 +5,9 @@ using ClinicManagementSystem.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+    options.Filters.Add<ClinicManagementSystem.Helpers.ClinicAccessFilter>());
+builder.Services.AddDistributedMemoryCache();
 
 // Add File Processing Service for image resizing
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
@@ -60,13 +62,20 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+// Patient attachments must go through clinic authorization, including inline images/PDFs.
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/PatientFile", StringComparison.OrdinalIgnoreCase),
+    branch => branch.UseStaticFiles());
 
 app.UseRouting();
 
 app.UseSession();
 
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "patient-files",
+    pattern: "PatientFile/{fileName}",
+    defaults: new { controller = "PatientFiles", action = "Download" });
 
 app.MapControllerRoute(
     name: "default",

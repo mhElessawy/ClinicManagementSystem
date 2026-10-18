@@ -1,0 +1,25 @@
+@model ClinicManagementSystem.Models.ClinicRegistration
+@{ ViewData["Title"] = "تسجيل عيادة جديدة"; }
+<div class="card shadow-sm mx-auto" style="max-width:760px" dir="rtl">
+    <div class="card-header"><h2>تسجيل عيادة جديدة</h2></div>
+    <div class="card-body">
+        <p>سجّل بيانات العيادة وحساب مديرها. بعد التسجيل سيظهر كود العيادة لاستخدامه عند دخول المدير والأطباء والمساعدين والاستقبال.</p>
+        <form asp-action="RegisterClinic" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="row g-3">
+                <div class="col-md-6"><label asp-for="Name"></label><input asp-for="Name" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Phone"></label><input asp-for="Phone" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Email"></label><input asp-for="Email" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Address"></label><input asp-for="Address" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="ManagerName"></label><input asp-for="ManagerName" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Username"></label><input asp-for="Username" class="form-control" autocomplete="username" dir="ltr" /></div>
+                <div class="col-md-6"><label asp-for="Password"></label><input asp-for="Password" class="form-control" autocomplete="new-password" /></div>
+                <div class="col-md-6"><label asp-for="ConfirmPassword"></label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" /></div>
+            </div>
+            <p class="form-text">كلمة المرور 8 أحرف على الأقل. احتفظ بكود العيادة الذي سيظهر بعد التسجيل.</p>
+            <button class="btn btn-primary mt-3" type="submit">تسجيل العيادة</button>
+            <a asp-action="Login" class="btn btn-outline-secondary mt-3">تسجيل الدخول</a>
+        </form>
+    </div>
+</div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

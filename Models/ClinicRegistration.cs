@@ -1,0 +1,33 @@
+using System.ComponentModel.DataAnnotations;
+
+namespace ClinicManagementSystem.Models;
+
+public class ClinicRegistration
+{
+    [Required, StringLength(100), Display(Name = "اسم العيادة")]
+    public string Name { get; set; } = string.Empty;
+    [StringLength(200), Display(Name = "العنوان")]
+    public string? Address { get; set; }
+    [Required, StringLength(20), Display(Name = "التليفون")]
+    public string Phone { get; set; } = string.Empty;
+    [Required, EmailAddress, StringLength(100), Display(Name = "البريد الإلكتروني")]
+    public string Email { get; set; } = string.Empty;
+    [Required, StringLength(100), Display(Name = "اسم مدير العيادة")]
+    public string ManagerName { get; set; } = string.Empty;
+    [Required, StringLength(50), RegularExpression(@"[a-zA-Z0-9_.-]+"), Display(Name = "اسم المستخدم")]
+    public string Username { get; set; } = string.Empty;
+    [Required, StringLength(72, MinimumLength = 8), DataType(DataType.Password), Display(Name = "كلمة المرور")]
+    public string Password { get; set; } = string.Empty;
+    [Required, Compare(nameof(Password)), DataType(DataType.Password), Display(Name = "تأكيد كلمة المرور")]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
+
+public class ClinicDetails
+{
+    public Clinic Clinic { get; set; } = null!;
+    public List<UserInfo> Managers { get; set; } = new();
+    public List<DoctorInfo> Doctors { get; set; } = new();
+    public List<DoctorAssist> Assistants { get; set; } = new();
+    public List<DoctorReception> Receptionists { get; set; } = new();
+    public List<Patient> Patients { get; set; } = new();
+}
