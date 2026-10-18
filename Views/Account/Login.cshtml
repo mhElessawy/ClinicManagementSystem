@@ -112,12 +112,12 @@
                 </div>
             }
 
-            <div class="mb-3 text-center"><a asp-action="RegisterClinic">تسجيل عيادة جديدة</a></div>
+            <div class="mb-3 text-center"><a asp-action="RegisterClinic">Register a New Clinic</a></div>
 <form method="post" asp-action="Login">
     <div class="mb-3">
-        <label for="clinicCode" class="form-label">كود العيادة</label>
+        <label for="clinicCode" class="form-label">Clinic Code</label>
         <input name="clinicCode" id="clinicCode" class="form-control" maxlength="32" autocomplete="organization" />
-        <div class="form-text">مطلوب لكل فريق العيادة. أدمن الموقع يتركه فارغًا.</div>
+        <div class="form-text">Required for all clinic staff. Site administrators should leave this blank.</div>
     </div>
                 @Html.AntiForgeryToken()
 

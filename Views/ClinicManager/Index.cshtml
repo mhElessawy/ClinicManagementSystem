@@ -101,9 +101,9 @@
 
 @if (ViewBag.Clinic is ClinicManagementSystem.Models.Clinic clinic)
 {
-    <div class="alert alert-info mt-4" dir="rtl">
+    <div class="alert alert-info mt-4" dir="ltr">
         <h4>@clinic.Name</h4>
-        <p>كود العيادة: <strong>@clinic.Code</strong> — يستخدمه كل فريق العيادة عند تسجيل الدخول.</p>
-        <a asp-controller="Patients" asp-action="Index" class="btn btn-primary">مرضى العيادة (@ViewBag.TotalPatients)</a>
+        <p>Clinic Code: <strong>@clinic.Code</strong> — all clinic staff use this code when signing in.</p>
+        <a asp-controller="Patients" asp-action="Index" class="btn btn-primary">Clinic Patients (@ViewBag.TotalPatients)</a>
     </div>
 }

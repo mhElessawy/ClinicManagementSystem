@@ -3,14 +3,14 @@
 @if (ClinicManagementSystem.Helpers.SessionHelper.IsSuperAdmin(Context.Session))
 {
     <div class="mb-3">
-        <label for="ClinicId" class="form-label">العيادة التابعة لها البيانات</label>
+        <label for="ClinicId" class="form-label">Clinic</label>
         <select name="ClinicId" id="ClinicId" class="form-select">
-            <option value="">-- اختر العيادة --</option>
+            <option value="">-- Select Clinic --</option>
             @foreach (var clinic in await ClinicDb.Clinics.OrderBy(c => c.Name).ToListAsync())
             {
                 <option value="@clinic.Id">@clinic.Name (@clinic.Code)</option>
             }
         </select>
-        <span class="form-text">مطلوب للبيانات التابعة لعيادة. حساب أدمن الموقع وحده يُترك بدون عيادة.</span>
+        <span class="form-text">Required for clinic records. Only site administrator accounts can be created without a clinic.</span>
     </div>
 }

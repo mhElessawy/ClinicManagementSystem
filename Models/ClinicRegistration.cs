@@ -4,21 +4,21 @@ namespace ClinicManagementSystem.Models;
 
 public class ClinicRegistration
 {
-    [Required, StringLength(100), Display(Name = "اسم العيادة")]
+    [Required, StringLength(100), Display(Name = "Clinic Name")]
     public string Name { get; set; } = string.Empty;
-    [StringLength(200), Display(Name = "العنوان")]
+    [StringLength(200), Display(Name = "Address")]
     public string? Address { get; set; }
-    [Required, StringLength(20), Display(Name = "التليفون")]
+    [Required, StringLength(20), Display(Name = "Phone")]
     public string Phone { get; set; } = string.Empty;
-    [Required, EmailAddress, StringLength(100), Display(Name = "البريد الإلكتروني")]
+    [Required, EmailAddress, StringLength(100), Display(Name = "Email Address")]
     public string Email { get; set; } = string.Empty;
-    [Required, StringLength(100), Display(Name = "اسم مدير العيادة")]
+    [Required, StringLength(100), Display(Name = "Clinic Manager Name")]
     public string ManagerName { get; set; } = string.Empty;
-    [Required, StringLength(50), RegularExpression(@"[a-zA-Z0-9_.-]+"), Display(Name = "اسم المستخدم")]
+    [Required, StringLength(50), RegularExpression(@"[a-zA-Z0-9_.-]+"), Display(Name = "Username")]
     public string Username { get; set; } = string.Empty;
-    [Required, StringLength(72, MinimumLength = 8), DataType(DataType.Password), Display(Name = "كلمة المرور")]
+    [Required, StringLength(72, MinimumLength = 8), DataType(DataType.Password), Display(Name = "Password")]
     public string Password { get; set; } = string.Empty;
-    [Required, Compare(nameof(Password)), DataType(DataType.Password), Display(Name = "تأكيد كلمة المرور")]
+    [Required, Compare(nameof(Password)), DataType(DataType.Password), Display(Name = "Confirm Password")]
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 

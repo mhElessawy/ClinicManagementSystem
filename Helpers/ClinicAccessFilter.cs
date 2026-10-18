@@ -67,7 +67,7 @@ public sealed class ClinicAccessFilter(ApplicationDbContext db) : IAsyncActionFi
         {
             foreach (var owned in context.ActionArguments.Values.OfType<IClinicOwned>())
                 if (owned.ClinicId == null && owned is not UserInfo { RoleId: 1 })
-                    context.ModelState.AddModelError("ClinicId", "اختر العيادة التابعة لها البيانات.");
+                    context.ModelState.AddModelError("ClinicId", "Select the clinic that owns this record.");
         }
 
         if (HttpMethods.IsPost(context.HttpContext.Request.Method) && controller == "ClinicManager")
@@ -85,11 +85,11 @@ public sealed class ClinicAccessFilter(ApplicationDbContext db) : IAsyncActionFi
                 var (id, username, password, canLogin, type) = credentials;
                 if (type == null) continue;
                 if (canLogin && string.IsNullOrWhiteSpace(username))
-                    context.ModelState.AddModelError("LoginUsername", "اسم المستخدم مطلوب لتفعيل الدخول.");
+                    context.ModelState.AddModelError("LoginUsername", "A username is required to enable login.");
                 if (canLogin && id == 0 && string.IsNullOrWhiteSpace(password))
-                    context.ModelState.AddModelError("LoginPassword", "كلمة المرور مطلوبة لتفعيل الدخول.");
+                    context.ModelState.AddModelError("LoginPassword", "A password is required to enable login.");
                 if (!string.IsNullOrEmpty(password) && (password.Length < 8 || password.Length > 72))
-                    context.ModelState.AddModelError("LoginPassword", "كلمة المرور بين 8 و72 حرفًا.");
+                    context.ModelState.AddModelError("LoginPassword", "The password must be between 8 and 72 characters long.");
                 if (string.IsNullOrWhiteSpace(username)) continue;
                 var duplicate = type switch
                 {
@@ -97,7 +97,7 @@ public sealed class ClinicAccessFilter(ApplicationDbContext db) : IAsyncActionFi
                     "Assistant" => await db.DoctorAssists.AnyAsync(d => d.Id != id && d.LoginUsername == username),
                     _ => await db.DoctorReceptions.AnyAsync(d => d.Id != id && d.LoginUsername == username)
                 };
-                if (duplicate) context.ModelState.AddModelError("LoginUsername", "اسم المستخدم موجود بالفعل في العيادة.");
+                if (duplicate) context.ModelState.AddModelError("LoginUsername", "This username is already used in your clinic.");
             }
         }
         await next();

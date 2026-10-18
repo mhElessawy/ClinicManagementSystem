@@ -11,7 +11,7 @@ public class LoginService
 
     public async Task<LoginResult> AuthenticateAsync(string username, string password, string userType, string? clinicCode)
     {
-        var failure = new LoginResult { ErrorMessage = "بيانات الدخول أو كود العيادة غير صحيح." };
+        var failure = new LoginResult { ErrorMessage = "Invalid credentials or clinic code." };
         username = username.Trim();
         int? clinicId = null;
         if (userType != SessionHelper.TYPE_ADMIN)

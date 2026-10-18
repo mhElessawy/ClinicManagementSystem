@@ -1,6 +1,6 @@
 @model ClinicManagementSystem.Models.UserInfo
 @{
-    ViewData["Title"] = "تعديل بيانات المستخدم";
+    ViewData["Title"] = "Edit User";
 }
 <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -24,7 +24,7 @@
                         <label asp-for="UserPassword" class="form-label"></label>
                         <input asp-for="UserPassword" type="password" class="form-control" />
                         <span asp-validation-for="UserPassword" class="text-danger"></span>
-                        <small class="text-muted">اترك فارغاً للإبقاء على كلمة المرور الحالية</small>
+                        <small class="text-muted">Leave blank to keep the current password</small>
                     </div>
 
                     <div class="mb-3">
@@ -72,8 +72,8 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> حفظ التعديلات</button>
-                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع</a>
+                        <button type="submit" class="btn btn-warning"><i class="fas fa-save"></i> Save Changes</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                     </div>
                 </form>
             </div>

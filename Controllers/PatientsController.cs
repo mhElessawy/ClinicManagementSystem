@@ -84,7 +84,7 @@ namespace ClinicManagementSystem.Controllers
                 var groupDoctorIds = await _context.GetGroupDoctorIdsAsync(doctorId.Value);
                 if (!patient.DoctorId.HasValue || !groupDoctorIds.Contains(patient.DoctorId.Value))
                 {
-                    ModelState.AddModelError("DoctorId", "��� ������ ���� �� ��������");
+                    ModelState.AddModelError("DoctorId", "Select a doctor from your clinic.");
                 }
             }
 

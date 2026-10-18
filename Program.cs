@@ -8,6 +8,14 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews(options =>
     options.Filters.Add<ClinicManagementSystem.Helpers.ClinicAccessFilter>());
 builder.Services.AddDistributedMemoryCache();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var english = System.Globalization.CultureInfo.GetCultureInfo("en-US");
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture(english);
+    options.SupportedCultures = new[] { english };
+    options.SupportedUICultures = new[] { english };
+    options.RequestCultureProviders.Clear();
+});
 
 // Add File Processing Service for image resizing
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
@@ -62,6 +70,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRequestLocalization();
 // Patient attachments must go through clinic authorization, including inline images/PDFs.
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/PatientFile", StringComparison.OrdinalIgnoreCase),
     branch => branch.UseStaticFiles());

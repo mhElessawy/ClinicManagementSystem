@@ -62,7 +62,7 @@ namespace ClinicManagementSystem.Controllers
                 UserTel = registration.Phone, RoleId = 6, Clinic = clinic, Group = group, Active = true
             };
             await _context.RegisterClinicAsync(clinic, group, manager);
-            TempData["Success"] = $"تم تسجيل العيادة بنجاح. احتفظ بكود العيادة: {clinic.Code} — استخدمه مع اسم المستخدم وكلمة المرور للدخول كمدير عيادة.";
+            TempData["Success"] = $"Clinic registered successfully. Save your clinic code: {clinic.Code} — use it with your username and password to log in as Clinic Manager.";
             return RedirectToAction(nameof(Login));
         }
         [HttpGet]
