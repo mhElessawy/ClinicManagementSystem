@@ -1,247 +1,116 @@
 using ClinicManagementSystem.Models;
+using ClinicManagementSystem.Helpers;
 using Microsoft.EntityFrameworkCore;
 
-namespace ClinicManagementSystem.Services
-{
-    public class LoginService
-    {
-        private readonly ApplicationDbContext _context;
+namespace ClinicManagementSystem.Services;
 
-        public LoginService(ApplicationDbContext context)
+public class LoginService
+{
+    private readonly ApplicationDbContext _context;
+    public LoginService(ApplicationDbContext context) => _context = context;
+
+    public async Task<LoginResult> AuthenticateAsync(string username, string password, string userType, string? clinicCode)
+    {
+        var failure = new LoginResult { ErrorMessage = "Invalid credentials or clinic code." };
+        username = username.Trim();
+        int? clinicId = null;
+        if (userType != SessionHelper.TYPE_ADMIN)
         {
-            _context = context;
+            var code = clinicCode?.Trim().ToUpperInvariant();
+            if (string.IsNullOrEmpty(code)) return failure;
+            clinicId = await _context.Clinics.Where(c => c.Code == code && c.Active)
+                .Select(c => (int?)c.Id).SingleOrDefaultAsync();
+            if (clinicId == null) return failure;
         }
 
-        public async Task<LoginResult> AuthenticateAsync(string username, string password)
+        if (userType == SessionHelper.TYPE_ADMIN || userType == SessionHelper.TYPE_CLINIC_MANAGER)
         {
-            // Try UserInfo (Admin/Staff/ClinicManager)
-            var user = await _context.UserInfos
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(u => u.UserName == username && u.Active);
-
-            if (user != null)
-            {
-                // TEMPORARY: Accept both BCrypt and plain text for testing
-                bool isValid = false;
-
-                try
-                {
-                    // Try BCrypt first
-                    isValid = BCrypt.Net.BCrypt.Verify(password, user.UserPassword);
-                }
-                catch
-                {
-                    // If BCrypt fails, try plain text comparison (TEMPORARY)
-                    isValid = user.UserPassword == password;
-                }
-
-                if (isValid)
-                {
-                    // Clinic Manager gets its own session type
-                    var userType = (user.RoleId == 6)
-                        ? Helpers.SessionHelper.TYPE_CLINIC_MANAGER
-                        : Helpers.SessionHelper.TYPE_ADMIN;
-
-                    return new LoginResult
-                    {
-                        Success = true,
-                        UserId = user.Id,
-                        UserName = user.UserName,
-                        FullName = user.UserFullName ?? user.UserName,
-                        UserType = userType,
-                        RoleId = user.RoleId,
-                        GroupId = user.GroupId
-                    };
-                }
-            }
-
-            // Try DoctorInfo
-            var doctor = await _context.DoctorInfos
-                .Include(d => d.Subscriptions)
-                .FirstOrDefaultAsync(d => d.LoginUsername == username && d.CanLogin && d.Active);
-
-            if (doctor != null && !string.IsNullOrEmpty(doctor.LoginPassword))
-            {
-                bool isValid = false;
-
-                try
-                {
-                    isValid = BCrypt.Net.BCrypt.Verify(password, doctor.LoginPassword);
-                }
-                catch
-                {
-                    isValid = doctor.LoginPassword == password;
-                }
-
-                if (isValid)
-                {
-                    // Check if doctor has valid subscription
-                    var today = DateTime.Today;
-
-                    // Debug: Check subscriptions
-                    if (doctor.Subscriptions == null || !doctor.Subscriptions.Any())
-                    {
-                        return new LoginResult
-                        {
-                            Success = false,
-                            ErrorMessage = "No subscription found. Please contact administration to add a subscription for your account."
-                        };
-                    }
-
-                    var hasValidSubscription = doctor.Subscriptions.Any(s =>
-                        s.IsActive &&
-                        s.StartDate <= today &&
-                        s.EndDate >= today);
-
-                    if (!hasValidSubscription)
-                    {
-                        // Find the most recent subscription to provide better error message
-                        var latestSubscription = doctor.Subscriptions
-                            .OrderByDescending(s => s.EndDate)
-                            .FirstOrDefault();
-
-                        if (latestSubscription != null)
-                        {
-                            if (!latestSubscription.IsActive)
-                            {
-                                return new LoginResult
-                                {
-                                    Success = false,
-                                    ErrorMessage = "Your subscription is inactive. Please contact administration to activate your subscription."
-                                };
-                            }
-                            else if (latestSubscription.StartDate > today)
-                            {
-                                return new LoginResult
-                                {
-                                    Success = false,
-                                    ErrorMessage = $"Your subscription will start on {latestSubscription.StartDate:yyyy-MM-dd}. Please contact administration if this is incorrect."
-                                };
-                            }
-                            else if (latestSubscription.EndDate < today)
-                            {
-                                return new LoginResult
-                                {
-                                    Success = false,
-                                    ErrorMessage = $"Your subscription expired on {latestSubscription.EndDate:yyyy-MM-dd}. Please contact administration to renew your subscription."
-                                };
-                            }
-                        }
-
-                        return new LoginResult
-                        {
-                            Success = false,
-                            ErrorMessage = "Your subscription has expired. Please contact administration to renew your subscription."
-                        };
-                    }
-
-                    // Update last login
-                    doctor.LastLoginDate = DateTime.Now;
-                    await _context.SaveChangesAsync();
-
-                    return new LoginResult
-                    {
-                        Success = true,
-                        UserId = doctor.Id,
-                        UserName = doctor.LoginUsername!,
-                        FullName = doctor.DoctorName,
-                        UserType = Helpers.SessionHelper.TYPE_DOCTOR,
-                        DoctorId = doctor.Id
-                    };
-                }
-            }
-
-            // Try DoctorAssist
-            var assistant = await _context.DoctorAssists
-                .Include(a => a.Doctor)
-                .FirstOrDefaultAsync(a => a.LoginUsername == username && a.CanLogin && a.Active);
-
-            if (assistant != null && !string.IsNullOrEmpty(assistant.LoginPassword))
-            {
-                bool isValid = false;
-
-                try
-                {
-                    isValid = BCrypt.Net.BCrypt.Verify(password, assistant.LoginPassword);
-                }
-                catch
-                {
-                    isValid = assistant.LoginPassword == password;
-                }
-
-                if (isValid)
-                {
-                    // Update last login
-                    assistant.LastLoginDate = DateTime.Now;
-                    await _context.SaveChangesAsync();
-
-                    return new LoginResult
-                    {
-                        Success = true,
-                        UserId = assistant.Id,
-                        UserName = assistant.LoginUsername!,
-                        FullName = assistant.AssistName,
-                        UserType = Helpers.SessionHelper.TYPE_ASSISTANT,
-                        DoctorId = assistant.DoctorId
-                    };
-                }
-            }
-
-            // Try DoctorReception
-            var reception = await _context.DoctorReceptions
-                .Include(r => r.Doctor)
-                .FirstOrDefaultAsync(r => r.LoginUsername == username && r.CanLogin && r.Active);
-
-            if (reception != null && !string.IsNullOrEmpty(reception.LoginPassword))
-            {
-                bool isValid = false;
-
-                try
-                {
-                    isValid = BCrypt.Net.BCrypt.Verify(password, reception.LoginPassword);
-                }
-                catch
-                {
-                    isValid = reception.LoginPassword == password;
-                }
-
-                if (isValid)
-                {
-                    // Update last login
-                    reception.LastLoginDate = DateTime.Now;
-                    await _context.SaveChangesAsync();
-
-                    return new LoginResult
-                    {
-                        Success = true,
-                        UserId = reception.Id,
-                        UserName = reception.LoginUsername!,
-                        FullName = reception.ReceptionName,
-                        UserType = Helpers.SessionHelper.TYPE_RECEPTION,
-                        DoctorId = reception.DoctorId
-                    };
-                }
-            }
-
-            // Authentication failed
+            var user = await _context.UserInfos.IgnoreQueryFilters().FirstOrDefaultAsync(u =>
+                u.UserName == username && u.Active && u.ClinicId == clinicId &&
+                (userType == SessionHelper.TYPE_ADMIN ? u.RoleId == 1 : u.RoleId == 6));
+            if (user == null || !Verify(password, user.UserPassword)) return failure;
             return new LoginResult
             {
-                Success = false,
-                ErrorMessage = "Invalid username or password"
+                Success = true,
+                UserId = user.Id,
+                UserName = user.UserName,
+                FullName = user.UserFullName ?? user.UserName,
+                UserType = userType,
+                RoleId = user.RoleId,
+                GroupId = user.GroupId,
+                ClinicId = clinicId
             };
         }
+        if (userType == SessionHelper.TYPE_DOCTOR)
+        {
+            var doctor = await _context.DoctorInfos.IgnoreQueryFilters().FirstOrDefaultAsync(d =>
+                d.ClinicId == clinicId && d.LoginUsername == username && d.Active && d.CanLogin);
+            if (doctor == null || !Verify(password, doctor.LoginPassword)) return failure;
+            // The clinic account owns access; doctors no longer need individual subscriptions.
+            return new LoginResult
+            {
+                Success = true,
+                UserId = doctor.Id,
+                UserName = doctor.LoginUsername,
+                FullName = doctor.DoctorName,
+                UserType = userType,
+                DoctorId = doctor.Id,
+                ClinicId = clinicId
+            };
+        }
+        if (userType == SessionHelper.TYPE_ASSISTANT)
+        {
+            var assistant = await _context.DoctorAssists.IgnoreQueryFilters().FirstOrDefaultAsync(a =>
+                a.ClinicId == clinicId && a.LoginUsername == username && a.Active && a.CanLogin);
+            if (assistant == null || !Verify(password, assistant.LoginPassword)) return failure;
+            return new LoginResult
+            {
+                Success = true,
+                UserId = assistant.Id,
+                UserName = assistant.LoginUsername,
+                FullName = assistant.AssistName,
+                UserType = userType,
+                DoctorId = assistant.DoctorId,
+                ClinicId = clinicId
+            };
+        }
+        if (userType == SessionHelper.TYPE_RECEPTION)
+        {
+            var reception = await _context.DoctorReceptions.IgnoreQueryFilters().FirstOrDefaultAsync(r =>
+                r.ClinicId == clinicId && r.LoginUsername == username && r.Active && r.CanLogin);
+            if (reception == null || !Verify(password, reception.LoginPassword)) return failure;
+            return new LoginResult
+            {
+                Success = true,
+                UserId = reception.Id,
+                UserName = reception.LoginUsername,
+                FullName = reception.ReceptionName,
+                UserType = userType,
+                DoctorId = reception.DoctorId,
+                ClinicId = clinicId
+            };
+        }
+        return failure;
     }
 
-    public class LoginResult
+    private static bool Verify(string password, string? hash)
     {
-        public bool Success { get; set; }
-        public int UserId { get; set; }
-        public string? UserName { get; set; }
-        public string? FullName { get; set; }
-        public string? UserType { get; set; }
-        public int? DoctorId { get; set; }
-        public int? RoleId { get; set; }
-        public int? GroupId { get; set; }
-        public string? ErrorMessage { get; set; }
+        if (string.IsNullOrEmpty(hash)) return false;
+        try { return BCrypt.Net.BCrypt.Verify(password, hash); }
+        catch (BCrypt.Net.SaltParseException) { return hash == password; } // Existing accounts only.
     }
+}
+
+public class LoginResult
+{
+    public bool Success { get; set; }
+    public int UserId { get; set; }
+    public string? UserName { get; set; }
+    public string? FullName { get; set; }
+    public string? UserType { get; set; }
+    public int? DoctorId { get; set; }
+    public int? RoleId { get; set; }
+    public int? GroupId { get; set; }
+    public int? ClinicId { get; set; }
+    public string? ErrorMessage { get; set; }
 }

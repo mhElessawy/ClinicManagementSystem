@@ -1,6 +1,6 @@
 @model ClinicManagementSystem.Models.UserInfo
 @{
-    ViewData["Title"] = "إضافة مستخدم جديد";
+    ViewData["Title"] = "Add a New User";
 }
 <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -11,8 +11,9 @@
             <div class="card-body">
                 <form asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <partial name="_ClinicSelector" />
+
                     <div class="mb-3">
                         <label asp-for="UserName" class="form-label"></label>
                         <input asp-for="UserName" class="form-control" />
@@ -70,8 +71,8 @@
                     </div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ</button>
-                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                     </div>
                 </form>
             </div>
@@ -79,7 +80,9 @@
     </div>
 </div>
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
         function toggleGroupField() {
             var roleSelect = document.getElementById('roleSelect');

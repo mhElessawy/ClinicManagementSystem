@@ -1,12 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ClinicManagementSystem.Models
 {
-    public class PatientInvoice
+    public class PatientInvoice : IClinicOwned
     {
         [Key]
         public int Id { get; set; }
+
+        public int? ClinicId { get; set; }
+        public virtual Clinic? Clinic { get; set; }
 
         [Required]
         [StringLength(50)]

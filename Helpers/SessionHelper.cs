@@ -23,6 +23,7 @@ namespace ClinicManagementSystem.Helpers
         // Set Session
         public static void SetUserSession(ISession session, int userId, string userName, string userType, string fullName, int? doctorId = null, int? roleId = null, int? groupId = null)
         {
+            session.Clear();
             session.SetInt32(USER_ID, userId);
             session.SetString(USER_NAME, userName);
             session.SetString(USER_TYPE, userType);
@@ -75,6 +76,9 @@ namespace ClinicManagementSystem.Helpers
         }
 
         // Check User Type
+        public static bool IsSuperAdmin(ISession session) =>
+            IsAdmin(session) && GetRoleId(session) == 1 && !session.GetInt32("ClinicId").HasValue;
+
         public static bool IsAdmin(ISession session)
         {
             return GetUserType(session) == TYPE_ADMIN;

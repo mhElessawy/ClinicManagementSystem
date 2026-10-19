@@ -3,10 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ClinicManagementSystem.Models
 {
-    public class Appointment
+    public class Appointment : IClinicOwned
     {
         [Key]
         public int Id { get; set; }
+
+        public int? ClinicId { get; set; }
+        public virtual Clinic? Clinic { get; set; }
 
         [Required]
         [Display(Name = "Patient")]

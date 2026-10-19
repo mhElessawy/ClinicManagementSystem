@@ -1,11 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace ClinicManagementSystem.Models
 {
-    public class DoctorSubscription
+    public class DoctorSubscription : IClinicOwned
     {
         [Key]
         public int Id { get; set; }
+
+        public int? ClinicId { get; set; }
+        public virtual Clinic? Clinic { get; set; }
         [Required(ErrorMessage = "Doctor is required")]
         [Display(Name = "Doctor")]
         public int DoctorId { get; set; }

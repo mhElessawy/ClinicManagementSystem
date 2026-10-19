@@ -14,16 +14,18 @@
             <table class="table table-striped table-hover">
                 <thead class="table-primary">
                     <tr>
-                        <th>م</th>
+                        <th>#</th>
                         <th>@Html.DisplayNameFor(model => model.AssistName)</th>
                         <th>@Html.DisplayNameFor(model => model.Doctor)</th>
                         <th>@Html.DisplayNameFor(model => model.AssistTel1)</th>
                         <th>@Html.DisplayNameFor(model => model.Active)</th>
-                        <th>الإجراءات</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @{ int counter = 1; }
+                    @{
+                        int counter = 1;
+                    }
                     @foreach (var item in Model)
                     {
                         <tr>

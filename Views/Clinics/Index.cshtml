@@ -1,0 +1,30 @@
+@model IEnumerable<ClinicManagementSystem.Models.Clinic>
+@{
+    ViewData["Title"] = "Clinic Management";
+}
+<div dir="ltr">
+    <h2>Registered Clinics</h2>
+    <p>Open a clinic to view its accounts, doctors and specialties, assistants, receptionists and patients.</p>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle">
+            <thead><tr><th>Clinic</th><th>Code</th><th>Phone</th><th>Email</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+                @foreach (var clinic in Model)
+                {
+                    <tr>
+                        <td>@clinic.Name</td>
+                        <td><code>@clinic.Code</code></td>
+                        <td>@clinic.Phone</td>
+                        <td>@clinic.Email</td>
+                        <td>@(clinic.Active ? "Active" : "Disabled")</td>
+                        <td><a asp-action="Details" asp-route-id="@clinic.Id" class="btn btn-sm btn-primary">Clinic Details</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    @if (!Model.Any())
+    {
+        <div class="alert alert-info">No clinics have registered yet.</div>
+    }
+</div>

@@ -1,6 +1,6 @@
 @model ClinicManagementSystem.Models.Patient
 @{
-    ViewData["Title"] = "إضافة مريض جديد";
+    ViewData["Title"] = "Add a New Patient";
 }
 <div class="row">
     <div class="col-md-8 offset-md-2">
@@ -11,7 +11,8 @@
             <div class="card-body">
                 <form asp-action="Create" method="post">
                     @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                    <partial name="_ClinicSelector" />
                     <div class="mb-3">
                         <label asp-for="PatientName" class="form-label"></label>
                         <input asp-for="PatientName" class="form-control" />
@@ -55,12 +56,12 @@
                     <div class="mb-3">
                         <label asp-for="DoctorId" class="form-label"></label>
                         <select asp-for="DoctorId" asp-items="ViewBag.DoctorId" class="form-control">
-                            <option value="">-- اختر الطبيب --</option>
+                            <option value="">-- Select Doctor --</option>
                         </select>
                     </div>
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> حفظ</button>
-                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> رجوع</a>
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Save</button>
+                        <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Back</a>
                     </div>
                 </form>
             </div>

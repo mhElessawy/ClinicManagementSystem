@@ -39,7 +39,7 @@
             <table class="table table-striped table-hover">
                 <thead class="table-primary">
                     <tr>
-                        <th>م</th>
+                        <th>#</th>
                         <th>@Html.DisplayNameFor(model => model.PatientName)</th>
                         <th>@Html.DisplayNameFor(model => model.PatientCivilID)</th>
                         <th>@Html.DisplayNameFor(model => model.BirthDate)</th>
@@ -63,7 +63,7 @@
                             <td>
                                 @if (item.Age.HasValue)
                                 {
-                                    <span class="badge bg-info">@item.Age سنة</span>
+                                    <span class="badge bg-info">@item.Age years</span>
                                 }
                                 else
                                 {

@@ -1,0 +1,32 @@
+@model ClinicManagementSystem.Models.ClinicRegistration
+@{
+    ViewData["Title"] = "Register a New Clinic";
+}
+<div class="card shadow-sm mx-auto" style="max-width:760px" dir="ltr">
+    <div class="card-header"><h2>Register a New Clinic</h2></div>
+    <div class="card-body">
+        <p>Register your clinic and its manager account. After registration, you will receive a clinic code for the manager, doctors, assistants and receptionists to use when signing in.</p>
+        <form asp-action="RegisterClinic" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="row g-3">
+                <div class="col-md-6"><label asp-for="Name"></label><input asp-for="Name" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Phone"></label><input asp-for="Phone" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Email"></label><input asp-for="Email" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Address"></label><input asp-for="Address" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="ManagerName"></label><input asp-for="ManagerName" class="form-control" /></div>
+                <div class="col-md-6"><label asp-for="Username"></label><input asp-for="Username" class="form-control" autocomplete="username" dir="ltr" /></div>
+                <div class="col-md-6"><label asp-for="Password"></label><input asp-for="Password" class="form-control" autocomplete="new-password" /></div>
+                <div class="col-md-6"><label asp-for="ConfirmPassword"></label><input asp-for="ConfirmPassword" class="form-control" autocomplete="new-password" /></div>
+            </div>
+            <p class="form-text">Use a password of at least 8 characters. Save the clinic code displayed after registration.</p>
+            <button class="btn btn-primary mt-3" type="submit">Register Clinic</button>
+            <a asp-action="Login" class="btn btn-outline-secondary mt-3">Log In</a>
+        </form>
+    </div>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+}

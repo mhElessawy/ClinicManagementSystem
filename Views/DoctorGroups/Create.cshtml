@@ -1,4 +1,4 @@
-﻿@model ClinicManagementSystem.Models.DoctorGroup
+@model ClinicManagementSystem.Models.DoctorGroup
 @{
     ViewData["Title"] = "Create Doctor Group";
     var doctors = ViewBag.Doctors as List<ClinicManagementSystem.Models.DoctorInfo>;
@@ -9,7 +9,8 @@
 <div class="card shadow-sm mt-3">
     <div class="card-body">
         <form asp-action="Create" method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
+                    <partial name="_ClinicSelector" />
 
             <div class="row">
                 <div class="col-md-6 mb-3">

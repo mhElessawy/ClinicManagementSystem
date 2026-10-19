@@ -34,112 +34,44 @@ namespace ClinicManagementSystem.Controllers
             return View();
         }
 
-        // GET: Account/Register
+        // Clinic registration replaces public individual-doctor registration.
         [HttpGet]
-        public IActionResult Register()
+        public IActionResult Register() => RedirectToAction(nameof(RegisterClinic));
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public IActionResult Register(DoctorInfo doctor) => RedirectToAction(nameof(RegisterClinic));
+
+        [HttpGet]
+        public IActionResult RegisterClinic() => View(new ClinicRegistration());
+
+        [HttpPost, ValidateAntiForgeryToken]
+        public async Task<IActionResult> RegisterClinic(ClinicRegistration registration)
         {
-            PopulateDropdowns();
-            return View();
+            if (!ModelState.IsValid) return View(registration);
+            var clinic = new Clinic
+            {
+                Name = registration.Name.Trim(),
+                Address = registration.Address,
+                Phone = registration.Phone,
+                Email = registration.Email,
+                Code = "CL-" + Guid.NewGuid().ToString("N")[..12].ToUpperInvariant()
+            };
+            var group = new DoctorGroup { GroupName = clinic.Name, Clinic = clinic };
+            var manager = new UserInfo
+            {
+                UserName = registration.Username.Trim(),
+                UserFullName = registration.ManagerName,
+                UserPassword = BCrypt.Net.BCrypt.HashPassword(registration.Password),
+                UserTel = registration.Phone,
+                RoleId = 6,
+                Clinic = clinic,
+                Group = group,
+                Active = true
+            };
+            await _context.RegisterClinicAsync(clinic, group, manager);
+            TempData["Success"] = $"Clinic registered successfully. Save your clinic code: {clinic.Code} — use it with your username and password to log in as Clinic Manager.";
+            return RedirectToAction(nameof(Login));
         }
-
-        // POST: Account/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(DoctorInfo doctor, string ConfirmPassword, IFormFile? DoctorPictureFile, int? DepartmentId)
-        {
-            // Check if Civil ID already exists
-            if (!string.IsNullOrEmpty(doctor.DoctorCivilId))
-            {
-                var existingCivilId = await _context.DoctorInfos
-                    .AnyAsync(d => d.DoctorCivilId == doctor.DoctorCivilId);
-                if (existingCivilId)
-                {
-                    ModelState.AddModelError("DoctorCivilId", "This Civil ID is already registered");
-                }
-            }
-
-            // Check if Email already exists
-            if (!string.IsNullOrEmpty(doctor.Email))
-            {
-                var existingEmail = await _context.DoctorInfos
-                    .AnyAsync(d => d.Email == doctor.Email);
-                if (existingEmail)
-                {
-                    ModelState.AddModelError("Email", "This Email is already registered");
-                }
-            }
-
-            // Check if Username already exists
-            if (!string.IsNullOrEmpty(doctor.LoginUsername))
-            {
-                var existingUsername = await _context.DoctorInfos
-                    .AnyAsync(d => d.LoginUsername == doctor.LoginUsername);
-                if (existingUsername)
-                {
-                    ModelState.AddModelError("LoginUsername", "This Username is already taken");
-                }
-            }
-
-            // Check password confirmation
-            if (doctor.LoginPassword != ConfirmPassword)
-            {
-                ModelState.AddModelError("ConfirmPassword", "Passwords do not match");
-            }
-
-            // Validate required fields
-            if (string.IsNullOrEmpty(doctor.DoctorCivilId))
-                ModelState.AddModelError("DoctorCivilId", "Civil ID is required");
-
-            if (string.IsNullOrEmpty(doctor.Email))
-                ModelState.AddModelError("Email", "Email is required");
-
-            if (string.IsNullOrEmpty(doctor.LoginUsername))
-                ModelState.AddModelError("LoginUsername", "Username is required");
-
-            if (string.IsNullOrEmpty(doctor.LoginPassword))
-                ModelState.AddModelError("LoginPassword", "Password is required");
-
-            if (ModelState.IsValid)
-            {
-                // Handle image upload with resizing and save to folder
-                if (DoctorPictureFile != null && DoctorPictureFile.Length > 0)
-                {
-                    doctor.DoctorPicture = await _fileProcessingService.SaveDoctorPictureAsync(
-                        DoctorPictureFile, _webHostEnvironment.WebRootPath);
-                }
-
-                // Hash password
-                if (!string.IsNullOrEmpty(doctor.LoginPassword))
-                {
-                    doctor.LoginPassword = BCrypt.Net.BCrypt.HashPassword(doctor.LoginPassword);
-                }
-
-                doctor.CanLogin = true;
-                doctor.Active = false; // Requires admin approval
-                doctor.RegDate = DateTime.Now;
-
-                _context.Add(doctor);
-                await _context.SaveChangesAsync();
-
-                // Send notification email to admin
-                try
-                {
-                    await _emailService.SendDoctorRegistrationNotificationAsync(doctor);
-                }
-                catch (Exception ex)
-                {
-                    // Log the error but don't fail the registration
-                    Console.WriteLine($"Failed to send admin notification email: {ex.Message}");
-                }
-
-                TempData["Success"] = "Registration successful! Please wait for admin approval.";
-                return RedirectToAction(nameof(Login));
-            }
-
-            PopulateDropdowns(doctor.SpecialistId, DepartmentId);
-            return View(doctor);
-        }
-
         [HttpGet]
         public IActionResult Login()
         {
@@ -152,7 +84,7 @@ namespace ClinicManagementSystem.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(string username, string password, string userType)
+        public async Task<IActionResult> Login(string username, string password, string userType, string? clinicCode)
         {
             if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(userType))
             {
@@ -166,7 +98,7 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            var result = await _loginService.AuthenticateAsync(username, password);
+            var result = await _loginService.AuthenticateAsync(username, password, userType, clinicCode);
 
             if (result.Success)
             {
@@ -187,6 +119,8 @@ namespace ClinicManagementSystem.Controllers
                     result.GroupId
                 );
 
+                if (result.ClinicId.HasValue)
+                    HttpContext.Session.SetInt32("ClinicId", result.ClinicId.Value);
                 TempData["Success"] = $"Welcome back, {result.FullName}!";
                 return RedirectToAction("Index", "Home");
             }
@@ -212,7 +146,7 @@ namespace ClinicManagementSystem.Controllers
         // POST: Account/ForgotPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword(string email, string clinicCode)
         {
             if (string.IsNullOrEmpty(email))
             {
@@ -220,7 +154,9 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            var doctor = await _context.DoctorInfos.FirstOrDefaultAsync(d => d.Email == email);
+            var code = clinicCode?.Trim().ToUpperInvariant();
+            var doctor = await _context.DoctorInfos.IgnoreQueryFilters().FirstOrDefaultAsync(d =>
+                d.Email == email && d.Active && d.CanLogin && d.Clinic != null && d.Clinic.Active && d.Clinic.Code == code);
 
             if (doctor == null)
             {
@@ -234,7 +170,9 @@ namespace ClinicManagementSystem.Controllers
             doctor.PasswordResetToken = token;
             doctor.PasswordResetTokenExpiry = DateTime.Now.AddHours(1); // Token valid for 1 hour
 
-            await _context.SaveChangesAsync();
+            await _context.DoctorInfos.IgnoreQueryFilters().Where(d => d.Id == doctor.Id && d.Active && d.Clinic != null && d.Clinic.Active)
+                .ExecuteUpdateAsync(update => update.SetProperty(d => d.PasswordResetToken, token)
+                    .SetProperty(d => d.PasswordResetTokenExpiry, (DateTime?)DateTime.Now.AddHours(1)));
 
             // Generate reset link
             var resetLink = Url.Action("ResetPassword", "Account",
@@ -265,8 +203,8 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            var doctor = await _context.DoctorInfos
-                .FirstOrDefaultAsync(d => d.PasswordResetToken == token &&
+            var doctor = await _context.DoctorInfos.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(d => d.Active && d.Clinic != null && d.Clinic.Active && d.PasswordResetToken == token &&
                                          d.PasswordResetTokenExpiry > DateTime.Now);
 
             if (doctor == null)
@@ -303,14 +241,14 @@ namespace ClinicManagementSystem.Controllers
                 return View();
             }
 
-            if (newPassword.Length < 6)
+            if (newPassword.Length < 8 || newPassword.Length > 72)
             {
-                ViewBag.Error = "Password must be at least 6 characters long";
+                ViewBag.Error = "Password must be between 8 and 72 characters long";
                 return View();
             }
 
-            var doctor = await _context.DoctorInfos
-                .FirstOrDefaultAsync(d => d.PasswordResetToken == token &&
+            var doctor = await _context.DoctorInfos.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(d => d.Active && d.Clinic != null && d.Clinic.Active && d.PasswordResetToken == token &&
                                          d.PasswordResetTokenExpiry > DateTime.Now);
 
             if (doctor == null)
@@ -319,13 +257,18 @@ namespace ClinicManagementSystem.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            // Update password
-            doctor.LoginPassword = BCrypt.Net.BCrypt.HashPassword(newPassword);
-            doctor.PasswordResetToken = null;
-            doctor.PasswordResetTokenExpiry = null;
-
-            await _context.SaveChangesAsync();
-
+            var hash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            var changed = await _context.DoctorInfos.IgnoreQueryFilters().Where(d =>
+                d.Id == doctor.Id && d.PasswordResetToken == token && d.PasswordResetTokenExpiry > DateTime.Now &&
+                d.Active && d.Clinic != null && d.Clinic.Active)
+                .ExecuteUpdateAsync(update => update.SetProperty(d => d.LoginPassword, hash)
+                    .SetProperty(d => d.PasswordResetToken, (string?)null)
+                    .SetProperty(d => d.PasswordResetTokenExpiry, (DateTime?)null));
+            if (changed != 1)
+            {
+                TempData["Error"] = "Invalid or expired password reset link.";
+                return RedirectToAction(nameof(Login));
+            }
             TempData["Success"] = "Your password has been reset successfully. You can now login with your new password.";
             return RedirectToAction(nameof(Login));
         }

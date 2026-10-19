@@ -2,11 +2,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ClinicManagementSystem.Models
 {
-    public class ApplicationDbContext : DbContext
+    public partial class ApplicationDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, Microsoft.AspNetCore.Http.IHttpContextAccessor? httpContextAccessor = null)
             : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<Role> Roles { get; set; }
@@ -30,29 +31,22 @@ namespace ClinicManagementSystem.Models
         public DbSet<PatientInvoice> PatientInvoices { get; set; }
         public DbSet<PatientInvoiceItem> PatientInvoiceItems { get; set; }
         /// <summary>
-        /// Gets all doctor IDs that share a group with the given doctor (including the doctor themselves).
-        /// If the doctor is not in any group, returns a list with only their own ID.
+        /// Gets all doctor IDs in the same clinic, including the given doctor.
+        /// Legacy groups do not limit the clinic's shared patient directory.
         /// </summary>
         public async Task<List<int>> GetGroupDoctorIdsAsync(int doctorId)
         {
-            var groupIds = await DoctorGroupMembers
-                .Where(m => m.DoctorId == doctorId && m.DoctorGroup!.Active)
-                .Select(m => m.DoctorGroupId)
-                .ToListAsync();
-
-            if (!groupIds.Any())
-                return new List<int> { doctorId };
-
-            return await DoctorGroupMembers
-                .Where(m => groupIds.Contains(m.DoctorGroupId))
-                .Select(m => m.DoctorId)
-                .Distinct()
-                .ToListAsync();
+            // All doctors in a clinic share the clinic's patient directory.
+            var doctor = await DoctorInfos.FirstOrDefaultAsync(d => d.Id == doctorId);
+            if (doctor?.ClinicId == null) return new List<int>();
+            return await DoctorInfos.Where(d => d.ClinicId == doctor.ClinicId)
+                .Select(d => d.Id).ToListAsync();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            ConfigureClinics(modelBuilder);
 
             // Configure relationships and constraints
 
@@ -82,7 +76,7 @@ namespace ClinicManagementSystem.Models
                 .HasOne(d => d.Specialist)
                 .WithMany(s => s.Doctors)
                 .HasForeignKey(d => d.SpecialistId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // DoctorInfo -> DoctorAssist (One-to-Many)
             modelBuilder.Entity<DoctorAssist>()
@@ -124,7 +118,7 @@ namespace ClinicManagementSystem.Models
                 .HasOne(pi => pi.Doctor)
                 .WithMany()
                 .HasForeignKey(pi => pi.DoctorId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.NoAction);
 
             // PatientInvoice -> PatientInvoiceItem (One-to-Many)
             modelBuilder.Entity<PatientInvoiceItem>()
@@ -189,17 +183,17 @@ namespace ClinicManagementSystem.Models
 
             // Unique constraints
             modelBuilder.Entity<DoctorInfo>()
-                .HasIndex(d => d.LoginUsername)
+                .HasIndex(d => new { d.ClinicId, d.LoginUsername })
                 .IsUnique()
                 .HasFilter("[LoginUsername] IS NOT NULL");
 
             modelBuilder.Entity<DoctorAssist>()
-                .HasIndex(a => a.LoginUsername)
+                .HasIndex(a => new { a.ClinicId, a.LoginUsername })
                 .IsUnique()
                 .HasFilter("[LoginUsername] IS NOT NULL");
 
             modelBuilder.Entity<DoctorReception>()
-                .HasIndex(r => r.LoginUsername)
+                .HasIndex(r => new { r.ClinicId, r.LoginUsername })
                 .IsUnique()
                 .HasFilter("[LoginUsername] IS NOT NULL");
 

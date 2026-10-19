@@ -19,6 +19,9 @@ namespace ClinicManagementSystem.Controllers
             if (!SessionHelper.IsLoggedIn(HttpContext.Session))
                 return RedirectToAction("Login", "Account");
 
+            if (SessionHelper.IsSuperAdmin(HttpContext.Session))
+                return RedirectToAction("Index", "Clinics");
+
             var userType = SessionHelper.GetUserType(HttpContext.Session);
             var doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
 

@@ -14,7 +14,7 @@
             <div class="card-body">
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>تحذير!</strong>Are you sure to Delete this doctor?
+                    <strong>Warning!</strong>Are you sure to Delete this doctor?
                 </div>
 
                 <div class="row">
@@ -53,7 +53,7 @@
                 <form asp-action="Delete" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" asp-for="Id" />
-                    
+
                     <div class="mt-4">
                         <button type="submit" class="btn btn-danger">
                             <i class="fas fa-trash"></i> Confirm Delete

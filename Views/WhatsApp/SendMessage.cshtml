@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "إرسال رسالة واتساب";
+    ViewData["Title"] = "Send a WhatsApp Message";
 }
 
 <div class="row justify-content-center">
@@ -7,18 +7,18 @@
         <div class="card shadow-lg border-0">
             <div class="card-header bg-success text-white">
                 <h3 class="mb-0">
-                    <i class="fab fa-whatsapp"></i> إرسال رسالة واتساب
+                    <i class="fab fa-whatsapp"></i> Send a WhatsApp Message
                 </h3>
             </div>
             <div class="card-body p-4">
                 <p class="text-muted mb-4">
-                    <i class="fas fa-info-circle"></i> أدخل رقم الهاتف والرسالة التي تريد إرسالها عبر واتساب
+                    <i class="fas fa-info-circle"></i> Enter the phone number and message you want to send via WhatsApp
                 </p>
 
                 <form id="whatsappForm">
                     <div class="mb-4">
                         <label for="phoneNumber" class="form-label">
-                            <i class="fas fa-phone"></i> رقم الهاتف
+                            <i class="fas fa-phone"></i> Phone Number
                         </label>
                         <div class="input-group">
                             <span class="input-group-text">
@@ -27,35 +27,35 @@
                             <input type="text"
                                    class="form-control form-control-lg"
                                    id="phoneNumber"
-                                   placeholder="مثال: 201234567890 (الكود الدولي + الرقم بدون +)"
+                                   placeholder="Example: 201234567890 (country code and number, without +)"
                                    required
                                    dir="ltr">
                         </div>
                         <small class="form-text text-muted">
-                            <i class="fas fa-lightbulb"></i> أدخل الرقم بالكود الدولي بدون علامة + (مثال: 201234567890 لمصر)
+                            <i class="fas fa-lightbulb"></i> Include the country code without a + sign (example: 201234567890 for Egypt)
                         </small>
                     </div>
 
                     <div class="mb-4">
                         <label for="message" class="form-label">
-                            <i class="fas fa-comment-dots"></i> الرسالة
+                            <i class="fas fa-comment-dots"></i> Message
                         </label>
                         <textarea class="form-control form-control-lg"
                                   id="message"
                                   rows="5"
-                                  placeholder="اكتب رسالتك هنا..."
+                                  placeholder="Type your message here..."
                                   required></textarea>
                         <small class="form-text text-muted">
-                            <i class="fas fa-info-circle"></i> يمكنك كتابة رسالتك بأي لغة
+                            <i class="fas fa-info-circle"></i> You can write your message in any language
                         </small>
                     </div>
 
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-success btn-lg">
-                            <i class="fab fa-whatsapp"></i> إرسال عبر واتساب
+                            <i class="fab fa-whatsapp"></i> Send via WhatsApp
                         </button>
                         <a asp-controller="Home" asp-action="Index" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> رجوع
+                            <i class="fas fa-arrow-left"></i> Back
                         </a>
                     </div>
                 </form>
@@ -63,7 +63,7 @@
             <div class="card-footer bg-light">
                 <div class="alert alert-info mb-0" role="alert">
                     <i class="fas fa-info-circle"></i>
-                    <strong>ملاحظة مهمة:</strong> سيتم فتح واتساب ويب مع الرسالة جاهزة. اضغط <kbd>Enter</kbd> أو زر الإرسال لإرسال الرسالة مباشرة!
+                    <strong>Important:</strong> WhatsApp Web will open with your message ready. Press <kbd>Enter</kbd> or click Send to deliver your message.
                 </div>
             </div>
         </div>
@@ -72,22 +72,22 @@
         <div class="card mt-4 border-info">
             <div class="card-header bg-info text-white">
                 <h5 class="mb-0">
-                    <i class="fas fa-question-circle"></i> كيف تستخدم هذه الصفحة؟
+                    <i class="fas fa-question-circle"></i> How do I use this page?
                 </h5>
             </div>
             <div class="card-body">
                 <ol class="mb-0">
                     <li class="mb-2">
-                        <strong>أدخل رقم الهاتف:</strong> بالكود الدولي بدون علامة + (مثال: 201234567890)
+                        <strong>Enter the phone number:</strong> Include the country code without a + sign (example: 201234567890)
                     </li>
                     <li class="mb-2">
-                        <strong>اكتب الرسالة:</strong> الرسالة التي تريد إرسالها
+                        <strong>Write your message:</strong> Enter the message you want to send
                     </li>
                     <li class="mb-2">
-                        <strong>اضغط إرسال:</strong> سيتم فتح واتساب ويب في نافذة جديدة
+                        <strong>Click Send:</strong> WhatsApp Web will open in a new window
                     </li>
                     <li class="mb-2">
-                        <strong>أرسل الرسالة:</strong> اضغط <kbd>Enter</kbd> أو زر الإرسال في واتساب لإتمام الإرسال
+                        <strong>Send the message:</strong> Press <kbd>Enter</kbd> or click Send in WhatsApp to deliver the message
                     </li>
                 </ol>
             </div>
@@ -105,7 +105,7 @@
 
             // Validate phone number
             if (!phoneNumber) {
-                alert('الرجاء إدخال رقم الهاتف');
+                alert('Please enter a phone number');
                 return;
             }
 
@@ -113,19 +113,19 @@
             phoneNumber = phoneNumber.replace(/\D/g, '');
 
             if (phoneNumber.length < 10) {
-                alert('رقم الهاتف غير صحيح. تأكد من إدخال الكود الدولي والرقم كاملاً');
+                alert('Invalid phone number. Include the country code and the full phone number');
                 return;
             }
 
             if (!message) {
-                alert('الرجاء كتابة الرسالة');
+                alert('Please enter a message');
                 return;
             }
 
             // Show loading message
             var submitBtn = document.querySelector('button[type="submit"]');
             var originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري فتح واتساب...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Opening WhatsApp...';
             submitBtn.disabled = true;
 
             // Encode the message for URL
@@ -139,12 +139,12 @@
 
             // Show success message
             setTimeout(function() {
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> تم فتح واتساب!';
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> WhatsApp opened!';
                 submitBtn.classList.remove('btn-success');
                 submitBtn.classList.add('btn-primary');
 
                 // Show instruction alert
-                alert('تم فتح واتساب ويب في نافذة جديدة!\n\nاضغط Enter أو زر الإرسال في واتساب لإرسال الرسالة.');
+                alert('WhatsApp Web opened in a new window!\n\nPress Enter or click Send in WhatsApp to deliver your message.');
 
                 // Reset button after 3 seconds
                 setTimeout(function() {

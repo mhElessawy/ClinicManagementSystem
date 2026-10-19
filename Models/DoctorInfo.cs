@@ -3,10 +3,13 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ClinicManagementSystem.Models
 {
-    public class DoctorInfo
+    public class DoctorInfo : IClinicOwned
     {
         [Key]
         public int Id { get; set; }
+
+        public int? ClinicId { get; set; }
+        public virtual Clinic? Clinic { get; set; }
 
         [Required(ErrorMessage = "Doctor name is required")]
         [StringLength(100)]
