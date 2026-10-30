@@ -30,8 +30,8 @@ public partial class ClinicManagerController
         if (!IsClinicManager() || !_context.CurrentClinicId.HasValue) return Forbid();
         var template = id == 0 ? new DiagnosisTemplate() : await _context.DiagnosisTemplates.FirstOrDefaultAsync(t => t.Id == id);
         if (template == null) return NotFound();
-        if (input.SpecialistId.HasValue && !await _context.Specialists.AnyAsync(s => s.Id == input.SpecialistId))
-            ModelState.AddModelError(nameof(input.SpecialistId), "Select a valid specialty.");
+        if (input.SpecialistId.HasValue && !await ClinicTemplateSpecialties().AnyAsync(s => s.Id == input.SpecialistId))
+            ModelState.AddModelError(nameof(input.SpecialistId), "Select a specialty available in your clinic.");
         if (!ModelState.IsValid)
         {
             input.Id = id;
@@ -60,9 +60,16 @@ public partial class ClinicManagerController
         return RedirectToAction(nameof(DiagnosisTemplates));
     }
 
+    private IQueryable<Specialist> ClinicTemplateSpecialties()
+    {
+        var clinicId = _context.CurrentClinicId;
+        return _context.Specialists.Where(s => _context.DoctorInfos
+            .Any(d => d.ClinicId == clinicId && d.SpecialistId == s.Id));
+    }
+
     private async Task PopulateTemplateSpecialties(int? selected)
     {
-        ViewBag.Specialties = new SelectList(await _context.Specialists.OrderBy(s => s.SpecialistName).ToListAsync(),
+        ViewBag.Specialties = new SelectList(await ClinicTemplateSpecialties().OrderBy(s => s.SpecialistName).ToListAsync(),
             "Id", "SpecialistName", selected);
     }
 }

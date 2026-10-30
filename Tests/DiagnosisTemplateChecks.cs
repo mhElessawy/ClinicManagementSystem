@@ -4,6 +4,7 @@ using ClinicManagementSystem.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -28,13 +29,31 @@ static class DiagnosisTemplateChecks
             ControllerContext = new ControllerContext { HttpContext = http },
             TempData = new TempDataDictionary(http, new TestTempDataProvider())
         };
+        Login(1);
+        await using (var db = Open())
+        {
+            (await db.DoctorInfos.SingleAsync(d => d.Id == doctors[1].Id)).SpecialistId = 2;
+            await db.SaveChangesAsync();
+        }
         Login(0);
         int id;
         await using (var db = Open())
         {
             var manager = Manager(db);
+            var form = (ViewResult)await manager.EditDiagnosisTemplate(null);
+            var specialties = (SelectList)form.ViewData["Specialties"]!;
+            Check(specialties.Select(s => s.Value).SequenceEqual(new[] { "1" }), "Template dropdown lists only current clinic specialties");
             Check(await manager.EditDiagnosisTemplate(0, new DiagnosisTemplate { Name = "General", Content = "Clinic text" }) is RedirectToActionResult, "Manager creates clinic template");
             id = await db.DiagnosisTemplates.Select(t => t.Id).SingleAsync();
+            Check((await db.DiagnosisTemplates.FindAsync(id))!.ClinicId == clinics[0].Id, "Template belongs to current clinic");
+            Check(await manager.EditDiagnosisTemplate(0, new DiagnosisTemplate { Name = "Foreign specialty", Content = "Rejected", SpecialistId = 2 }) is ViewResult
+                && !manager.ModelState.IsValid, "Existing specialty from another clinic cannot be posted");
+            Check(await db.DiagnosisTemplates.CountAsync() == 1, "Rejected specialty does not create a template");
+            manager.ModelState.Clear();
+            Check(await manager.EditDiagnosisTemplate(id, new DiagnosisTemplate { Name = "Invalid edit", Content = "Rejected", SpecialistId = 2 }) is ViewResult
+                && !manager.ModelState.IsValid, "Template edit rejects specialties outside current clinic");
+            Check((await db.DiagnosisTemplates.FindAsync(id))!.SpecialistId == null, "Rejected edit preserves original template scope");
+            manager.ModelState.Clear();
             db.DiagnosisTemplates.AddRange(
                 new DiagnosisTemplate { Name = "Matching", Content = "Specialty text", SpecialistId = 1 },
                 new DiagnosisTemplate { Name = "Other", Content = "Other specialty", SpecialistId = 2 },

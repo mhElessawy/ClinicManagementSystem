@@ -1,20 +1,30 @@
 @model ClinicManagementSystem.Models.DiagnosisTemplate
-@{ ViewData["Title"] = Model.Id == 0 ? "Add Diagnosis Template" : "Edit Diagnosis Template"; }
-<div class="row"><div class="col-lg-8 offset-lg-2"><div class="card">
-    <div class="card-header"><h4>@ViewData["Title"]</h4></div>
-    <div class="card-body">
-        <form asp-action="EditDiagnosisTemplate" asp-route-id="@Model.Id" method="post">
-            <div asp-validation-summary="All" class="text-danger"></div>
-            <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" maxlength="100" /><span asp-validation-for="Name" class="text-danger"></span></div>
-            <div class="mb-3"><label asp-for="SpecialistId" class="form-label"></label>
-                <select asp-for="SpecialistId" asp-items="ViewBag.Specialties" class="form-select"><option value="">All clinic specialties</option></select>
-                <span asp-validation-for="SpecialistId" class="text-danger"></span>
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Add Diagnosis Template" : "Edit Diagnosis Template";
+}
+<div class="row">
+    <div class="col-lg-8 offset-lg-2">
+        <div class="card">
+            <div class="card-header"><h4>@ViewData["Title"]</h4></div>
+            <div class="card-body">
+                <form asp-action="EditDiagnosisTemplate" asp-route-id="@Model.Id" method="post">
+                    <div asp-validation-summary="All" class="text-danger"></div>
+                    <div class="mb-3"><label asp-for="Name" class="form-label"></label><input asp-for="Name" class="form-control" maxlength="100" /><span asp-validation-for="Name" class="text-danger"></span></div>
+                    <div class="mb-3">
+                        <label asp-for="SpecialistId" class="form-label"></label>
+                        <select asp-for="SpecialistId" asp-items="ViewBag.Specialties" class="form-select"><option value="">All clinic specialties</option></select>
+                        <span asp-validation-for="SpecialistId" class="text-danger"></span>
+                        <div class="form-text">Only specialties assigned to doctors in your clinic are listed. This template is available only within your clinic.</div>
+                    </div>
+                    <div class="mb-3"><label asp-for="Content" class="form-label"></label><textarea asp-for="Content" class="form-control" rows="10" maxlength="1000"></textarea><span asp-validation-for="Content" class="text-danger"></span><div class="form-text">Up to 1,000 characters. Doctors can insert and edit this text during diagnosis.</div></div>
+                    <div class="form-check mb-3"><input asp-for="Active" class="form-check-input" /><label asp-for="Active" class="form-check-label"></label></div>
+                    <button type="submit" class="btn btn-primary">Save Template</button>
+                    <a asp-action="DiagnosisTemplates" class="btn btn-secondary">Back</a>
+                </form>
             </div>
-            <div class="mb-3"><label asp-for="Content" class="form-label"></label><textarea asp-for="Content" class="form-control" rows="10" maxlength="1000"></textarea><span asp-validation-for="Content" class="text-danger"></span><div class="form-text">Up to 1,000 characters. Doctors can insert and edit this text during diagnosis.</div></div>
-            <div class="form-check mb-3"><input asp-for="Active" class="form-check-input" /><label asp-for="Active" class="form-check-label"></label></div>
-            <button type="submit" class="btn btn-primary">Save Template</button>
-            <a asp-action="DiagnosisTemplates" class="btn btn-secondary">Back</a>
-        </form>
+        </div>
     </div>
-</div></div></div>
-@section Scripts { <partial name="_ValidationScriptsPartial" /> }
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
