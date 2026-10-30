@@ -482,6 +482,26 @@ namespace ClinicManagementSystem.Controllers
             return File(fileBytes, contentType, fileName);
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Templates(int? doctorId)
+        {
+            if (!SessionHelper.IsLoggedIn(HttpContext.Session)) return Unauthorized();
+            if (!_context.CurrentClinicId.HasValue) return Forbid();
+            if (SessionHelper.GetUserType(HttpContext.Session) == SessionHelper.TYPE_DOCTOR)
+                doctorId = SessionHelper.GetDoctorId(HttpContext.Session);
+            var doctor = doctorId.HasValue
+                ? await _context.DoctorInfos.AsNoTracking().FirstOrDefaultAsync(d => d.Id == doctorId)
+                : null;
+            if (doctorId.HasValue && doctor == null) return NotFound();
+            var specialtyId = doctor?.SpecialistId;
+            var templates = await _context.DiagnosisTemplates.AsNoTracking()
+                .Where(t => t.Active && (t.SpecialistId == null ||
+                    (specialtyId != null && t.SpecialistId == specialtyId)))
+                .OrderBy(t => t.Name)
+                .Select(t => new { t.Id, t.Name, t.Content }).ToListAsync();
+            return Json(templates);
+        }
+
         private bool DiagnosisExists(int id)
         {
             return _context.PatientDiagnoses.Any(e => e.Id == id);

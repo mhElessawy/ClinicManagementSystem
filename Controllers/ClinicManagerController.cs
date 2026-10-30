@@ -7,7 +7,7 @@ using ClinicManagementSystem.Services;
 
 namespace ClinicManagementSystem.Controllers
 {
-    public class ClinicManagerController : Controller
+    public partial class ClinicManagerController : Controller
     {
         private readonly ApplicationDbContext _context;
         private readonly IFileProcessingService _fileProcessingService;

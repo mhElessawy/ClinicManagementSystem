@@ -14,6 +14,7 @@ namespace ClinicManagementSystem.Models
         public DbSet<UserInfo> UserInfos { get; set; }
         public DbSet<DoctorInfo> DoctorInfos { get; set; }
         public DbSet<Patient> Patients { get; set; }
+        public DbSet<DiagnosisTemplate> DiagnosisTemplates { get; set; }
         public DbSet<PatientDiagnosis> PatientDiagnoses { get; set; }
         public DbSet<Specialist> Specialists { get; set; }
         public DbSet<Department> Departments { get; set; }

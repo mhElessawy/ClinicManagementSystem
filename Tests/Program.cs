@@ -193,6 +193,7 @@ await using (var db = Open())
     await new ClinicAccessFilter(db).OnActionExecutionAsync(action, () => { ran = true; return Task.FromResult(new ActionExecutedContext(action, new List<IFilterMetadata>(), new object())); });
     Check(!ran && action.Result is RedirectToActionResult && !SessionHelper.IsLoggedIn(http.Session), "Disabling clinic revokes an existing session");
 }
+await DiagnosisTemplateChecks.Run(options, http, clinics, doctors);
 Console.WriteLine("All clinic tenancy checks passed.");
 
 sealed class MemorySession : ISession

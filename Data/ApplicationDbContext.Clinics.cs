@@ -1,4 +1,4 @@
-﻿using ClinicManagementSystem.Helpers;
+using ClinicManagementSystem.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace ClinicManagementSystem.Models;
@@ -26,6 +26,10 @@ public partial class ApplicationDbContext
         ConfigureClinicEntity<Appointment>(modelBuilder);
         ConfigureClinicEntity<AppointmentIntake>(modelBuilder);
         ConfigureClinicEntity<PatientDiagnosis>(modelBuilder);
+        ConfigureClinicEntity<DiagnosisTemplate>(modelBuilder);
+        modelBuilder.Entity<DiagnosisTemplate>().HasOne(t => t.Specialist).WithMany()
+            .HasForeignKey(t => t.SpecialistId).OnDelete(DeleteBehavior.Restrict);
+        modelBuilder.Entity<DiagnosisTemplate>().HasIndex(t => new { t.ClinicId, t.SpecialistId });
         ConfigureClinicEntity<PatientInvoice>(modelBuilder);
         ConfigureClinicEntity<PatientInvoiceItem>(modelBuilder);
         ConfigureClinicEntity<DoctorSubscription>(modelBuilder);

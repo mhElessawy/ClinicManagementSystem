@@ -1,0 +1,10 @@
+<div class="border rounded p-3 mb-3 bg-light" id="diagnosis-template-picker" data-url="@Url.Action("Templates", "PatientDiagnoses")">
+    <label for="diagnosis-template" class="form-label">Diagnosis Template</label>
+    <div class="input-group">
+        <select id="diagnosis-template" class="form-select" disabled><option value="">Loading templates...</option></select>
+        <button type="button" id="insert-diagnosis-template" class="btn btn-outline-primary" disabled>Insert Template</button>
+    </div>
+    <p id="diagnosis-template-preview" class="small mt-2 mb-0" style="white-space:pre-wrap"></p>
+    <div id="diagnosis-template-status" class="form-text" role="status">Templates match the doctor's specialty and clinic. Text is added to the existing diagnosis and can be edited.</div>
+</div>
+<script src="~/js/diagnosis-templates.js" asp-append-version="true" defer></script>

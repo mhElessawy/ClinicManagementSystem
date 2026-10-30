@@ -23,7 +23,7 @@ static class MigrationCheck
                 await previous.SaveChangesAsync();
                 await previous.Database.ExecuteSqlRawAsync("CREATE TABLE [__EFMigrationsHistory] ([MigrationId] nvarchar(150) NOT NULL PRIMARY KEY, [ProductVersion] nvarchar(32) NOT NULL);");
                 await using var current = new ApplicationDbContext(options, accessor);
-                foreach (var migration in current.Database.GetMigrations().Where(m => !m.EndsWith("_AddClinicSubscriptionExpiry")))
+                foreach (var migration in current.Database.GetMigrations().Where(m => !m.EndsWith("_AddClinicSubscriptionExpiry") && !m.EndsWith("_AddDiagnosisTemplates")))
                     await previous.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [__EFMigrationsHistory] VALUES ({migration}, N'8.0.0');");
             }
             await using var db = new ApplicationDbContext(options, accessor);
@@ -102,6 +102,7 @@ sealed class BeforeSubscriptionContext(DbContextOptions<ApplicationDbContext> op
     {
         base.OnModelCreating(builder);
         builder.Entity<Clinic>().Ignore(c => c.SubscriptionEndsOn);
+        builder.Ignore<DiagnosisTemplate>();
     }
 }
 
@@ -111,6 +112,7 @@ sealed class LegacySchemaContext(DbContextOptions<ApplicationDbContext> options,
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.Ignore<DiagnosisTemplate>();
         foreach (var type in builder.Model.GetEntityTypes().Where(e => typeof(IClinicOwned).IsAssignableFrom(e.ClrType)).ToList())
         {
             builder.Entity(type.ClrType).HasQueryFilter(null);
