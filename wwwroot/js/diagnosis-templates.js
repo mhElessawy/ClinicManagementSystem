@@ -1,56 +1,94 @@
 (() => {
     const picker = document.getElementById('diagnosis-template-picker');
     if (!picker) return;
-    const select = document.getElementById('diagnosis-template');
-    const button = document.getElementById('insert-diagnosis-template');
-    const preview = document.getElementById('diagnosis-template-preview');
+    const options = document.getElementById('diagnosis-template-options');
     const status = document.getElementById('diagnosis-template-status');
     const doctor = document.getElementById('DoctorId');
     const details = document.getElementById('DiagnosisDetails');
-    let templates = [];
+    if (!details) return;
+    let checkboxes = [];
     let request = 0;
-    async function load() {
-        const current = ++request;
-        templates = [];
-        select.replaceChildren(new Option('Loading templates...', ''));
-        select.disabled = button.disabled = true;
-        preview.textContent = '';
-        try {
-            const url = new URL(picker.dataset.url, window.location.origin);
-            if (doctor?.value) url.searchParams.set('doctorId', doctor.value);
-            const response = await fetch(url, { headers: { Accept: 'application/json' } });
-            if (!response.ok) throw new Error('Unable to load templates.');
-            const data = await response.json();
-            if (current !== request) return;
-            templates = data;
-            select.replaceChildren(new Option(data.length ? '-- Select Template --' : 'No templates available', ''));
-            data.forEach(t => select.add(new Option(t.name, String(t.id))));
-            select.disabled = !data.length;
-            status.textContent = data.length ? 'Preview a template, then insert it into the diagnosis. Existing text is kept.' : 'No active templates for this clinic and specialty. Ask your clinic manager to add one.';
-        } catch {
-            if (current !== request) return;
-            select.replaceChildren(new Option('Templates unavailable', ''));
-            status.textContent = 'Could not load templates. You can still enter the diagnosis manually. Change the doctor or reload to retry.';
-        }
+    const lines = () => details.value.split(/\r?\n/);
+    function syncSelection() {
+        const selected = new Set(lines().map(line => line.trim()));
+        checkboxes.forEach(input => { input.checked = selected.has(input.value); });
     }
-    select.addEventListener('change', () => {
-        const template = templates.find(t => String(t.id) === select.value);
-        preview.textContent = template?.content || '';
-        button.disabled = !template;
-    });
-    button.addEventListener('click', () => {
-        const template = templates.find(t => String(t.id) === select.value);
-        if (!template || !details) return;
-        const value = details.value ? details.value + '\n\n' + template.content : template.content;
+    function changeSelection(input) {
+        const current = lines();
+        let value;
+        if (input.checked) {
+            if (current.some(line => line.trim() === input.value)) return;
+            value = details.value + (details.value && !details.value.endsWith('\n') ? '\n' : '') + input.value;
+        } else {
+            value = current.filter(line => line.trim() !== input.value).join('\n');
+        }
         if (value.length > 1000) {
-            status.textContent = 'This would exceed the 1,000 character diagnosis limit. Shorten the existing text before inserting.';
+            syncSelection();
+            status.textContent = 'This would exceed the 1,000 character diagnosis limit. Shorten the diagnosis before selecting more options.';
             return;
         }
         details.value = value;
         details.dispatchEvent(new Event('input', { bubbles: true }));
-        details.focus();
-        status.textContent = 'Template inserted. Review and edit the diagnosis before saving.';
-    });
+        status.textContent = 'Selections updated in Diagnosis Details. Save the diagnosis to keep your changes.';
+    }
+    function render(templates) {
+        templates.forEach(template => {
+            const choices = [...new Set(template.content.split(/\r?\n/).map(line => line.trim()).filter(Boolean))];
+            if (!choices.length) return;
+            const group = document.createElement('fieldset');
+            group.className = 'mb-3';
+            const legend = document.createElement('legend');
+            legend.className = 'fs-6 fw-bold';
+            legend.textContent = template.name;
+            group.append(legend);
+            const row = document.createElement('div');
+            row.className = 'd-flex flex-wrap gap-3';
+            choices.forEach((choice, index) => {
+                const label = document.createElement('label');
+                label.className = 'form-check d-flex align-items-start gap-2 mb-0';
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.className = 'form-check-input flex-shrink-0';
+                input.id = `diagnosis-choice-${template.id}-${index}`;
+                input.value = choice;
+                // Choices are saved as text in DiagnosisDetails, alongside the doctor's notes.
+                input.addEventListener('change', () => changeSelection(input));
+                const text = document.createElement('span');
+                text.className = 'form-check-label';
+                text.style.overflowWrap = 'anywhere';
+                text.textContent = choice;
+                label.append(input, text);
+                row.append(label);
+                checkboxes.push(input);
+            });
+            group.append(row);
+            options.append(group);
+        });
+        syncSelection();
+    }
+    async function load() {
+        const current = ++request;
+        checkboxes = [];
+        options.replaceChildren();
+        options.setAttribute('aria-busy', 'true');
+        status.textContent = 'Loading diagnosis options...';
+        try {
+            const url = new URL(picker.dataset.url, window.location.origin);
+            if (doctor?.value) url.searchParams.set('doctorId', doctor.value);
+            const response = await fetch(url, { headers: { Accept: 'application/json' } });
+            if (!response.ok) throw new Error('Unable to load options.');
+            const templates = await response.json();
+            if (current !== request) return;
+            render(templates);
+            status.textContent = checkboxes.length ? 'Options are specific to your clinic and specialty.' : 'No active diagnosis options for this clinic and specialty. Ask your clinic manager to add a template.';
+        } catch {
+            if (current !== request) return;
+            status.textContent = 'Could not load diagnosis options. You can still enter the diagnosis manually. Change the doctor or reload to retry.';
+        } finally {
+            if (current === request) options.setAttribute('aria-busy', 'false');
+        }
+    }
+    details.addEventListener('input', syncSelection);
     doctor?.addEventListener('change', load);
     load();
 })();

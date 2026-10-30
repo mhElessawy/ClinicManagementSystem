@@ -1,29 +1,35 @@
 @model IEnumerable<ClinicManagementSystem.Models.DiagnosisTemplate>
-@{ ViewData["Title"] = "Diagnosis Templates"; }
+@{
+    ViewData["Title"] = "Diagnosis Templates";
+}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div><h2>Diagnosis Templates</h2><p class="text-muted">Templates are available only within your clinic. Leave specialty empty to share with all doctors.</p></div>
     <a asp-action="EditDiagnosisTemplate" class="btn btn-primary"><i class="fas fa-plus"></i> Add Template</a>
 </div>
 <div class="table-responsive">
-<table class="table table-striped align-middle">
-    <thead><tr><th>Name</th><th>Scope</th><th>Diagnosis Text</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody>
-    @foreach (var item in Model)
-    {
-        <tr>
-            <td>@item.Name</td><td>@(item.Specialist?.SpecialistName ?? "All clinic specialties")</td>
-            <td style="white-space:pre-wrap;max-width:450px;overflow-wrap:anywhere">@item.Content</td>
-            <td>@(item.Active ? "Active" : "Inactive")</td>
-            <td>
-                <a asp-action="EditDiagnosisTemplate" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
-                <form asp-action="DeleteDiagnosisTemplate" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this template? Saved diagnoses will be kept.');">
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                </form>
-            </td>
-        </tr>
-    }
-    @if (!Model.Any()) { <tr><td colspan="5" class="text-center text-muted p-4">No templates yet. Add your first diagnosis template.</td></tr> }
-    </tbody>
-</table>
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Name</th><th>Scope</th><th>Diagnosis Options</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@(item.Specialist?.SpecialistName ?? "All clinic specialties")</td>
+                    <td style="white-space:pre-wrap;max-width:450px;overflow-wrap:anywhere">@item.Content</td>
+                    <td>@(item.Active ? "Active" : "Inactive")</td>
+                    <td>
+                        <a asp-action="EditDiagnosisTemplate" asp-route-id="@item.Id" class="btn btn-sm btn-outline-primary">Edit</a>
+                        <form asp-action="DeleteDiagnosisTemplate" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this template? Saved diagnoses will be kept.');">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+            @if (!Model.Any())
+            {
+                <tr><td colspan="5" class="text-center text-muted p-4">No templates yet. Add your first diagnosis template.</td></tr>
+            }
+        </tbody>
+    </table>
 </div>
 <a asp-action="Index" class="btn btn-secondary">Back to Dashboard</a>
