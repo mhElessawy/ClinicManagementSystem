@@ -69,16 +69,17 @@ namespace ClinicManagementSystem.Controllers
                 Active = true
             };
             await _context.RegisterClinicAsync(clinic, group, manager);
-            TempData["Success"] = $"Clinic registered successfully. Save your clinic code: {clinic.Code} — use it with your username and password to log in as Clinic Manager.";
+            TempData["Success"] = $"Clinic registered successfully. Save your clinic code: {clinic.Code}. The administrator must activate your clinic and set its subscription before you can log in.";
             return RedirectToAction(nameof(Login));
         }
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(bool subscriptionExpired = false)
         {
             if (SessionHelper.IsLoggedIn(HttpContext.Session))
             {
                 return RedirectToAction("Index", "Home");
             }
+            if (subscriptionExpired) ViewBag.Error = ClinicSubscription.AccessDeniedMessage;
             return View();
         }
 

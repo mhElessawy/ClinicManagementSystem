@@ -5,6 +5,47 @@ using Microsoft.EntityFrameworkCore;
 
 static class MigrationCheck
 {
+    public static async Task RunSubscriptionAsync()
+    {
+        var databaseName = "ClinicSubscriptionTest_" + Guid.NewGuid().ToString("N");
+        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
+            .UseSqlServer($"Server=(localdb)\\MSSQLLocalDB;Database={databaseName};Trusted_Connection=True;TrustServerCertificate=True;")
+            .Options;
+        var http = new DefaultHttpContext { Session = new MemorySession() };
+        SessionHelper.SetUserSession(http.Session, 1, "admin", "Admin", "Admin", roleId: 1);
+        var accessor = new HttpContextAccessor { HttpContext = http };
+        try
+        {
+            await using (var previous = new BeforeSubscriptionContext(options, accessor))
+            {
+                await previous.Database.EnsureCreatedAsync();
+                previous.Clinics.Add(new Clinic { Name = "Existing clinic", Code = "CL-EXISTING", Phone = "123", Email = "test@example.test", Active = true });
+                await previous.SaveChangesAsync();
+                await previous.Database.ExecuteSqlRawAsync("CREATE TABLE [__EFMigrationsHistory] ([MigrationId] nvarchar(150) NOT NULL PRIMARY KEY, [ProductVersion] nvarchar(32) NOT NULL);");
+                await using var current = new ApplicationDbContext(options, accessor);
+                foreach (var migration in current.Database.GetMigrations().Where(m => !m.EndsWith("_AddClinicSubscriptionExpiry")))
+                    await previous.Database.ExecuteSqlInterpolatedAsync($"INSERT INTO [__EFMigrationsHistory] VALUES ({migration}, N'8.0.0');");
+            }
+            await using var db = new ApplicationDbContext(options, accessor);
+            await db.Database.MigrateAsync();
+            var clinic = await db.Clinics.SingleAsync();
+            if (clinic.Code != "CL-EXISTING" || !clinic.Active || clinic.SubscriptionEndsOn != null)
+                throw new Exception("Subscription migration changed existing clinic data.");
+            clinic.SubscriptionEndsOn = ClinicSubscription.Today.AddMonths(1);
+            await db.SaveChangesAsync();
+            db.ChangeTracker.Clear();
+            if ((await db.Clinics.SingleAsync()).SubscriptionEndsOn != ClinicSubscription.Today.AddMonths(1))
+                throw new Exception("Subscription end date was not persisted.");
+            if (db.Database.HasPendingModelChanges()) throw new Exception("Migration model is stale.");
+            Console.WriteLine("PASS: SQL Server subscription migration preserves existing clinics and persists expiry dates; model matches migrations.");
+        }
+        finally
+        {
+            await using var cleanup = new ApplicationDbContext(options, accessor);
+            await cleanup.Database.EnsureDeletedAsync();
+        }
+    }
+
     public static async Task RunAsync()
     {
         // Dedicated disposable database; never read the application's connection string.
@@ -51,6 +92,16 @@ static class MigrationCheck
             await using var cleanup = new ApplicationDbContext(options, accessor);
             await cleanup.Database.EnsureDeletedAsync();
         }
+    }
+}
+
+sealed class BeforeSubscriptionContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor accessor)
+    : ApplicationDbContext(options, accessor)
+{
+    protected override void OnModelCreating(ModelBuilder builder)
+    {
+        base.OnModelCreating(builder);
+        builder.Entity<Clinic>().Ignore(c => c.SubscriptionEndsOn);
     }
 }
 

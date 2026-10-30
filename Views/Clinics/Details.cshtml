@@ -7,7 +7,8 @@
     <h2 class="mt-3">@Model.Clinic.Name <small class="text-muted">@Model.Clinic.Code</small></h2>
     <p>@Model.Clinic.Address | @Model.Clinic.Phone | @Model.Clinic.Email</p>
     <form asp-action="ToggleActive" asp-route-id="@Model.Clinic.Id" method="post" class="mb-4">
-        <span>Status: @(Model.Clinic.Active ? "Active" : "Disabled")</span>
+        <span>Status: @ClinicManagementSystem.Helpers.ClinicSubscription.Status(Model.Clinic) | Subscription ends: @(Model.Clinic.SubscriptionEndsOn?.ToString("yyyy-MM-dd") ?? "Not set")</span>
+        <a asp-action="Subscription" asp-route-id="@Model.Clinic.Id" class="btn btn-sm btn-success">Manage Subscription</a>
         <button class="btn btn-sm btn-outline-warning" type="submit">@(Model.Clinic.Active ? "Disable Clinic Access" : "Enable Clinic Access")</button>
     </form>
     <h3>Management Accounts (@Model.Managers.Count)</h3>

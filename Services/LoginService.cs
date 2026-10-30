@@ -18,9 +18,11 @@ public class LoginService
         {
             var code = clinicCode?.Trim().ToUpperInvariant();
             if (string.IsNullOrEmpty(code)) return failure;
-            clinicId = await _context.Clinics.Where(c => c.Code == code && c.Active)
-                .Select(c => (int?)c.Id).SingleOrDefaultAsync();
-            if (clinicId == null) return failure;
+            var clinic = await _context.Clinics.SingleOrDefaultAsync(c => c.Code == code);
+            if (clinic == null) return failure;
+            if (!clinic.Active || clinic.SubscriptionEndsOn == null || clinic.SubscriptionEndsOn < ClinicSubscription.Today)
+                return new LoginResult { ErrorMessage = ClinicSubscription.AccessDeniedMessage };
+            clinicId = clinic.Id;
         }
 
         if (userType == SessionHelper.TYPE_ADMIN || userType == SessionHelper.TYPE_CLINIC_MANAGER)

@@ -15,7 +15,9 @@ public class Clinic
     public string Phone { get; set; } = string.Empty;
     [Required, EmailAddress, StringLength(100), Display(Name = "Email Address")]
     public string Email { get; set; } = string.Empty;
-    public bool Active { get; set; } = true;
+    public bool Active { get; set; }
+    [DataType(DataType.Date), Display(Name = "Subscription End Date")]
+    public DateOnly? SubscriptionEndsOn { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 }
 

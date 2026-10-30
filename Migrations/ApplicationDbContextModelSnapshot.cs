@@ -240,6 +240,9 @@ namespace ClinicManagementSystem.Migrations
                     .HasMaxLength(20)
                     .HasColumnType("nvarchar(20)");
 
+                b.Property<DateOnly?>("SubscriptionEndsOn")
+                    .HasColumnType("date");
+
                 b.HasKey("Id");
 
                 b.HasIndex("Code")

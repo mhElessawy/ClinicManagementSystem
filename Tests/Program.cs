@@ -14,6 +14,11 @@ if (args.Contains("--sqlserver-migrations"))
     await MigrationCheck.RunAsync();
     return;
 }
+if (args.Contains("--subscription-migration"))
+{
+    await MigrationCheck.RunSubscriptionAsync();
+    return;
+}
 
 await using var connection = new SqliteConnection("Data Source=:memory:");
 await connection.OpenAsync();
@@ -45,7 +50,8 @@ for (int i = 0; i < 2; i++)
 {
     http.Session.Clear();
     await using var db = Open();
-    var clinic = new Clinic { Name = $"Clinic {i}", Code = $"CL-TEST{i}", Phone = "123", Email = $"clinic{i}@example.test" };
+    var clinic = new Clinic { Name = $"Clinic {i}", Code = $"CL-TEST{i}", Phone = "123", Email = $"clinic{i}@example.test",
+        Active = true, SubscriptionEndsOn = ClinicSubscription.Today.AddMonths(1) };
     var group = new DoctorGroup { GroupName = clinic.Name, Clinic = clinic };
     var manager = new UserInfo { UserName = "same-manager", UserPassword = BCrypt.Net.BCrypt.HashPassword("Test12345"), RoleId = 6, Clinic = clinic, Group = group };
     await db.RegisterClinicAsync(clinic, group, manager);
@@ -113,6 +119,65 @@ await using (var db = Open())
 Login(null, "Admin");
 await using (var db = Open())
 {
+    var clinic = await db.Clinics.FindAsync(clinics[0].Id);
+    db.DoctorAssists.Add(new DoctorAssist { ClinicId = clinic!.Id, DoctorId = doctors[0].Id, AssistName = "Assistant",
+        LoginUsername = "assistant", LoginPassword = BCrypt.Net.BCrypt.HashPassword("Test12345"), CanLogin = true });
+    db.DoctorReceptions.Add(new DoctorReception { ClinicId = clinic.Id, DoctorId = doctors[0].Id, ReceptionName = "Reception",
+        LoginUsername = "reception", LoginPassword = BCrypt.Net.BCrypt.HashPassword("Test12345"), CanLogin = true });
+    await db.SaveChangesAsync();
+    var accounts = new[] { ("same-manager", "ClinicManager"), ("doctor0", "Doctor"), ("assistant", "Assistant"), ("reception", "Reception") };
+    foreach (var end in new DateOnly?[] { null, ClinicSubscription.Today.AddDays(-1), ClinicSubscription.Today })
+    {
+        clinic.SubscriptionEndsOn = end;
+        await db.SaveChangesAsync();
+        foreach (var (username, type) in accounts)
+            Check((await new LoginService(db).AuthenticateAsync(username, "Test12345", type, clinic.Code)).Success == (end == ClinicSubscription.Today),
+                $"{type}: missing/expired subscription blocked; final day allowed ({end})");
+    }
+    clinic.SubscriptionEndsOn = ClinicSubscription.Today.AddDays(-1);
+    await db.SaveChangesAsync();
+}
+foreach (var type in new[] { "ClinicManager", "Doctor", "Assistant", "Reception" })
+{
+    Login(clinics[0].Id, type, managers[0].Id, managers[0].GroupId);
+    await using var db = Open();
+    var route = new RouteData(); route.Values["controller"] = "Patients";
+    var action = new ActionExecutingContext(new ActionContext(http, route, new ActionDescriptor()), new List<IFilterMetadata>(), new Dictionary<string, object?>(), new object());
+    bool ran = false;
+    await new ClinicAccessFilter(db).OnActionExecutionAsync(action, () => { ran = true; return Task.FromResult(new ActionExecutedContext(action, new List<IFilterMetadata>(), new object())); });
+    Check(!ran && action.Result is RedirectToActionResult && !SessionHelper.IsLoggedIn(http.Session), $"Expiry revokes {type} session");
+}
+Login(null, "Admin");
+await using (var db = Open())
+{
+    var controller = new ClinicManagementSystem.Controllers.ClinicsController(db)
+    {
+        TempData = new Microsoft.AspNetCore.Mvc.ViewFeatures.TempDataDictionary(http, new TestTempDataProvider())
+    };
+    var clinic = await db.Clinics.FindAsync(clinics[0].Id);
+    Check(await controller.Subscription(clinic!.Id, new ClinicSubscriptionUpdate { Active = true, Period = "1" }) is RedirectToActionResult,
+        "Administrator can renew expired clinic for one month");
+    Check(clinic.SubscriptionEndsOn == ClinicSubscription.Today.AddMonths(1), "Expired subscription renews from today");
+    await controller.Subscription(clinic.Id, new ClinicSubscriptionUpdate { Active = true, Period = "3" });
+    Check(clinic.SubscriptionEndsOn == ClinicSubscription.Today.AddMonths(1).AddMonths(3), "Renewal preserves remaining subscription time");
+    Check((await new LoginService(db).AuthenticateAsync("doctor0", "Test12345", "Doctor", clinic.Code)).Success, "Renewal restores clinic login");
+    var savedEnd = clinic.SubscriptionEndsOn;
+    var invalid = await controller.Subscription(clinic.Id, new ClinicSubscriptionUpdate { Active = true, Period = "custom", SubscriptionEndsOn = ClinicSubscription.Today.AddDays(-1) });
+    Check(invalid is ViewResult && clinic.SubscriptionEndsOn == savedEnd, "Cannot activate a clinic with a past end date");
+    controller.ModelState.Clear();
+    invalid = await controller.Subscription(clinic.Id, new ClinicSubscriptionUpdate { Active = true, Period = "custom" });
+    Check(invalid is ViewResult && clinic.SubscriptionEndsOn == savedEnd, "Cannot activate a clinic without an end date");
+    controller.ModelState.Clear();
+    invalid = await controller.Subscription(clinic.Id, new ClinicSubscriptionUpdate { Active = true, Period = "99" });
+    Check(invalid is ViewResult && clinic.SubscriptionEndsOn == savedEnd, "Invalid renewal period is rejected");
+    controller.ModelState.Clear();
+    var custom = ClinicSubscription.Today.AddDays(10);
+    await controller.Subscription(clinic.Id, new ClinicSubscriptionUpdate { Active = true, Period = "custom", SubscriptionEndsOn = custom });
+    Check(clinic.SubscriptionEndsOn == custom, "Administrator can set a custom end date");
+}
+Login(null, "Admin");
+await using (var db = Open())
+{
     Check(await db.Patients.CountAsync() == 3 && await db.Clinics.CountAsync() == 2, "Site administrator sees both clinics");
     var clinic = await db.Clinics.FindAsync(clinics[0].Id);
     clinic!.Active = false;
@@ -142,4 +207,10 @@ sealed class MemorySession : ISession
     public void Remove(string key) => data.Remove(key);
     public void Set(string key, byte[] value) => data[key] = value;
     public bool TryGetValue(string key, out byte[] value) => data.TryGetValue(key, out value!);
+}
+
+sealed class TestTempDataProvider : Microsoft.AspNetCore.Mvc.ViewFeatures.ITempDataProvider
+{
+    public IDictionary<string, object> LoadTempData(HttpContext context) => new Dictionary<string, object>();
+    public void SaveTempData(HttpContext context, IDictionary<string, object> values) { }
 }

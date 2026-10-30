@@ -39,8 +39,13 @@ public sealed class ClinicAccessFilter(ApplicationDbContext db) : IAsyncActionFi
         bool valid;
         if (SessionHelper.IsSuperAdmin(session))
             valid = await db.UserInfos.IgnoreQueryFilters().AnyAsync(u => u.Id == userId && u.Active && u.RoleId == 1 && u.ClinicId == null);
-        else if (clinicId == null || !await db.Clinics.AnyAsync(c => c.Id == clinicId && c.Active))
-            valid = false;
+        else if (clinicId == null || !await db.Clinics.AnyAsync(c => c.Id == clinicId && c.Active &&
+                     c.SubscriptionEndsOn != null && c.SubscriptionEndsOn >= ClinicSubscription.Today))
+        {
+            session.Clear();
+            context.Result = new RedirectToActionResult("Login", "Account", new { subscriptionExpired = true });
+            return;
+        }
         else
             valid = userType switch
             {
